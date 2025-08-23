@@ -1,0 +1,6 @@
+[submodule "data-streams-sdk"]
+	path = data-streams-sdk
+	url = https://github.com/smartcontractkit/data-streams-sdk
+[submodule "solana-starter-kit"]
+	path = solana-starter-kit
+	url = https://github.com/smartcontractkit/solana-starter-kit
