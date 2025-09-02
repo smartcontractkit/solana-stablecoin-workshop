@@ -7,8 +7,8 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-oracle = "7T1DsCBj5puBiTUgDZb3Un28tsmxBCHR1xXbd7ggJfYd"  # Enhanced oracle with price storage
-stablecoin = "11111111111111111111111111111111"  # Placeholder - will be updated after deployment
+oracle = "9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1"
+stablecoin = "CtQ7Dim2Q623X6R4JuGnGXmCLLi3uAzrY2dSdqJyhCSD"
 
 [registry]
 url = "https://api.apr.dev"

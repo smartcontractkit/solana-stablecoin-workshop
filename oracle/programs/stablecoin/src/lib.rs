@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 // SPL imports temporarily removed due to version conflicts
 // Will be restored in Phase 3 with proper dependency resolution
 
-declare_id!("11111111111111111111111111111111"); // Placeholder - will be updated after deployment
+declare_id!("CtQ7Dim2Q623X6R4JuGnGXmCLLi3uAzrY2dSdqJyhCSD"); // Placeholder - will be updated after deployment
 
 #[program]
 pub mod stablecoin {
