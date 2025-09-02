@@ -20,7 +20,7 @@ impl StablecoinClient {
     pub async fn deposit_and_mint(
         &self,
         collateral_amount: u64,
-        user_pubkey: Pubkey,
+        _user_pubkey: Pubkey,
     ) -> Result<String> {
         // TODO: Implement stablecoin minting using anchor-client
         println!("🪙 Minting stablecoins for collateral: {} lamports", collateral_amount);

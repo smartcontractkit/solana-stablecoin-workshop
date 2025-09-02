@@ -5,14 +5,14 @@ description = "Rust client for Chainlink Oracle-Backed Stablecoin system"
 edition = "2021"
 
 [dependencies]
-# Chainlink SDKs - Test full features without anchor-client
-chainlink-data-streams-sdk = { version = "1.0.3", features = ["full"] }
+# Real Chainlink Data Streams SDK
+chainlink-data-streams-sdk = "1.0.3"
 chainlink-data-streams-report = "1.0.3"
 
 # Solana client libraries - using direct RPC (no anchor-client conflicts)
 solana-client = "1.17.0"
 solana-sdk = "1.17.0" 
-# anchor-client = "0.31.1"  # Conflicts due to sha2 version mismatch
+solana-program = "1.17.0"
 
 # Async runtime and utilities
 tokio = { version = "1.0", features = ["full"] }
@@ -21,6 +21,13 @@ clap = { version = "4.0", features = ["derive"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 
+# Environment and configuration
+dotenv = "0.15"
+
 # Additional utilities
 env_logger = "0.10"
 log = "0.4"
+hex = "0.4"
+num-bigint = "0.4"
+num-traits = "0.2"
+snap = "1.1" # Added for snappy compression/decompression
