@@ -2,6 +2,9 @@
 members = [
     "programs/*"
 ]
+exclude = [
+    "client"
+]
 resolver = "2"
 
 [profile.release]

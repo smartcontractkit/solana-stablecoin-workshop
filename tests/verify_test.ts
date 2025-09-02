@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor"
 import { Program } from "@coral-xyz/anchor"
 import { PublicKey } from "@solana/web3.js"
-import { ExampleVerify } from "../target/types/example_verify"
+import { Oracle } from "../target/types/oracle"
 import * as snappy from "snappy"
 
 // Data Streams Verifier Program ID on Devnet
@@ -13,7 +13,7 @@ async function main() {
   anchor.setProvider(provider)
 
   // Initialize your program using the workspace
-  const program = anchor.workspace.ExampleVerify as Program<ExampleVerify>
+  const program = anchor.workspace.Oracle as Program<Oracle>
 
   // Convert the hex string to a Uint8Array
   // This is an example report payload for a crypto stream
@@ -49,7 +49,7 @@ async function main() {
 
     const tx = await program.methods
       .verify(compressedReport)
-      .accounts({
+      .accountsStrict({
         verifierAccount: verifierAccount[0],
         accessController: accessController,
         user: provider.wallet.publicKey,

@@ -932,15 +932,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
 
 [[package]]
-name = "example_verify"
-version = "0.1.0"
-dependencies = [
- "anchor-lang",
- "chainlink_solana_data_streams",
- "solana-program 1.18.26",
-]
-
-[[package]]
 name = "feature-probe"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1375,6 +1366,15 @@ name = "opaque-debug"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c08d65885ee38876c4f86fa503fb49d7b507c2b62552df7c70b2fce627e06381"
+
+[[package]]
+name = "oracle"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
+ "chainlink_solana_data_streams",
+ "solana-program 1.18.26",
+]
 
 [[package]]
 name = "parking_lot"
@@ -2779,6 +2779,13 @@ dependencies = [
  "solana-serialize-utils",
  "solana-short-vec",
  "solana-system-interface",
+]
+
+[[package]]
+name = "stablecoin"
+version = "0.1.0"
+dependencies = [
+ "anchor-lang",
 ]
 
 [[package]]
