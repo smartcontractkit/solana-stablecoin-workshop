@@ -1,0 +1,24 @@
+[package]
+name = "example_verify"
+version = "0.1.0"
+description = "Created with Anchor"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "example_verify"
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build"]
+
+
+[dependencies]
+chainlink_solana_data_streams = { git = "https://github.com/smartcontractkit/chainlink-solana", branch = "develop", subdir = "contracts/crates/chainlink-solana-data-streams" }
+anchor-lang = "0.31.1"
+solana-program = "1.17.0"  # Match the version used by chainlink
+
