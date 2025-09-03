@@ -9,8 +9,40 @@ const ORACLE_PROGRAM_ID = new PublicKey("9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1o
 const REAL_FEED_ID = [209, 190, 98, 183, 73, 106, 212, 137, 123, 152, 77, 185, 146, 67, 224, 146, 25, 6, 246, 109, 237, 21, 20, 157, 153, 62, 244, 44, 104, 183, 40, 195]
 const REAL_ORACLE_PRICE_FEED = new PublicKey("5CjYMCxwds8bKxnkfMoayEMy1oVjToZUMtoejAPkTYBH")
 
-describe("🚀 REAL Oracle CPI Integration Test", () => {
-  console.log("🚀 Testing REAL Oracle CPI Integration with Live Price Feed")
+// Enhanced retry helper for blockhash issues
+async function retryTransaction(
+  connection: anchor.web3.Connection,
+  fn: (blockhash: string) => Promise<string>, 
+  maxRetries = 3
+): Promise<string> {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const { blockhash } = await connection.getLatestBlockhash('confirmed')
+      const signature = await fn(blockhash)
+      
+      // Wait for confirmation
+      const latestBlockhash = await connection.getLatestBlockhash('confirmed')
+      await connection.confirmTransaction({
+        signature,
+        blockhash: latestBlockhash.blockhash,
+        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+      }, 'confirmed')
+      
+      return signature
+    } catch (error: any) {
+      console.log(`⚠️ Attempt ${i + 1} failed: ${error.message}`)
+      if (i === maxRetries - 1) throw error
+      
+      const delay = Math.pow(2, i) * 2000 // 2s, 4s, 8s
+      console.log(`⏳ Waiting ${delay/1000}s before retry...`)
+      await new Promise(resolve => setTimeout(resolve, delay))
+    }
+  }
+  throw new Error("All retry attempts failed")
+}
+
+describe("🔮 Oracle Unit Tests - Real Chainlink Data", () => {
+  console.log("🔮 Testing Oracle Program with Real Chainlink Data Streams")
   console.log("═══════════════════════════════════════════════════════════════")
 
   const provider = anchor.AnchorProvider.env()
@@ -57,9 +89,9 @@ describe("🚀 REAL Oracle CPI Integration Test", () => {
     console.log("✅ Oracle price feed confirmed:", REAL_ORACLE_PRICE_FEED.toString())
   })
 
-  it("🏗️ Initialize Stablecoin Mint", async () => {
-    console.log("\n🏗️ Test 1: Initialize Stablecoin Mint")
-    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  it("🏗️ Setup: Initialize Stablecoin Mint for Oracle Testing", async () => {
+    console.log("\n🏗️ Test 1: Setup - Initialize Stablecoin Mint for Oracle Testing")
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
     // Create a new mint keypair
     const mintKeypair = anchor.web3.Keypair.generate()
@@ -67,21 +99,26 @@ describe("🚀 REAL Oracle CPI Integration Test", () => {
 
     console.log("🪙 New Mint Address:", stablecoinMint.toString())
 
-    const tx = await program.methods
-      .initializeMint(6) // 6 decimals for stablecoin
-      .accountsStrict({
-        mint: stablecoinMint,
-        mintAuthority: mintAuthority,
-        payer: payer,
-        rent: SYSVAR_RENT_PUBKEY,
-        tokenProgram: TOKEN_PROGRAM_ID,
-        systemProgram: SystemProgram.programId,
-      })
-      .signers([mintKeypair])
-      .rpc({
-        commitment: "confirmed",
-        skipPreflight: false,
-      })
+    const tx = await retryTransaction(
+      provider.connection,
+      async (blockhash) => {
+        return await program.methods
+          .initializeMint(6) // 6 decimals for stablecoin
+          .accountsStrict({
+            mint: stablecoinMint,
+            mintAuthority: mintAuthority,
+            payer: payer,
+            rent: SYSVAR_RENT_PUBKEY,
+            tokenProgram: TOKEN_PROGRAM_ID,
+            systemProgram: SystemProgram.programId,
+          })
+          .signers([mintKeypair])
+          .rpc({
+            commitment: "confirmed",
+            skipPreflight: false,
+          })
+      }
+    )
 
     console.log("✅ Mint initialized successfully!")
     console.log("🔗 Transaction:", tx)
@@ -91,9 +128,9 @@ describe("🚀 REAL Oracle CPI Integration Test", () => {
     console.log("📊 Mint account created:", mintInfo !== null)
   })
 
-  it("💰 Deposit Collateral and Mint Stablecoins (REAL Oracle CPI)", async () => {
-    console.log("\n💰 Test 2: Deposit Collateral and Mint Stablecoins with REAL Oracle CPI")
-    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  it("🔮 Test Oracle Integration: Mint Stablecoins with Real Chainlink Price", async () => {
+    console.log("\n🔮 Test 2: Oracle Integration - Mint Stablecoins with Real Chainlink Price")
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
     // Get user's associated token account
     userTokenAccount = await getAssociatedTokenAddress(
@@ -110,31 +147,49 @@ describe("🚀 REAL Oracle CPI Integration Test", () => {
     console.log("📊 Oracle Price Feed:", REAL_ORACLE_PRICE_FEED.toString())
 
     try {
-      const tx = await program.methods
-        .depositAndMint(collateralAmount, REAL_FEED_ID)
-        .accountsStrict({
-          mint: stablecoinMint,
-          mintAuthority: mintAuthority,
-          userTokenAccount: userTokenAccount,
-          collateralVault: collateralVault,
-          user: payer,
-          oracleProgram: ORACLE_PROGRAM_ID,
-          oraclePriceFeed: REAL_ORACLE_PRICE_FEED,
-          tokenProgram: TOKEN_PROGRAM_ID,
-          associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
-          systemProgram: SystemProgram.programId,
-        })
-        .rpc({
-          commitment: "confirmed",
-          skipPreflight: false,
-        })
+      const tx = await retryTransaction(
+        provider.connection,
+        async (blockhash) => {
+          return await program.methods
+            .depositAndMint(collateralAmount, REAL_FEED_ID)
+            .accountsStrict({
+              mint: stablecoinMint,
+              mintAuthority: mintAuthority,
+              userTokenAccount: userTokenAccount,
+              collateralVault: collateralVault,
+              user: payer,
+              oracleProgram: ORACLE_PROGRAM_ID,
+              oraclePriceFeed: REAL_ORACLE_PRICE_FEED,
+              tokenProgram: TOKEN_PROGRAM_ID,
+              associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+              systemProgram: SystemProgram.programId,
+            })
+            .rpc({
+              commitment: "confirmed",
+              skipPreflight: false,
+            })
+        }
+      )
 
       console.log("🎉 REAL Oracle CPI SUCCESS!")
       console.log("🔗 Transaction:", tx)
 
-      // Check token balance
+      // Check token balance with proper formatting
       const tokenBalance = await provider.connection.getTokenAccountBalance(userTokenAccount)
-      console.log("🪙 Stablecoin balance:", tokenBalance.value.amount, tokenBalance.value.uiAmountString)
+      const stablecoinAmount = parseFloat(tokenBalance.value.uiAmountString || "0")
+      const rawAmount = tokenBalance.value.amount
+      
+      console.log(`🪙 Stablecoin balance: ${stablecoinAmount.toLocaleString()} USD (${rawAmount} raw units)`)
+      
+      // Calculate and display the economics
+      const collateralSOL = collateralAmount.toNumber() / 1_000_000_000 // Convert lamports to SOL
+      const expectedUSD = collateralSOL * 210 // Approximate SOL price
+      
+      console.log(`💰 Economics Summary:`)
+      console.log(`   📊 Collateral: ${collateralSOL.toFixed(9)} SOL (${collateralAmount.toNumber().toLocaleString()} lamports)`)
+      console.log(`   💵 Expected USD value: ~$${expectedUSD.toFixed(2)}`)
+      console.log(`   🪙 Minted stablecoins: ${stablecoinAmount.toFixed(6)} USD`)
+      console.log(`   ✅ Conversion accuracy: ${((stablecoinAmount / expectedUSD) * 100).toFixed(2)}%`)
 
       // Get transaction logs to see CPI details
       const txDetails = await provider.connection.getTransaction(tx, {
@@ -172,9 +227,9 @@ describe("🚀 REAL Oracle CPI Integration Test", () => {
     }
   })
 
-  it("📊 Verify Oracle Price Feed Data", async () => {
-    console.log("\n📊 Test 3: Verify Oracle Price Feed Data")
-    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+  it("🔍 Verify Oracle Price Feed Data Structure", async () => {
+    console.log("\n🔍 Test 3: Verify Oracle Price Feed Data Structure")
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
     // Read the oracle price feed account directly
     const oracleFeedInfo = await provider.connection.getAccountInfo(REAL_ORACLE_PRICE_FEED)
@@ -197,9 +252,9 @@ describe("🚀 REAL Oracle CPI Integration Test", () => {
   })
 
   after("📊 Test Summary", () => {
-    console.log("\n📊 REAL ORACLE CPI INTEGRATION TEST SUMMARY")
-    console.log("═══════════════════════════════════════════════════════════")
-    console.log("🎯 OBJECTIVE: Test actual Oracle CPI calls with live price data")
+      console.log("\n📊 ORACLE UNIT TESTS SUMMARY")
+  console.log("═══════════════════════════════════════════════════════════")
+  console.log("🎯 OBJECTIVE: Test Oracle program with real Chainlink Data Streams")
     console.log("")
     console.log("✅ Stablecoin mint initialization: TESTED")
     console.log("✅ Real oracle price feed: CONFIRMED")

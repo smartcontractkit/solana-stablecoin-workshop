@@ -41,9 +41,9 @@ async function retryTransaction(
   throw new Error("Max retries exceeded")
 }
 
-describe("🪙 Stablecoin Unit Tests", () => {
-  console.log("🪙 Stablecoin Unit Tests - Mint & Burn Logic")
-  console.log("═══════════════════════════════════════════════")
+describe("🪙 Stablecoin Unit Tests - Program Logic", () => {
+  console.log("🪙 Testing Stablecoin Program Logic (Independent)")
+  console.log("═══════════════════════════════════════════════════════════")
 
   const provider = anchor.AnchorProvider.env()
   provider.opts.commitment = 'confirmed'

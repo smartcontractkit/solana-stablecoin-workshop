@@ -4,7 +4,7 @@ use anchor_spl::{
     token::{self, Mint, Token, TokenAccount, MintTo, Burn},
 };
 
-declare_id!("EWmZfjm93yvKzpD8idETKHBb73qDVMYmyWtnjvZn4cTs");
+declare_id!("7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR");
 
 // Oracle program ID (our deployed oracle)
 const ORACLE_PROGRAM_ID: Pubkey = pubkey!("9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1");
@@ -30,7 +30,8 @@ pub mod stablecoin_program {
         collateral_amount: u64,
         feed_id: [u8; 32],
     ) -> Result<()> {
-        msg!("Depositing {} lamports as collateral", collateral_amount);
+        let collateral_sol = collateral_amount as f64 / 1_000_000_000.0;
+        msg!("Depositing {} lamports ({:.9} SOL) as collateral", collateral_amount, collateral_sol);
 
         // Step 1: Get price from oracle via CPI
         let oracle_program = ctx.accounts.oracle_program.to_account_info();
@@ -60,7 +61,8 @@ pub mod stablecoin_program {
         let oracle_price = u64::from_le_bytes(price_bytes.try_into().unwrap()); // Price with 8 decimals
         let oracle_timestamp = u64::from_le_bytes(timestamp_bytes.try_into().unwrap());
         
-        msg!("Oracle price: {} (8 decimals), timestamp: {}", oracle_price, oracle_timestamp);
+        let oracle_price_usd = oracle_price as f64 / 100_000_000.0; // Convert 8 decimals to USD
+        msg!("Oracle price: {} raw (${:.8} USD per SOL), timestamp: {}", oracle_price, oracle_price_usd, oracle_timestamp);
         
         // Convert oracle price (8 decimals) to USD per SOL
         // Oracle price has 8 decimals: 200000000000 = $200.00000000
@@ -74,7 +76,8 @@ pub mod stablecoin_program {
         // Step 2: Calculate mint amount (1:1 USD backing for simplicity)
         let mint_amount = collateral_value_usd * 10u64.pow(ctx.accounts.mint.decimals as u32);
         
-        msg!("Collateral value: {} USD, Minting: {} stablecoins", collateral_value_usd, mint_amount);
+        let stablecoin_amount = mint_amount as f64 / 10u64.pow(ctx.accounts.mint.decimals as u32) as f64;
+        msg!("Collateral value: ${} USD, Minting: {} raw units ({:.6} USD stablecoins)", collateral_value_usd, mint_amount, stablecoin_amount);
 
         // Step 3: Transfer collateral from user to vault
         let transfer_instruction = anchor_lang::solana_program::system_instruction::transfer(
@@ -108,7 +111,7 @@ pub mod stablecoin_program {
         
         token::mint_to(cpi_ctx, mint_amount)?;
 
-        msg!("Successfully minted {} stablecoins", mint_amount);
+        msg!("Successfully minted {} raw units ({:.6} USD stablecoins)", mint_amount, stablecoin_amount);
         Ok(())
     }
 
@@ -118,7 +121,8 @@ pub mod stablecoin_program {
         burn_amount: u64,
         feed_id: [u8; 32],
     ) -> Result<()> {
-        msg!("Burning {} stablecoins", burn_amount);
+        let stablecoin_usd_amount = burn_amount as f64 / 10u64.pow(ctx.accounts.mint.decimals as u32) as f64;
+        msg!("Burning {} raw units ({:.6} USD stablecoins) and withdrawing collateral", burn_amount, stablecoin_usd_amount);
 
         // Step 1: Get current price from oracle
         let oracle_program = ctx.accounts.oracle_program.to_account_info();
@@ -148,7 +152,8 @@ pub mod stablecoin_program {
         let oracle_price = u64::from_le_bytes(price_bytes.try_into().unwrap()); // Price with 8 decimals
         let oracle_timestamp = u64::from_le_bytes(timestamp_bytes.try_into().unwrap());
         
-        msg!("Oracle price for burn: {} (8 decimals), timestamp: {}", oracle_price, oracle_timestamp);
+        let oracle_price_usd_burn = oracle_price as f64 / 100_000_000.0; // Convert 8 decimals to USD
+        msg!("Oracle price for burn: {} raw (${:.8} USD per SOL), timestamp: {}", oracle_price, oracle_price_usd_burn, oracle_timestamp);
 
         // Step 2: Calculate collateral to return
         // Convert oracle price (8 decimals) to calculate collateral return
@@ -173,17 +178,27 @@ pub mod stablecoin_program {
         
         token::burn(cpi_ctx, burn_amount)?;
 
-        // Step 4: Return collateral to user
+        // Step 4: Return collateral to user using system program transfer with PDA signing
         let vault_seeds = &[
             b"collateral_vault".as_ref(),
             &[ctx.bumps.collateral_vault],
         ];
         let signer_seeds = &[&vault_seeds[..]];
 
-        **ctx.accounts.collateral_vault.to_account_info().try_borrow_mut_lamports()? -= collateral_amount;
-        **ctx.accounts.user.to_account_info().try_borrow_mut_lamports()? += collateral_amount;
+        // Use system program to transfer lamports from vault (PDA) to user
+        let transfer_instruction = anchor_lang::system_program::Transfer {
+            from: ctx.accounts.collateral_vault.to_account_info(),
+            to: ctx.accounts.user.to_account_info(),
+        };
+        let cpi_ctx = CpiContext::new_with_signer(
+            ctx.accounts.system_program.to_account_info(),
+            transfer_instruction,
+            signer_seeds,
+        );
+        anchor_lang::system_program::transfer(cpi_ctx, collateral_amount)?;
 
-        msg!("Successfully burned {} stablecoins and returned {} lamports", burn_amount, collateral_amount);
+        let collateral_sol = collateral_amount as f64 / 1_000_000_000.0;
+        msg!("Successfully burned {} raw units ({:.6} USD stablecoins) and returned {} lamports ({:.9} SOL)", burn_amount, stablecoin_usd_amount, collateral_amount, collateral_sol);
         Ok(())
     }
 }
@@ -290,6 +305,7 @@ pub struct BurnAndWithdraw<'info> {
     pub oracle_price_feed: UncheckedAccount<'info>,
     
     pub token_program: Program<'info, Token>,
+    pub system_program: Program<'info, System>,
 }
 
 // Oracle CPI module
