@@ -8,7 +8,7 @@ use anchor_lang::solana_program::{
 use chainlink_solana_data_streams::VerifierInstructions;
 
 
-declare_id!("9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1");
+declare_id!("9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU");
 
 #[program]
 pub mod oracle {

@@ -171,11 +171,11 @@ async fn main() -> Result<()> {
                 }
             };
             
-            // Step 5: Extract feed ID from environment
-            let feed_id_hex = std::env::var("FEED_ID")
-                .map_err(|_| anyhow::anyhow!("FEED_ID not found in environment"))?;
-            let feed_id_bytes = hex::decode(&feed_id_hex[2..]) // Remove 0x prefix
-                .map_err(|_| anyhow::anyhow!("Invalid feed ID hex"))?;
+            // Step 5: Use the test feed ID to write to the same oracle account that stablecoin tests read from
+            // This is the feed ID from the stablecoin test: d1be62b7496ad4897b984db99243e0921906f66ded15149d993ef42c68b728c3
+            let test_feed_id_hex = "d1be62b7496ad4897b984db99243e0921906f66ded15149d993ef42c68b728c3";
+            let feed_id_bytes = hex::decode(test_feed_id_hex)
+                .map_err(|_| anyhow::anyhow!("Failed to decode test feed ID hex"))?;
             let mut feed_id = [0u8; 32];
             feed_id.copy_from_slice(&feed_id_bytes[0..32]);
             

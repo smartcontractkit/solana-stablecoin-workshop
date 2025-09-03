@@ -7,7 +7,7 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-oracle = "9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1"
+oracle = "9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU"
 stablecoin = "CtQ7Dim2Q623X6R4JuGnGXmCLLi3uAzrY2dSdqJyhCSD"
 
 [registry]
