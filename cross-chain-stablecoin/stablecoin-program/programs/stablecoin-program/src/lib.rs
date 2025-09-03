@@ -42,12 +42,34 @@ pub mod stablecoin_program {
         oracle::cpi::get_price(oracle_ctx)?;
         
         // Extract price and timestamp from return data
-        // Note: In a real implementation, we'd parse the return data properly
-        // For now, we'll use a mock price calculation
-        // Mock: 1 SOL = $200 USD, so 1 SOL (1e9 lamports) = $200
-        let sol_price_usd = 200u64; // $200 per SOL
-        let lamports_per_sol = 1_000_000_000u64; // 1e9 lamports = 1 SOL
-        let collateral_value_usd = (collateral_amount * sol_price_usd) / lamports_per_sol;
+        let return_data = anchor_lang::solana_program::program::get_return_data()
+            .ok_or(StablecoinError::OraclePriceNotAvailable)?;
+        
+        if return_data.0 != ORACLE_PROGRAM_ID {
+            return Err(StablecoinError::OraclePriceNotAvailable.into());
+        }
+        
+        // Parse return data: (price: u64, timestamp: u64) = 16 bytes total
+        if return_data.1.len() != 16 {
+            return Err(StablecoinError::OraclePriceNotAvailable.into());
+        }
+        
+        let price_bytes = &return_data.1[0..8];
+        let timestamp_bytes = &return_data.1[8..16];
+        
+        let oracle_price = u64::from_le_bytes(price_bytes.try_into().unwrap()); // Price with 8 decimals
+        let oracle_timestamp = u64::from_le_bytes(timestamp_bytes.try_into().unwrap());
+        
+        msg!("Oracle price: {} (8 decimals), timestamp: {}", oracle_price, oracle_timestamp);
+        
+        // Convert oracle price (8 decimals) to USD per SOL
+        // Oracle price has 8 decimals: 200000000000 = $200.00000000
+        let lamports_per_sol = 1_000_000_000u128; // 1e9 lamports = 1 SOL
+        let oracle_decimals = 100_000_000u128; // 1e8 for oracle price scaling
+        
+        // Calculate USD value using u128 to prevent overflow: (collateral_lamports * oracle_price_8_decimals) / (lamports_per_sol * oracle_decimals)
+        let collateral_value_usd = ((collateral_amount as u128) * (oracle_price as u128)) / (lamports_per_sol * oracle_decimals);
+        let collateral_value_usd = collateral_value_usd as u64; // Convert back to u64
         
         // Step 2: Calculate mint amount (1:1 USD backing for simplicity)
         let mint_amount = collateral_value_usd * 10u64.pow(ctx.accounts.mint.decimals as u32);
@@ -107,12 +129,36 @@ pub mod stablecoin_program {
         let oracle_ctx = CpiContext::new(oracle_program, oracle_accounts);
         oracle::cpi::get_price(oracle_ctx)?;
 
+        // Extract price and timestamp from return data
+        let return_data = anchor_lang::solana_program::program::get_return_data()
+            .ok_or(StablecoinError::OraclePriceNotAvailable)?;
+        
+        if return_data.0 != ORACLE_PROGRAM_ID {
+            return Err(StablecoinError::OraclePriceNotAvailable.into());
+        }
+        
+        // Parse return data: (price: u64, timestamp: u64) = 16 bytes total
+        if return_data.1.len() != 16 {
+            return Err(StablecoinError::OraclePriceNotAvailable.into());
+        }
+        
+        let price_bytes = &return_data.1[0..8];
+        let timestamp_bytes = &return_data.1[8..16];
+        
+        let oracle_price = u64::from_le_bytes(price_bytes.try_into().unwrap()); // Price with 8 decimals
+        let oracle_timestamp = u64::from_le_bytes(timestamp_bytes.try_into().unwrap());
+        
+        msg!("Oracle price for burn: {} (8 decimals), timestamp: {}", oracle_price, oracle_timestamp);
+
         // Step 2: Calculate collateral to return
-        // Mock: 1 SOL = $200 USD
-        let sol_price_usd = 200u64; // $200 per SOL
-        let lamports_per_sol = 1_000_000_000u64; // 1e9 lamports = 1 SOL
+        // Convert oracle price (8 decimals) to calculate collateral return
+        let lamports_per_sol = 1_000_000_000u128; // 1e9 lamports = 1 SOL
+        let oracle_decimals = 100_000_000u128; // 1e8 for oracle price scaling
         let usd_value = burn_amount / 10u64.pow(ctx.accounts.mint.decimals as u32);
-        let collateral_amount = (usd_value * lamports_per_sol) / sol_price_usd;
+        
+        // Calculate collateral using u128 to prevent overflow: (usd_value * lamports_per_sol * oracle_decimals) / oracle_price_8_decimals
+        let collateral_amount = ((usd_value as u128) * lamports_per_sol * oracle_decimals) / (oracle_price as u128);
+        let collateral_amount = collateral_amount as u64; // Convert back to u64
 
         msg!("Returning {} lamports collateral for {} USD value", collateral_amount, usd_value);
 
