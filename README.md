@@ -4,6 +4,10 @@
 
 This repository contains a **complete workshop implementation** of an **oracle-backed stablecoin system** that integrates **Chainlink Data Streams** for real-time price feeds and **Chainlink CCIP** for cross-chain functionality on Solana and Ethereum.
 
+**Built on Official Chainlink Tools:**
+- **[Chainlink Data Streams SDK](https://docs.chain.link/data-streams)** - Official SDK for real-time price feed integration
+- **[Chainlink Solana CCIP Starter Kit](https://github.com/smartcontractkit/ccip-solana-starter-kit)** - Official starter kit for cross-chain functionality
+
 ### Workshop Content
 - **Real-time price integration** via Chainlink Data Streams SDK
 - **Oracle program** for on-chain price verification and storage
