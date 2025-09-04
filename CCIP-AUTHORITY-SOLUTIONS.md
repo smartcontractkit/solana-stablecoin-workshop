@@ -228,3 +228,4 @@ For the hackathon/workshop, I recommend **Option 2 (Pre-Mint)** because:
 4. **Can upgrade later** - can move to multisig for production
 
 Should we proceed with the pre-mint approach?
+

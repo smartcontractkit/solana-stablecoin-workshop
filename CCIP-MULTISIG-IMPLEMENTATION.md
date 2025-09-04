@@ -848,3 +848,4 @@ spl-token mint $SOL_TOKEN_MINT 1 \
 Save all configuration in environment files for easy switching between terminals and test runs.
 
 This comprehensive plan ensures our oracle-backed stablecoin works seamlessly with CCIP while preserving all existing functionality!
+
