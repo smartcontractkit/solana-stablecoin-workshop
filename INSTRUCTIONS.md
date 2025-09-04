@@ -587,6 +587,77 @@ yarn svm:token-transfer --receiver-address 0x[your-address]
 
 ---
 
+## ⚠️ Important: Custom Oracle Program Deployment
+
+**If you deploy your own oracle program (different from the provided example), you MUST update the stablecoin program to reference your oracle program ID.**
+
+### 🔧 Required Steps for Custom Oracle Deployment:
+
+#### Step 1: Update Stablecoin Program Source Code
+Navigate to the stablecoin program source file:
+```bash
+cd cross-chain-stablecoin/stablecoin-program/programs/stablecoin-program/src/lib.rs
+```
+
+Find line 11 and update the `ORACLE_PROGRAM_ID` constant:
+```rust
+// Oracle program ID (your deployed oracle)
+const ORACLE_PROGRAM_ID: Pubkey = pubkey!("YOUR_ORACLE_PROGRAM_ID_HERE");
+```
+
+Replace `YOUR_ORACLE_PROGRAM_ID_HERE` with your actual deployed oracle program ID.
+
+#### Step 2: Update Environment Configuration
+Update your `.env` file with your oracle program details:
+```bash
+# Your deployed oracle program
+ORACLE_PROGRAM_ID=YOUR_ORACLE_PROGRAM_ID_HERE
+
+# Your oracle price feed PDA (derived from your oracle program)
+REAL_ORACLE_PRICE_FEED=YOUR_PRICE_FEED_PDA_HERE
+```
+
+**📍 To find your Price Feed PDA:**
+```bash
+cd oracle/client
+cargo run -- update-oracle
+# Look for: "📍 PriceFeed PDA: YOUR_PDA_HERE"
+```
+
+#### Step 3: Rebuild and Redeploy Stablecoin Program
+```bash
+cd cross-chain-stablecoin/stablecoin-program
+anchor build
+anchor deploy --provider.cluster devnet
+```
+
+#### Step 4: Update INSTRUCTIONS.md (This File)
+Update the program IDs throughout this file to match your deployments:
+- Replace `ORACLE_PROGRAM_ID=9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU` with your oracle program ID
+- Replace `STABLECOIN_PROGRAM_ID=7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR` with your stablecoin program ID
+- Replace `REAL_ORACLE_PRICE_FEED=HqqVks96kxdktt3jUvmoeF9dsc9pWgXVfYG27ri8Xi6C` with your price feed PDA
+
+### 🚨 Why This Is Required
+
+The stablecoin program has a **hardcoded constraint** that validates the oracle program ID for security. This prevents malicious actors from using fake oracle programs. When you deploy your own oracle, the stablecoin program must be updated to recognize your oracle as legitimate.
+
+**Error you'll see if not updated:**
+```
+AnchorError caused by account: oracle_program. Error Code: ConstraintAddress.
+Program log: Left:  YOUR_ORACLE_PROGRAM_ID
+Program log: Right: OLD_ORACLE_PROGRAM_ID
+```
+
+### 🎯 Alternative: Use Provided Example Programs
+
+If you want to skip this step, you can use the pre-deployed example programs:
+- **Oracle Program:** `9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU`
+- **Stablecoin Program:** `7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR`
+
+These are already configured to work together and are used throughout this tutorial.
+
+---
+
 ## 🎉 Conclusion
 
 You have successfully implemented a complete oracle-backed stablecoin system with cross-chain capabilities! This system demonstrates:

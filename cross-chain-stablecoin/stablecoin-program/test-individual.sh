@@ -30,7 +30,7 @@ run_test() {
     
     # Run the specific test
     echo "🧪 Running tests..."
-    yarn run ts-mocha -p ./tsconfig.json -t 1000000 --grep "$grep_pattern" 'tests/**/*.ts'
+    NODE_NO_WARNINGS=1 yarn run ts-mocha -p ./tsconfig.json -t 1000000 --grep "$grep_pattern" 'tests/**/*.ts'
     
     echo -e "${GREEN}✅ $test_name completed successfully!${NC}"
     echo ""

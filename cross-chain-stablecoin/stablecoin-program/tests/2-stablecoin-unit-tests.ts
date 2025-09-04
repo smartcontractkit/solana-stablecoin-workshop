@@ -4,10 +4,16 @@ import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY, Keypair } from "@solana/w
 import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddress, getMint, getAccount } from "@solana/spl-token"
 import { StablecoinProgram } from "../target/types/stablecoin_program"
 
-// Mock Oracle data for unit testing (no real oracle needed)
-const MOCK_ORACLE_PROGRAM_ID = new PublicKey("11111111111111111111111111111111") // System program as mock
-const MOCK_FEED_ID = new Array(32).fill(0) // All zeros for mock
-const MOCK_ORACLE_PRICE_FEED = Keypair.generate().publicKey // Random address for mock
+// Load environment variables
+import dotenv from 'dotenv'
+dotenv.config()
+
+// Mock Oracle data for unit testing (from .env file)
+const MOCK_ORACLE_PROGRAM_ID = new PublicKey(process.env.MOCK_ORACLE_PROGRAM_ID || "11111111111111111111111111111111")
+const MOCK_FEED_ID = process.env.MOCK_FEED_ID ? 
+  Array.from(Buffer.from(process.env.MOCK_FEED_ID.replace('0x', ''), 'hex')) : 
+  new Array(32).fill(0)
+const MOCK_ORACLE_PRICE_FEED = new PublicKey(process.env.MOCK_ORACLE_PRICE_FEED || "11111111111111111111111111111111")
 
 // Enhanced retry helper
 async function retryTransaction(
@@ -131,7 +137,7 @@ describe("🪙 Stablecoin Unit Tests - Program Logic", () => {
     
     // Assertions
     if (mintInfo.decimals !== 6) throw new Error("Expected 6 decimals")
-    if (!mintInfo.mintAuthority?.equals(mintAuthority)) throw new Error("Wrong mint authority")
+    if (!mintInfo.mintAuthority?.equals(payer)) throw new Error("Wrong mint authority - should be payer")
     if (mintInfo.supply !== 0n) throw new Error("Initial supply should be 0")
     
     console.log("✅ All mint initialization checks passed!")
@@ -150,7 +156,7 @@ describe("🪙 Stablecoin Unit Tests - Program Logic", () => {
     try {
       const depositAndMint = async (blockhash: string): Promise<string> => {
         const tx = await program.methods
-          .depositAndMint(collateralAmount, MOCK_FEED_ID)
+          .depositAndMintSingle(collateralAmount, MOCK_FEED_ID)
           .accountsStrict({
             mint: stablecoinMint,
             mintAuthority: mintAuthority,
@@ -205,9 +211,9 @@ describe("🪙 Stablecoin Unit Tests - Program Logic", () => {
     console.log("📊 Total supply:", mintInfo.supply.toString())
     console.log("👤 Mint authority:", mintInfo.mintAuthority?.toString())
 
-    // Mint authority PDA should be correct
-    if (!mintInfo.mintAuthority?.equals(mintAuthority)) {
-      throw new Error("Mint authority should be the PDA")
+    // Mint authority should be the payer (in unit tests)
+    if (!mintInfo.mintAuthority?.equals(payer)) {
+      throw new Error("Mint authority should be the payer in unit tests")
     }
 
     // Collateral vault should exist (even if empty)
@@ -233,7 +239,7 @@ describe("🪙 Stablecoin Unit Tests - Program Logic", () => {
     const availableMethods = Object.keys(program.methods)
     console.log("📋 Available methods:", availableMethods)
 
-    const expectedMethods = ['initializeMint', 'depositAndMint', 'burnAndWithdraw']
+    const expectedMethods = ['initializeMint', 'depositAndMintSingle', 'depositAndMintMultisig', 'burnAndWithdraw']
     const missingMethods = expectedMethods.filter(method => !availableMethods.includes(method))
     
     if (missingMethods.length > 0) {

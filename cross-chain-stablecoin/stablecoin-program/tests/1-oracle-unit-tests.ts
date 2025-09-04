@@ -10,11 +10,15 @@ import {
 } from "@solana/spl-token"
 import { StablecoinProgram } from "../target/types/stablecoin_program"
 
-// REAL Oracle data from our working oracle test
-const ORACLE_PROGRAM_ID = new PublicKey("9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1")
+// Load environment variables
+import dotenv from 'dotenv'
+dotenv.config()
+
+// REAL Oracle data from deployed program (from .env)
+const ORACLE_PROGRAM_ID = new PublicKey(process.env.ORACLE_PROGRAM_ID || "9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU")
 // Official SOL/USD Feed ID from Chainlink Data Streams docs
 const REAL_FEED_ID = [0, 3, 211, 56, 234, 42, 195, 190, 158, 2, 96, 51, 177, 170, 96, 22, 115, 195, 123, 171, 94, 19, 133, 28, 89, 150, 111, 159, 130, 7, 84, 214]
-const REAL_ORACLE_PRICE_FEED = new PublicKey("C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen")
+const REAL_ORACLE_PRICE_FEED = new PublicKey(process.env.REAL_ORACLE_PRICE_FEED || "C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen")
 
 // CCIP Pool Program ID (Chainlink's self-service BurnMint pool program)
 const CCIP_POOL_PROGRAM_ID = new PublicKey("41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB")
@@ -182,11 +186,11 @@ describe("🔮 Oracle Unit Tests - Real Chainlink Data", () => {
         provider.connection,
         async (blockhash) => {
           return await program.methods
-            .depositAndMint(collateralAmount, REAL_FEED_ID)
+            .depositAndMintMultisig(collateralAmount, REAL_FEED_ID)
             .accounts({
               mint: stablecoinMint,
+              multisig: multisigAuthority, // The multisig authority
               mintAuthority: mintAuthority, // Our PDA will sign for the multisig
-              multisigMintAuthority: multisigAuthority, // The actual mint authority
               userTokenAccount: userTokenAccount,
               collateralVault: collateralVault,
               user: payer,

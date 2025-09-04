@@ -7,8 +7,8 @@ use anchor_lang::solana_program::program::invoke_signed;
 
 declare_id!("7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR");
 
-// Oracle program ID (our deployed oracle)
-const ORACLE_PROGRAM_ID: Pubkey = pubkey!("9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1");
+// Dynamic Oracle Configuration - injected at build time from .env!
+const ORACLE_PROGRAM_ID: Pubkey = pubkey!(env!("ORACLE_PROGRAM_ID"));
 
 #[program]
 pub mod stablecoin_program {

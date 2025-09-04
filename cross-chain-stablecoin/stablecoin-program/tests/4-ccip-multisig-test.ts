@@ -1,6 +1,10 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { StablecoinProgram } from "../target/types/stablecoin_program";
+
+// Load environment variables
+import dotenv from 'dotenv'
+dotenv.config()
 import { 
   TOKEN_PROGRAM_ID, 
   ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -71,16 +75,16 @@ describe("🌉 CCIP Multisig Integration Test", () => {
     try {
       // This is the CRITICAL TEST - can our program mint through multisig?
       const tx = await program.methods
-        .depositAndMint(collateralAmount, Array.from(feedId))
+        .depositAndMintMultisig(collateralAmount, Array.from(feedId))
         .accounts({
           mint: ccipMint,
+          multisig: multisigAddress, // The multisig authority
           mintAuthority: mintAuthority, // Our PDA will sign for the multisig
-          multisigMintAuthority: multisigAddress, // The actual mint authority
           userTokenAccount: userTokenAccount,
           collateralVault: collateralVault,
           user: payer.publicKey,
-          oracleProgram: new PublicKey("9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1"), // Real oracle
-          oraclePriceFeed: new PublicKey("5CjYMCxwds8bKxnkfMoayEMy1oVjToZUMtoejAPkTYBH"), // Real feed
+          oracleProgram: new PublicKey(process.env.ORACLE_PROGRAM_ID || "9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU"), // Real oracle from .env
+          oraclePriceFeed: new PublicKey(process.env.REAL_ORACLE_PRICE_FEED || "C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen"), // Real feed from .env
           tokenProgram: TOKEN_PROGRAM_ID,
           associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
