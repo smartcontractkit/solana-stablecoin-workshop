@@ -1,0 +1,171 @@
+warning: unexpected `cfg` condition value: `custom-heap`
+  --> programs/stablecoin-program/src/lib.rs:13:1
+   |
+13 | #[program]
+   | ^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `cpi`, `default`, `idl-build`, `no-entrypoint`, `no-idl`, and `no-log-ix-name`
+   = help: consider adding `custom-heap` as a feature in `Cargo.toml`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: `#[warn(unexpected_cfgs)]` on by default
+   = note: this warning originates in the macro `$crate::custom_heap_default` which comes from the expansion of the attribute macro `program` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `custom-panic`
+  --> programs/stablecoin-program/src/lib.rs:13:1
+   |
+13 | #[program]
+   | ^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `cpi`, `default`, `idl-build`, `no-entrypoint`, `no-idl`, and `no-log-ix-name`
+   = help: consider adding `custom-panic` as a feature in `Cargo.toml`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the macro `$crate::custom_panic_default` which comes from the expansion of the attribute macro `program` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `anchor-debug`
+  --> programs/stablecoin-program/src/lib.rs:13:1
+   |
+13 | #[program]
+   | ^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `cpi`, `default`, `idl-build`, `no-entrypoint`, `no-idl`, and `no-log-ix-name`
+   = help: consider adding `anchor-debug` as a feature in `Cargo.toml`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the attribute macro `program` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `anchor-debug`
+  --> programs/stablecoin-program/src/lib.rs:13:1
+   |
+13 | #[program]
+   | ^^^^^^^^^^
+   |
+   = note: expected values for `feature` are: `cpi`, `default`, `idl-build`, `no-entrypoint`, `no-idl`, and `no-log-ix-name`
+   = help: consider adding `anchor-debug` as a feature in `Cargo.toml`
+   = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+   = note: this warning originates in the derive macro `Accounts` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `anchor-debug`
+   --> programs/stablecoin-program/src/lib.rs:235:10
+    |
+235 | #[derive(Accounts)]
+    |          ^^^^^^^^
+    |
+    = note: expected values for `feature` are: `cpi`, `default`, `idl-build`, `no-entrypoint`, `no-idl`, and `no-log-ix-name`
+    = help: consider adding `anchor-debug` as a feature in `Cargo.toml`
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+    = note: this warning originates in the derive macro `Accounts` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `anchor-debug`
+   --> programs/stablecoin-program/src/lib.rs:261:10
+    |
+261 | #[derive(Accounts)]
+    |          ^^^^^^^^
+    |
+    = note: expected values for `feature` are: `cpi`, `default`, `idl-build`, `no-entrypoint`, `no-idl`, and `no-log-ix-name`
+    = help: consider adding `anchor-debug` as a feature in `Cargo.toml`
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+    = note: this warning originates in the derive macro `Accounts` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `anchor-debug`
+   --> programs/stablecoin-program/src/lib.rs:308:10
+    |
+308 | #[derive(Accounts)]
+    |          ^^^^^^^^
+    |
+    = note: expected values for `feature` are: `cpi`, `default`, `idl-build`, `no-entrypoint`, `no-idl`, and `no-log-ix-name`
+    = help: consider adding `anchor-debug` as a feature in `Cargo.toml`
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+    = note: this warning originates in the derive macro `Accounts` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unexpected `cfg` condition value: `anchor-debug`
+   --> programs/stablecoin-program/src/lib.rs:353:22
+    |
+353 |             #[derive(Accounts)]
+    |                      ^^^^^^^^
+    |
+    = note: expected values for `feature` are: `cpi`, `default`, `idl-build`, `no-entrypoint`, `no-idl`, and `no-log-ix-name`
+    = help: consider adding `anchor-debug` as a feature in `Cargo.toml`
+    = note: see <https://doc.rust-lang.org/nightly/rustc/check-cfg/cargo-specifics.html> for more information about checking conditional configuration
+    = note: this warning originates in the derive macro `Accounts` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: use of deprecated method `anchor_lang::prelude::AccountInfo::<'a>::realloc`: Use AccountInfo::resize() instead
+  --> programs/stablecoin-program/src/lib.rs:13:1
+   |
+13 | #[program]
+   | ^^^^^^^^^^
+   |
+   = note: `#[warn(deprecated)]` on by default
+   = note: this warning originates in the attribute macro `program` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unused variable: `feed_id`
+  --> programs/stablecoin-program/src/lib.rs:32:9
+   |
+32 |         feed_id: [u8; 32],
+   |         ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_feed_id`
+   |
+   = note: `#[warn(unused_variables)]` on by default
+
+warning: unused variable: `feed_id`
+   --> programs/stablecoin-program/src/lib.rs:151:9
+    |
+151 |         feed_id: [u8; 32],
+    |         ^^^^^^^ help: if this is intentional, prefix it with an underscore: `_feed_id`
+
+warning: `stablecoin-program` (lib) generated 16 warnings (5 duplicates)
+    Finished `release` profile [optimized] target(s) in 0.13s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.12s
+     Running unittests src/lib.rs (/Users/woogieboogie/github/example_verify/cross-chain-stablecoin/stablecoin-program/target/debug/deps/stablecoin_program-2840755d3fa1c49c)
+
+Found a 'test' script in the Anchor.toml. Running it as a test suite!
+
+Running test suite: "/Users/woogieboogie/github/example_verify/cross-chain-stablecoin/stablecoin-program/Anchor.toml"
+
+yarn run v1.22.22
+$ /Users/woogieboogie/github/example_verify/cross-chain-stablecoin/stablecoin-program/node_modules/.bin/ts-mocha -p ./tsconfig.json -t 1000000 'tests/**/*.ts'
+(node:97563) ExperimentalWarning: Type Stripping is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:97563) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///Users/woogieboogie/github/example_verify/cross-chain-stablecoin/stablecoin-program/tests/0-program-initialization.ts is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to /Users/woogieboogie/github/example_verify/cross-chain-stablecoin/stablecoin-program/package.json.
+🔮 Testing Oracle Program with Real Chainlink Data Streams
+═══════════════════════════════════════════════════════════════
+🔑 Stablecoin Program ID: 7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR
+🔑 Oracle Program ID: 9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1
+📊 Real Oracle Price Feed: C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen
+👤 Payer: J7pNaceD5QmxNxcYAMD1NDWqqUxoacVUevu66pEai6Dh
+🪙 Testing Stablecoin Program Logic (Independent)
+═══════════════════════════════════════════════════════════
+🔗 Testing Complete Oracle ↔ Stablecoin Integration
+═══════════════════════════════════════════════════════════════
+
+
+  stablecoin-program
+Available methods: [ 'burnAndWithdraw', 'depositAndMint', 'initializeMint' ]
+Program has the following instructions: initializeMint, depositAndMint, burnAndWithdraw
+    ✔ Is initialized!
+
+  🔮 Oracle Unit Tests - Real Chainlink Data
+
+🏗️ Setting up test environment...
+🏦 Mint Authority PDA: Fj4WW2NEKeXmJqDWRq7rTLiLQ1wQJ7e8Qo49q55iJYFY
+🏛️ Collateral Vault PDA: 9RutecvzFhfum6UrwCGRuf3iRqipwDv34qY6i6wMDHQ6
+✅ Oracle price feed confirmed: C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen
+
+🏗️ Test 1: Setup - Create Mint with Multisig Authority (CCIP-Compatible)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+🔑 Creating 1-of-3 multisig with signers:
+  - Admin Wallet: EFTfqenpXWscnZkrXPYVVrPJMz5EWTZ5vc3zTNpdR9f3
+  - Pool Signer PDA: E9of6ZTqE5vnCtoFe6t6DQ6VQ97xXc3xtnGKZnQJpV1e
+  - Our Program PDA: Fj4WW2NEKeXmJqDWRq7rTLiLQ1wQJ7e8Qo49q55iJYFY
+🔐 Multisig created: 3RQXPqqEygmNZLSoAYQMN7rKpCrAQy2czG7Pox8weV4Z
+🪙 Mint created with multisig authority: 7Z6zMFnsuSv1k1F6ygDkLtH8ySLv1oePFinZGLR96P9q
+🔐 Mint authority (multisig): 3RQXPqqEygmNZLSoAYQMN7rKpCrAQy2czG7Pox8weV4Z
+✅ Mint account created: true
+👤 User token account: DVKsxjRUpUyaPaMTP19mLbCTu7U95PVfEAdKRNt2CTG6
+    ✔ 🏗️ Setup: Create Mint with Multisig Authority (CCIP-Compatible) (2846ms)
+
+🔮 Test 2: Oracle Integration - Mint Stablecoins with Real Chainlink Price
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+👤 User Token Account: DVKsxjRUpUyaPaMTP19mLbCTu7U95PVfEAdKRNt2CTG6
+💎 Depositing: 100000000 lamports (0.1 SOL)
+📋 Using REAL Feed ID from oracle
+📊 Oracle Price Feed: C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen

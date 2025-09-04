@@ -1,13 +1,33 @@
 import * as anchor from "@coral-xyz/anchor"
 import { Program } from "@coral-xyz/anchor"
 import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY } from "@solana/web3.js"
-import { TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddress } from "@solana/spl-token"
+import { 
+  TOKEN_PROGRAM_ID, 
+  ASSOCIATED_TOKEN_PROGRAM_ID, 
+  getAssociatedTokenAddress,
+  createMint,
+  createMultisig
+} from "@solana/spl-token"
 import { StablecoinProgram } from "../target/types/stablecoin_program"
 
 // REAL Oracle data from our working oracle test
 const ORACLE_PROGRAM_ID = new PublicKey("9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1")
-const REAL_FEED_ID = [209, 190, 98, 183, 73, 106, 212, 137, 123, 152, 77, 185, 146, 67, 224, 146, 25, 6, 246, 109, 237, 21, 20, 157, 153, 62, 244, 44, 104, 183, 40, 195]
-const REAL_ORACLE_PRICE_FEED = new PublicKey("5CjYMCxwds8bKxnkfMoayEMy1oVjToZUMtoejAPkTYBH")
+// Official SOL/USD Feed ID from Chainlink Data Streams docs
+const REAL_FEED_ID = [0, 3, 211, 56, 234, 42, 195, 190, 158, 2, 96, 51, 177, 170, 96, 22, 115, 195, 123, 171, 94, 19, 133, 28, 89, 150, 111, 159, 130, 7, 84, 214]
+const REAL_ORACLE_PRICE_FEED = new PublicKey("C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen")
+
+// CCIP Pool Program ID (Chainlink's self-service BurnMint pool program)
+const CCIP_POOL_PROGRAM_ID = new PublicKey("41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB")
+
+// Function to derive Pool Signer PDA deterministically
+function findPoolSignerPDA(tokenMint: PublicKey, poolProgramId: PublicKey): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from("ccip_tokenpool_signer"), tokenMint.toBuffer()],
+    poolProgramId
+  )
+}
+
+// We'll create these dynamically in the test setup
 
 // Enhanced retry helper for blockhash issues
 async function retryTransaction(
@@ -52,8 +72,10 @@ describe("🔮 Oracle Unit Tests - Real Chainlink Data", () => {
   const payer = provider.wallet.publicKey
 
   // Test accounts
+  // Test state - will create multisig setup dynamically
   let stablecoinMint: PublicKey
   let mintAuthority: PublicKey
+  let multisigAuthority: PublicKey
   let collateralVault: PublicKey
   let userTokenAccount: PublicKey
 
@@ -89,54 +111,63 @@ describe("🔮 Oracle Unit Tests - Real Chainlink Data", () => {
     console.log("✅ Oracle price feed confirmed:", REAL_ORACLE_PRICE_FEED.toString())
   })
 
-  it("🏗️ Setup: Initialize Stablecoin Mint for Oracle Testing", async () => {
-    console.log("\n🏗️ Test 1: Setup - Initialize Stablecoin Mint for Oracle Testing")
+  it("🏗️ Setup: Create Mint with Multisig Authority (CCIP-Compatible)", async () => {
+    console.log("\n🏗️ Test 1: Setup - Create Mint with Multisig Authority (CCIP-Compatible)")
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
-    // Create a new mint keypair
-    const mintKeypair = anchor.web3.Keypair.generate()
-    stablecoinMint = mintKeypair.publicKey
+    // Step 1: Create a multisig with our PDA as one of the signers
+    // This uses the REAL CCIP Pool Signer PDA (deterministic)
+    const adminKeypair = anchor.web3.Keypair.generate() // Simulate admin wallet
+    
+    // Step 2: Create a temporary mint to derive the real Pool Signer PDA
+    const tempMintKeypair = anchor.web3.Keypair.generate()
+    const [realPoolSignerPDA, poolSignerBump] = findPoolSignerPDA(tempMintKeypair.publicKey, CCIP_POOL_PROGRAM_ID)
+    
+    console.log("🔑 Creating 1-of-3 multisig with signers:")
+    console.log("  - Admin Wallet:", adminKeypair.publicKey.toString())
+    console.log("  - Pool Signer PDA:", realPoolSignerPDA.toString(), `(bump: ${poolSignerBump})`)
+    console.log("  - Our Program PDA:", mintAuthority.toString())
 
-    console.log("🪙 New Mint Address:", stablecoinMint.toString())
-
-    const tx = await retryTransaction(
+    // Create the multisig (1-of-3: any one signer can authorize)
+    const multisigKeypair = anchor.web3.Keypair.generate()
+    multisigAuthority = await createMultisig(
       provider.connection,
-      async (blockhash) => {
-        return await program.methods
-          .initializeMint(6) // 6 decimals for stablecoin
-          .accountsStrict({
-            mint: stablecoinMint,
-            mintAuthority: mintAuthority,
-            payer: payer,
-            rent: SYSVAR_RENT_PUBKEY,
-            tokenProgram: TOKEN_PROGRAM_ID,
-            systemProgram: SystemProgram.programId,
-          })
-          .signers([mintKeypair])
-          .rpc({
-            commitment: "confirmed",
-            skipPreflight: false,
-          })
-      }
+      provider.wallet.payer, // Use the actual keypair, not wallet wrapper
+      [adminKeypair.publicKey, realPoolSignerPDA, mintAuthority], // Real CCIP Pool Signer PDA
+      1, // M = 1 (1-of-3)
+      multisigKeypair, // Provide the keypair
+      { commitment: "confirmed" }
+    )
+    
+    console.log("🔐 Multisig created:", multisigAuthority.toString())
+
+    // Step 2: Create mint with multisig as authority
+    const mintKeypair = anchor.web3.Keypair.generate()
+    stablecoinMint = await createMint(
+      provider.connection,
+      provider.wallet.payer, // Use the actual keypair
+      multisigAuthority, // Mint authority (multisig)
+      null, // Freeze authority (none)
+      6, // Decimals
+      mintKeypair, // Provide the keypair
+      { commitment: "confirmed" }
     )
 
-    console.log("✅ Mint initialized successfully!")
-    console.log("🔗 Transaction:", tx)
+    console.log("🪙 Mint created with multisig authority:", stablecoinMint.toString())
+    console.log("🔐 Mint authority (multisig):", multisigAuthority.toString())
 
-    // Verify mint was created correctly
+    // Verify setup
     const mintInfo = await provider.connection.getAccountInfo(stablecoinMint)
-    console.log("📊 Mint account created:", mintInfo !== null)
+    console.log("✅ Mint account created:", mintInfo !== null)
+    
+    // Get user's token account (now that mint is created)
+    userTokenAccount = await getAssociatedTokenAddress(stablecoinMint, payer)
+    console.log("👤 User token account:", userTokenAccount.toString())
   })
 
   it("🔮 Test Oracle Integration: Mint Stablecoins with Real Chainlink Price", async () => {
     console.log("\n🔮 Test 2: Oracle Integration - Mint Stablecoins with Real Chainlink Price")
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
-
-    // Get user's associated token account
-    userTokenAccount = await getAssociatedTokenAddress(
-      stablecoinMint,
-      payer
-    )
 
     console.log("👤 User Token Account:", userTokenAccount.toString())
 
@@ -152,9 +183,10 @@ describe("🔮 Oracle Unit Tests - Real Chainlink Data", () => {
         async (blockhash) => {
           return await program.methods
             .depositAndMint(collateralAmount, REAL_FEED_ID)
-            .accountsStrict({
+            .accounts({
               mint: stablecoinMint,
-              mintAuthority: mintAuthority,
+              mintAuthority: mintAuthority, // Our PDA will sign for the multisig
+              multisigMintAuthority: multisigAuthority, // The actual mint authority
               userTokenAccount: userTokenAccount,
               collateralVault: collateralVault,
               user: payer,

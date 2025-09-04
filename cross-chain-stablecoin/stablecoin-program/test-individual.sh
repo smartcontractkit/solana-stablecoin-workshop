@@ -59,6 +59,9 @@ case "${1:-help}" in
     "integration")
         run_test "Integration Tests" "Oracle-Stablecoin Integration"
         ;;
+    "ccip"|"multisig")
+        run_test "CCIP Multisig Tests" "CCIP Multisig Integration"
+        ;;
     "all")
         run_all_tests
         ;;
@@ -69,6 +72,7 @@ case "${1:-help}" in
         echo "  oracle      - Run Oracle Unit Tests only"
         echo "  stablecoin  - Run Stablecoin Unit Tests only"  
         echo "  integration - Run Integration Tests only"
+        echo "  ccip        - Run CCIP Multisig Tests only"
         echo "  all         - Run all tests (full suite)"
         echo "  help        - Show this help message"
         echo ""

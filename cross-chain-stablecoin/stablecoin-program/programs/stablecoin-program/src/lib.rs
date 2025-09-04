@@ -1,8 +1,9 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token::{self, Mint, Token, TokenAccount, MintTo, Burn},
+    token::{self, Mint, Token, TokenAccount, Burn},
 };
+use anchor_lang::solana_program::program as solana_program;
 
 declare_id!("7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR");
 
@@ -101,15 +102,43 @@ pub mod stablecoin_program {
         ];
         let signer_seeds = &[&mint_seeds[..]];
 
-        let cpi_accounts = MintTo {
-            mint: ctx.accounts.mint.to_account_info(),
-            to: ctx.accounts.user_token_account.to_account_info(),
-            authority: ctx.accounts.mint_authority.to_account_info(),
-        };
-        let cpi_program = ctx.accounts.token_program.to_account_info();
-        let cpi_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, signer_seeds);
+        // For multisig minting, we need to construct the instruction manually
+        // because Anchor's MintTo doesn't support remaining_accounts for multisig signers
         
-        token::mint_to(cpi_ctx, mint_amount)?;
+        // Create the mint_to instruction manually for multisig
+        use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
+        
+        let mint_to_ix = Instruction {
+            program_id: ctx.accounts.token_program.key(),
+            accounts: vec![
+                AccountMeta::new(ctx.accounts.mint.key(), false),
+                AccountMeta::new(ctx.accounts.user_token_account.key(), false),
+                AccountMeta::new_readonly(ctx.accounts.multisig_mint_authority.key(), false),
+                AccountMeta::new_readonly(ctx.accounts.mint_authority.key(), true), // Our PDA signs
+            ],
+            data: {
+                let mut data = vec![7]; // MintTo instruction discriminator
+                data.extend_from_slice(&mint_amount.to_le_bytes());
+                data
+            },
+        };
+        
+        // Build account infos for the instruction
+        let mut account_infos = vec![
+            ctx.accounts.mint.to_account_info(),
+            ctx.accounts.user_token_account.to_account_info(),
+            ctx.accounts.multisig_mint_authority.to_account_info(),
+        ];
+        
+        // Add our PDA as a signer for the multisig
+        account_infos.push(ctx.accounts.mint_authority.to_account_info());
+        
+        // Invoke the SPL Token instruction with our PDA signing
+        solana_program::invoke_signed(
+            &mint_to_ix,
+            &account_infos,
+            signer_seeds,
+        )?;
 
         msg!("Successfully minted {} raw units ({:.6} USD stablecoins)", mint_amount, stablecoin_amount);
         Ok(())
@@ -238,8 +267,11 @@ pub struct DepositAndMint<'info> {
         seeds = [b"mint_authority"],
         bump
     )]
-    /// CHECK: This is a PDA used as mint authority
+    /// CHECK: This is a PDA used as mint authority (now a multisig signer)
     pub mint_authority: UncheckedAccount<'info>,
+    
+    /// CHECK: Multisig mint authority account
+    pub multisig_mint_authority: UncheckedAccount<'info>,
     
     #[account(
         init_if_needed,
