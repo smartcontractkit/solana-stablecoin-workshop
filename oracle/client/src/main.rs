@@ -27,8 +27,7 @@ fn load_keypair_from_file() -> Result<Keypair, Box<dyn std::error::Error>> {
 // Chainlink Data Streams uses 18 decimals (1e18)
 const CHAINLINK_DECIMALS: f64 = 1_000_000_000_000_000_000.0;
 
-// Oracle program ID (from our deployed program)
-const ORACLE_PROGRAM_ID: &str = "9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU";
+// Oracle program ID will be loaded from .env file for dynamic configuration
 
 #[derive(Parser)]
 #[command(name = "chainlink-stablecoin-client")]
@@ -110,9 +109,12 @@ async fn main() -> Result<()> {
             // Load environment variables
             dotenv::dotenv().ok();
             
-            // Step 1: Initialize oracle client
-            let oracle_program_id = Pubkey::from_str(ORACLE_PROGRAM_ID)
-                .map_err(|_| anyhow::anyhow!("Invalid oracle program ID"))?;
+            // Step 1: Initialize oracle client with dynamic program ID from .env
+            let oracle_program_id_str = std::env::var("ORACLE_PROGRAM_ID")
+                .map_err(|_| anyhow::anyhow!("ORACLE_PROGRAM_ID not found in environment. Please set it in .env file."))?;
+            println!("🔧 Using Oracle Program ID from .env: {}", oracle_program_id_str);
+            let oracle_program_id = Pubkey::from_str(&oracle_program_id_str)
+                .map_err(|_| anyhow::anyhow!("Invalid oracle program ID: {}", oracle_program_id_str))?;
             let oracle_client = OracleClient::new("https://api.devnet.solana.com", oracle_program_id)?;
             
             // Step 2: Load keypair from Solana CLI (should have SOL)
@@ -193,9 +195,7 @@ async fn main() -> Result<()> {
             
             // Step 7: Call oracle verify_and_store
             info!("🔮 Calling oracle verify_and_store...");
-            println!("📊 Price to store: ${:.8}", chainlink_client.bigint_to_f64(&price_data.benchmark_price) / CHAINLINK_DECIMALS);
-            println!("📦 Compressed report: {} bytes", compressed_report.len());
-            println!("🎯 Feed ID: {}", hex::encode(&feed_id));
+            println!("📊 Updating oracle with SOL/USD price: ${:.8}", chainlink_client.bigint_to_f64(&price_data.benchmark_price) / CHAINLINK_DECIMALS);
             
             match oracle_client.verify_and_store(compressed_report, &price_data, feed_id, &payer).await {
                 Ok(signature) => {
@@ -259,25 +259,20 @@ async fn main() -> Result<()> {
             println!("✅ {:.9} SOL × ${:.8} = ${:.2} → ~{:.6} stablecoins", 
                      collateral_sol, sol_price, collateral_usd, collateral_usd);
             
-            // Step 3: Get compressed report for oracle
-            println!("\n📦 Step 3: Preparing compressed report for oracle...");
-            let compressed_report = match chainlink_client.fetch_latest_sol_usd_report().await {
+            // Step 3: Verify report can be fetched for oracle integration
+            println!("\n📦 Step 3: Verifying oracle integration readiness...");
+            match chainlink_client.fetch_latest_sol_usd_report().await {
                 Ok(report) => {
-                    println!("✅ Compressed report ready ({} bytes)", report.len());
-                    report
+                    println!("✅ Oracle integration ready ({} bytes report)", report.len());
                 }
                 Err(e) => {
-                    error!("❌ Failed to fetch compressed report: {}", e);
+                    error!("❌ Failed to fetch report for oracle: {}", e);
                     return Err(e);
                 }
             };
             
-            println!("\n🎉 Demo complete! Ready for oracle integration:");
-            println!("   📊 Real SOL/USD price: ${:.8}", sol_price);
-            println!("   📦 Compressed report: {} bytes", compressed_report.len());
-            println!("   🪙 Expected stablecoins: ~{:.6}", collateral_usd);
-            println!("   🔮 Next: Integrate with oracle verify_and_store");
-            println!("   💰 Then: Integrate with stablecoin deposit_and_mint");
+            println!("\n🎉 Demo complete!");
+            println!("💰 SOL Price: ${:.8} → ~{:.6} stablecoins from {:.9} SOL", sol_price, collateral_usd, collateral_sol);
         }
         Commands::Monitor { interval } => {
             info!("📈 Starting SOL/USD price monitoring (interval: {}s)", interval);
@@ -289,16 +284,13 @@ async fn main() -> Result<()> {
                 interval_timer.tick().await;
                 iteration += 1;
                 
-                println!("\n📊 Price Update #{}", iteration);
-                println!("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-                
                 match chainlink_client.get_latest_sol_usd_price().await {
                     Ok(price_data) => {
                         let sol_price = chainlink_client.bigint_to_f64(&price_data.benchmark_price) / CHAINLINK_DECIMALS;
-                        println!("💰 SOL/USD: ${:.8}", sol_price);
-                        println!("📉 Bid:     ${:.8}", chainlink_client.bigint_to_f64(&price_data.bid) / CHAINLINK_DECIMALS);
-                        println!("📈 Ask:     ${:.8}", chainlink_client.bigint_to_f64(&price_data.ask) / CHAINLINK_DECIMALS);
-                        println!("⏰ Time:    {}", price_data.observations_timestamp);
+                        println!("#{} 💰 SOL/USD: ${:.8} (Bid: ${:.8} | Ask: ${:.8})", 
+                                iteration, sol_price,
+                                chainlink_client.bigint_to_f64(&price_data.bid) / CHAINLINK_DECIMALS,
+                                chainlink_client.bigint_to_f64(&price_data.ask) / CHAINLINK_DECIMALS);
                         
                         // Show price change if we have previous data
                         // TODO: Store previous price for comparison

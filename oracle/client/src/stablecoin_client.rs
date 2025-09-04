@@ -3,11 +3,13 @@ use solana_client::rpc_client::RpcClient;
 use solana_sdk::pubkey::Pubkey;
 
 /// Client for interacting with the Stablecoin program
+#[allow(dead_code)]
 pub struct StablecoinClient {
     rpc_client: RpcClient,
     program_id: Pubkey,
 }
 
+#[allow(dead_code)]
 impl StablecoinClient {
     pub fn new(rpc_url: &str, program_id: Pubkey) -> Self {
         Self {

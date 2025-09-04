@@ -92,6 +92,7 @@ impl ChainlinkClient {
     }
 
     /// Fetch a report for a specific timestamp
+    #[allow(dead_code)]
     pub async fn fetch_sol_usd_report_at_timestamp(&self, timestamp: i64) -> Result<Vec<u8>> {
         info!("🔗 Fetching SOL/USD report at timestamp: {}", timestamp);
         

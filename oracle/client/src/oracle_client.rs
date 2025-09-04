@@ -10,7 +10,7 @@ use solana_sdk::{
 use chainlink_data_streams_report::report::v3::ReportDataV3;
 use num_traits::ToPrimitive;
 use num_bigint::BigInt;
-use snap::raw::{Encoder, Decoder};
+use snap::raw::Encoder;
 
 // Constants for Chainlink Data Streams on Devnet
 const VERIFIER_PROGRAM_ID: &str = "Gt9S41PtjR58CbG9JhJ3J6vxesqrNAswbWYbLNTMZA3c";
@@ -80,24 +80,12 @@ impl OracleClient {
         
         let timestamp = report_data.observations_timestamp as u64;
         
-        println!("🔍 Derived accounts:");
-        println!("   📊 Verifier Account: {}", verifier_account);
-        println!("   ⚙️ Config Account: {}", config_account);
-        println!("   💰 Price Feed PDA: {}", price_feed_pda);
-        println!("   🔢 Expected Price: {}", expected_price);
+        // Accounts derived successfully
         
-        // Debug: Check the first few bytes of the compressed report
-        println!("🔍 Debug - Original report first 32 bytes: {:?}", &compressed_report[0..32.min(compressed_report.len())]);
-        println!("🔍 Debug - Original report size: {} bytes", compressed_report.len());
-        println!("🔍 Debug - Original report as hex: {}", hex::encode(&compressed_report[0..64.min(compressed_report.len())]));
-        
-        // Try snappy compressing the report (like the working test does)
+        // Compress report using snappy
         let mut encoder = Encoder::new();
         let snappy_compressed = encoder.compress_vec(&compressed_report)
-            .map_err(|e| anyhow::anyhow!("Failed to snappy compress report: {}", e))?;
-        
-        println!("🔍 Debug - Snappy compressed size: {} bytes", snappy_compressed.len());
-        println!("🔍 Debug - Snappy compressed first 32 bytes: {:?}", &snappy_compressed[0..32.min(snappy_compressed.len())]);
+            .map_err(|e| anyhow::anyhow!("Failed to compress report: {}", e))?;
         
         // Use the snappy compressed version for the transaction
         let final_report = snappy_compressed;
@@ -229,13 +217,13 @@ impl OracleClient {
         // 4. timestamp: u64
         data.extend_from_slice(&timestamp.to_le_bytes());
         
-        println!("📦 Instruction data size: {} bytes", data.len());
-        println!("🔍 Discriminator: {:?}", &data[0..8]);
+        // Instruction data prepared
         
         Ok(data)
     }
     
     /// Read current price from oracle PriceFeed account
+    #[allow(dead_code)]
     pub async fn get_price(&self, feed_id: [u8; 32]) -> Result<(u64, u64)> {
         let (price_feed_pda, _) = Pubkey::find_program_address(
             &[b"price_feed", &feed_id],
