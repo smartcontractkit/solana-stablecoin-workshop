@@ -117,14 +117,14 @@ describe("🔮 Oracle Unit Tests - Real Chainlink Data", () => {
 
     // Step 1: Create a multisig with our PDA as one of the signers
     // This uses the REAL CCIP Pool Signer PDA (deterministic)
-    const adminKeypair = anchor.web3.Keypair.generate() // Simulate admin wallet
+    const adminWallet = provider.wallet.publicKey // Use our real wallet as admin
     
     // Step 2: Create a temporary mint to derive the real Pool Signer PDA
     const tempMintKeypair = anchor.web3.Keypair.generate()
     const [realPoolSignerPDA, poolSignerBump] = findPoolSignerPDA(tempMintKeypair.publicKey, CCIP_POOL_PROGRAM_ID)
     
     console.log("🔑 Creating 1-of-3 multisig with signers:")
-    console.log("  - Admin Wallet:", adminKeypair.publicKey.toString())
+    console.log("  - Admin Wallet:", adminWallet.toString(), "(YOUR REAL WALLET)")
     console.log("  - Pool Signer PDA:", realPoolSignerPDA.toString(), `(bump: ${poolSignerBump})`)
     console.log("  - Our Program PDA:", mintAuthority.toString())
 
@@ -133,7 +133,7 @@ describe("🔮 Oracle Unit Tests - Real Chainlink Data", () => {
     multisigAuthority = await createMultisig(
       provider.connection,
       provider.wallet.payer, // Use the actual keypair, not wallet wrapper
-      [adminKeypair.publicKey, realPoolSignerPDA, mintAuthority], // Real CCIP Pool Signer PDA
+      [adminWallet, realPoolSignerPDA, mintAuthority], // Real admin wallet + CCIP Pool Signer PDA + Program PDA
       1, // M = 1 (1-of-3)
       multisigKeypair, // Provide the keypair
       { commitment: "confirmed" }

@@ -1,9 +1,9 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
     associated_token::AssociatedToken,
-    token::{self, Mint, Token, TokenAccount, Burn},
+    token::{self, spl_token, Mint, Token, TokenAccount, MintTo, Burn},
 };
-use anchor_lang::solana_program::program as solana_program;
+use anchor_lang::solana_program::program::invoke_signed;
 
 declare_id!("7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR");
 
@@ -25,11 +25,12 @@ pub mod stablecoin_program {
         Ok(())
     }
 
-    /// Deposit collateral and mint stablecoins based on oracle price
-    pub fn deposit_and_mint(
-        ctx: Context<DepositAndMint>,
+    /// Deposit collateral and mint stablecoins based on oracle price (Single Authority Mode)
+    /// Use this during CCIP setup phase when mint authority is a single wallet/PDA
+    pub fn deposit_and_mint_single(
+        ctx: Context<DepositAndMintSingle>,
         collateral_amount: u64,
-        feed_id: [u8; 32],
+        _feed_id: [u8; 32],
     ) -> Result<()> {
         let collateral_sol = collateral_amount as f64 / 1_000_000_000.0;
         msg!("Depositing {} lamports ({:.9} SOL) as collateral", collateral_amount, collateral_sol);
@@ -95,52 +96,116 @@ pub mod stablecoin_program {
             ],
         )?;
 
-        // Step 4: Mint stablecoins to user
+        // Step 4: Mint stablecoins to user using wallet authority
+        let cpi_accounts = MintTo {
+            mint: ctx.accounts.mint.to_account_info(),
+            to: ctx.accounts.user_token_account.to_account_info(),
+            authority: ctx.accounts.user.to_account_info(), // Use user's wallet as authority
+        };
+        let cpi_ctx = CpiContext::new(
+            ctx.accounts.token_program.to_account_info(),
+            cpi_accounts,
+        );
+        token::mint_to(cpi_ctx, mint_amount)?;
+
+        msg!("Successfully minted {} raw units ({:.6} USD stablecoins)", mint_amount, stablecoin_amount);
+        Ok(())
+    }
+
+    /// Deposit collateral and mint stablecoins based on oracle price (Multisig Authority Mode)
+    /// Use this after CCIP setup when mint authority is a multisig
+    pub fn deposit_and_mint_multisig(
+        ctx: Context<DepositAndMintMultisig>,
+        collateral_amount: u64,
+        _feed_id: [u8; 32],
+    ) -> Result<()> {
+        let collateral_sol = collateral_amount as f64 / 1_000_000_000.0;
+        msg!("Depositing {} lamports ({:.9} SOL) as collateral (Multisig Mode)", collateral_amount, collateral_sol);
+
+        // Step 1: Get price from oracle via CPI
+        let oracle_program = ctx.accounts.oracle_program.to_account_info();
+        let oracle_accounts = oracle::cpi::accounts::GetPrice {
+            price_feed: ctx.accounts.oracle_price_feed.clone(),
+        };
+        
+        let oracle_ctx = CpiContext::new(oracle_program, oracle_accounts);
+        oracle::cpi::get_price(oracle_ctx)?;
+        
+        // Extract price and timestamp from return data
+        let return_data = anchor_lang::solana_program::program::get_return_data()
+            .ok_or(StablecoinError::OraclePriceNotAvailable)?;
+        
+        if return_data.0 != ORACLE_PROGRAM_ID {
+            return Err(StablecoinError::OraclePriceNotAvailable.into());
+        }
+        
+        // Parse return data: (price: u64, timestamp: u64) = 16 bytes total
+        if return_data.1.len() != 16 {
+            return Err(StablecoinError::OraclePriceNotAvailable.into());
+        }
+        
+        let price_bytes = &return_data.1[0..8];
+        let timestamp_bytes = &return_data.1[8..16];
+        
+        let oracle_price = u64::from_le_bytes(price_bytes.try_into().unwrap()); // Price with 8 decimals
+        let oracle_timestamp = u64::from_le_bytes(timestamp_bytes.try_into().unwrap());
+        
+        let oracle_price_usd = oracle_price as f64 / 100_000_000.0; // Convert 8 decimals to USD
+        msg!("Oracle price: {} raw (${:.8} USD per SOL), timestamp: {}", oracle_price, oracle_price_usd, oracle_timestamp);
+
+        // Step 2: Calculate collateral value and mint amount
+        let collateral_value_usd = (collateral_amount as f64 / 1_000_000_000.0) * oracle_price_usd;
+        let stablecoin_amount = collateral_value_usd; // 1:1 USD backing
+        let mint_amount = (stablecoin_amount * 10u64.pow(ctx.accounts.mint.decimals as u32) as f64) as u64;
+        
+        msg!("Collateral value: ${} USD, Minting: {} raw units ({:.6} USD stablecoins)", collateral_value_usd, mint_amount, stablecoin_amount);
+
+        // Step 3: Transfer collateral from user to vault
+        let transfer_instruction = anchor_lang::solana_program::system_instruction::transfer(
+            &ctx.accounts.user.key(),
+            &ctx.accounts.collateral_vault.key(),
+            collateral_amount,
+        );
+        
+        anchor_lang::solana_program::program::invoke(
+            &transfer_instruction,
+            &[
+                ctx.accounts.user.to_account_info(),
+                ctx.accounts.collateral_vault.to_account_info(),
+            ],
+        )?;
+
+        // Step 4: Mint stablecoins to user using MULTISIG CPI
         let mint_seeds = &[
             b"mint_authority".as_ref(),
             &[ctx.bumps.mint_authority],
         ];
         let signer_seeds = &[&mint_seeds[..]];
 
-        // For multisig minting, we need to construct the instruction manually
-        // because Anchor's MintTo doesn't support remaining_accounts for multisig signers
-        
-        // Create the mint_to instruction manually for multisig
-        use anchor_lang::solana_program::instruction::{AccountMeta, Instruction};
-        
-        let mint_to_ix = Instruction {
-            program_id: ctx.accounts.token_program.key(),
-            accounts: vec![
-                AccountMeta::new(ctx.accounts.mint.key(), false),
-                AccountMeta::new(ctx.accounts.user_token_account.key(), false),
-                AccountMeta::new_readonly(ctx.accounts.multisig_mint_authority.key(), false),
-                AccountMeta::new_readonly(ctx.accounts.mint_authority.key(), true), // Our PDA signs
+        // Create manual mint_to instruction for multisig
+        let mint_instruction = spl_token::instruction::mint_to(
+            &spl_token::ID,
+            &ctx.accounts.mint.key(),
+            &ctx.accounts.user_token_account.key(),
+            &ctx.accounts.multisig.key(),                    // Multisig as authority
+            &[&ctx.accounts.mint_authority.key()],           // Our PDA as signer FOR the multisig
+            mint_amount,
+        )?;
+
+        // Execute multisig CPI with our PDA as signer
+        invoke_signed(
+            &mint_instruction,
+            &[
+                ctx.accounts.mint.to_account_info(),
+                ctx.accounts.user_token_account.to_account_info(),
+                ctx.accounts.multisig.to_account_info(),        // Multisig account
+                ctx.accounts.mint_authority.to_account_info(),  // Our PDA as signer
+                ctx.accounts.token_program.to_account_info(),
             ],
-            data: {
-                let mut data = vec![7]; // MintTo instruction discriminator
-                data.extend_from_slice(&mint_amount.to_le_bytes());
-                data
-            },
-        };
-        
-        // Build account infos for the instruction
-        let mut account_infos = vec![
-            ctx.accounts.mint.to_account_info(),
-            ctx.accounts.user_token_account.to_account_info(),
-            ctx.accounts.multisig_mint_authority.to_account_info(),
-        ];
-        
-        // Add our PDA as a signer for the multisig
-        account_infos.push(ctx.accounts.mint_authority.to_account_info());
-        
-        // Invoke the SPL Token instruction with our PDA signing
-        solana_program::invoke_signed(
-            &mint_to_ix,
-            &account_infos,
             signer_seeds,
         )?;
 
-        msg!("Successfully minted {} raw units ({:.6} USD stablecoins)", mint_amount, stablecoin_amount);
+        msg!("Successfully minted {} raw units ({:.6} USD stablecoins) via multisig", mint_amount, stablecoin_amount);
         Ok(())
     }
 
@@ -238,17 +303,10 @@ pub struct InitializeMint<'info> {
         init,
         payer = payer,
         mint::decimals = 6,
-        mint::authority = mint_authority,
-        mint::freeze_authority = mint_authority,
+        mint::authority = payer, // Use wallet as initial authority for CCIP setup
+        mint::freeze_authority = payer,
     )]
     pub mint: Account<'info, Mint>,
-    
-    #[account(
-        seeds = [b"mint_authority"],
-        bump
-    )]
-    /// CHECK: This is a PDA used as mint authority
-    pub mint_authority: UncheckedAccount<'info>,
     
     #[account(mut)]
     pub payer: Signer<'info>,
@@ -259,19 +317,56 @@ pub struct InitializeMint<'info> {
 }
 
 #[derive(Accounts)]
-pub struct DepositAndMint<'info> {
+pub struct DepositAndMintSingle<'info> {
     #[account(mut)]
     pub mint: Account<'info, Mint>,
+    
+    #[account(
+        init_if_needed,
+        payer = user,
+        associated_token::mint = mint,
+        associated_token::authority = user,
+    )]
+    pub user_token_account: Account<'info, TokenAccount>,
+    
+    #[account(
+        mut,
+        seeds = [b"collateral_vault"],
+        bump
+    )]
+    /// CHECK: This is a PDA used as collateral vault
+    pub collateral_vault: UncheckedAccount<'info>,
+    
+    #[account(mut)]
+    pub user: Signer<'info>,
+    
+    // Oracle CPI accounts
+    /// CHECK: Oracle program ID is validated
+    #[account(address = ORACLE_PROGRAM_ID)]
+    pub oracle_program: UncheckedAccount<'info>,
+    
+    /// CHECK: Oracle price feed account - validated by oracle program
+    pub oracle_price_feed: UncheckedAccount<'info>,
+    
+    pub token_program: Program<'info, Token>,
+    pub associated_token_program: Program<'info, AssociatedToken>,
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct DepositAndMintMultisig<'info> {
+    #[account(mut)]
+    pub mint: Account<'info, Mint>,
+    
+    /// CHECK: Multisig account that serves as mint authority
+    pub multisig: UncheckedAccount<'info>,
     
     #[account(
         seeds = [b"mint_authority"],
         bump
     )]
-    /// CHECK: This is a PDA used as mint authority (now a multisig signer)
+    /// CHECK: Our PDA that signs for the multisig
     pub mint_authority: UncheckedAccount<'info>,
-    
-    /// CHECK: Multisig mint authority account
-    pub multisig_mint_authority: UncheckedAccount<'info>,
     
     #[account(
         init_if_needed,

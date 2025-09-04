@@ -1,0 +1,678 @@
+Cross-Chain Token Setup: BurnMint with SPL Token Multisig Tutorial
+This educational tutorial demonstrates how to create and configure cross-chain tokens using Chainlink's Cross-Chain Interoperability Protocol (CCIP) between Solana Devnet and Ethereum Sepolia using SPL token multisig concepts. You will learn to implement the SPL token multisig approach within Path A from the CCIP Cross-Chain Token Integration Guide.
+
+Path A Mint Authority Options:
+
+Direct Transfer: Transfer mint authority directly to Pool Signer PDA - suitable for development and testing (see tutorial)
+Multisig Setup (this tutorial): Learn SPL token multisig concepts with Pool Signer PDA as a member - foundation for production systems
+Production Multisig: Enterprise-grade dual-layer governance with Squads + SPL multisig (see tutorial)
+This tutorial focuses on demonstrating multisig architecture concepts, helping you understand governance controls while maintaining autonomous cross-chain token transfers through BurnMint token pools.
+
+note
+Educational Multisig Tutorial
+
+Important: This tutorial demonstrates SPL token multisig concepts for learning purposes, using simplified configurations (1-of-2 with single admin wallet). While the multisig architecture shown provides a foundation for production systems, real production deployments require additional considerations: proper governance multisig (like Squads), higher signature thresholds, and comprehensive security audits. For development and testing environments, consider the simpler Direct Mint Authority Transfer tutorial.
+
+caution
+SPL Token Multisig Limitations
+
+Critical Understanding: The SPL token multisig demonstrated in this tutorial can ONLY execute SPL token instructions (mint, burn, transfer, etc.). It cannot execute arbitrary transactions or general governance operations like transferring CCIP admin roles or pool ownership. For comprehensive production governance, you would typically implement a separate governance multisig (such as Squads) that controls broader aspects including CCIP administration, while potentially being one of the signers in the SPL token multisig shown here.
+
+What You Will Build
+This tutorial implements the SPL token multisig variant of Path A from the CCIP Cross-Chain Token Integration Guide. This approach is designed for learning multisig concepts and provides a foundation for production systems.
+
+Cross-Chain Token Architecture
+This tutorial implements the Burn and Mint token handling mechanism between Solana Devnet and Ethereum Sepolia with SPL token multisig governance. You'll deploy two BurnMint pools (one on each chain) that work together to maintain consistent token supply across chains while learning multisig architecture concepts.
+
+How Burn and Mint Works:
+
+Source Chain: Burns tokens from sender's account
+CCIP Protocol: Transmits message cross-chain
+Destination Chain: Mints equivalent tokens to the receiver
+Component Overview
+Component	Implementation	Authority Model
+Ethereum Sepolia	ERC20 token with CCIP BurnMint pool	Multiple minters: EOA + Pool
+Solana Devnet	SPL token with CCIP BurnMint pool	SPL Token Multisig: Pool Signer PDA + Admin wallet
+SPL Token Multisig Architecture
+Key Approach: You will create an SPL token multisig that includes the Pool Signer PDA as a required member, enabling both autonomous CCIP operations and governance-controlled minting.
+
+Educational Focus: This tutorial demonstrates multisig architecture concepts using a simplified 1-of-2 configuration for learning purposes.
+
+Prerequisites
+This tutorial requires setting up two different repositories in separate terminal windows. Follow the setup instructions for both environments before proceeding.
+
+Development Environment Requirements
+System Requirements:
+
+Anchor and Solana CLI Tools: Install following the installation guide. Requires Rust to be installed.
+Node.js v20 or higher: Use the nvm package to install and manage versions. Verify with node -v
+Yarn: For dependency management
+Git: For cloning repositories
+Terminal 1: Solana Starter Kit Setup
+Clone and setup the Solana Starter Kit:
+
+copy to clipboard
+git clone https://github.com/smartcontractkit/solana-starter-kit.git && cd solana-starter-kit
+Install dependencies:
+
+copy to clipboard
+yarn install
+Configure your Solana environment:
+
+copy to clipboard
+# Set Solana CLI to use devnet
+solana config set --url https://api.devnet.solana.com
+
+# Set your keypair (create one if needed)
+solana config set --keypair ~/.config/solana/id.json
+
+# If you do not have a keypair, create one:
+solana-keygen new --outfile ~/.config/solana/id.json
+Fund your Solana wallet:
+
+copy to clipboard
+# Get your wallet address
+solana address
+
+# Request SOL from the devnet faucet
+solana airdrop 2
+Verify your setup:
+
+copy to clipboard
+# Check your SOL balance
+solana balance
+
+# Verify you are on devnet
+solana config get
+Terminal 2: Smart Contract Examples Setup
+Clone the repository and navigate to the Hardhat project:
+
+copy to clipboard
+git clone https://github.com/smartcontractkit/smart-contract-examples.git
+cd smart-contract-examples/ccip/cct/hardhat
+Install and compile dependencies:
+
+copy to clipboard
+npm install
+npm run compile
+Set up encrypted environment variables:
+
+copy to clipboard
+# Set encryption password
+npx env-enc set-pw
+
+# Configure environment variables
+npx env-enc set
+Required environment variables for Ethereum Sepolia:
+
+ETHEREUM_SEPOLIA_RPC_URL: RPC endpoint from Alchemy or Infura
+PRIVATE_KEY: Your testnet wallet private key (MetaMask export guide)
+ETHERSCAN_API_KEY: API key from Etherscan
+Fund your wallet:
+
+Acquire LINK and ETH on Ethereum Sepolia using Chainlink faucets
+note
+Two-Terminal Workflow
+
+Keep both terminal windows open throughout the tutorial. You will switch between the Solana Starter Kit (Terminal 1) and Hardhat project (Terminal 2) as you progress through the phases.
+
+Tutorial Approach
+This tutorial provides step-by-step instructions with detailed explanations of what each command does and why. You'll work primarily in Terminal 1 (Solana) with occasional switches to Terminal 2 (EVM).
+
+Environment Variable Management: This tutorial uses phase-based variable files (e.g., ~/.phase1_vars, ~/.ccip_complete_vars) to eliminate manual variable re-entry when switching between terminals. Each phase saves its variables to files that subsequent phases can load automatically.
+
+For detailed implementation code explanations, refer to the comprehensive READMEs in both repositories:
+
+Solana Starter Kit README: Detailed explanations of all SVM commands and implementation
+Smart Contract Examples README: Comprehensive EVM implementation guide
+The READMEs contain detailed technical explanations, troubleshooting guides, and advanced configuration options.
+
+Phase 1: Ethereum Sepolia Token Setup
+In this step, you will use Hardhat tasks to deploy an ERC20 token contract and a corresponding burn and mint token pool on Ethereum Sepolia. The tasks interact with the BurnMintERC20 contract for token deployment and the BurnMintTokenPool contract for pool creation.
+
+Current Terminal: Terminal 2 (Smart Contract Examples - Hardhat) Verify your location:
+
+copy to clipboard
+pwd
+# Should show: .../smart-contract-examples/ccip/cct/hardhat
+Step 1: Deploy ERC20 Token
+Using the deployToken task, deploy a burnable and mintable ERC20 token on Ethereum Sepolia:
+
+Deploy TokenExpected Output
+copy to clipboard
+# Deploy BurnMint ERC20 token
+npx hardhat deployToken \
+ --name "BnM AEM Token" \
+ --symbol BnMAEM \
+ --decimals 18 \
+ --verifycontract true \
+ --network sepolia
+Export your token address for later use:
+
+Export Token AddressExpected Output
+copy to clipboard
+# Set token address from deployment
+export ETH_TOKEN_ADDRESS="<YOUR_TOKEN_ADDRESS>"
+Verify your token address:
+
+copy to clipboard
+echo "Token Address: $ETH_TOKEN_ADDRESS"
+Step 2: Deploy Token Pool
+In this step, you will use the deployTokenPool task to deploy a CCIP BurnMint token pool for the token on Ethereum Sepolia. This task interacts with the BurnMintTokenPool contract and grants the necessary mint and burn privileges to the pool.
+
+Deploy PoolExpected Output
+copy to clipboard
+# Deploy BurnMint pool
+npx hardhat deployTokenPool \
+ --tokenaddress $ETH_TOKEN_ADDRESS \
+ --localtokendecimals 18 \
+ --pooltype burnMint \
+ --verifycontract true \
+ --network sepolia
+Export your pool address for later use:
+
+Export Pool AddressExpected Output
+copy to clipboard
+# Set pool address from deployment
+export ETH_POOL_ADDRESS="<YOUR_POOL_ADDRESS>"
+Verify your pool address:
+
+copy to clipboard
+echo "Pool Address: $ETH_POOL_ADDRESS"
+Step 3: Mint Tokens
+In this step, you will use the mintTokens task to mint tokens on Ethereum Sepolia for your Externally Owned Account (EOA). Since you assigned mint and burn privileges to your EOA when deploying the tokens, you can now mint tokens for testing purposes. This ensures that you have enough tokens in your EOA to perform cross-chain transfers later.
+
+Mint TokensExpected Output
+copy to clipboard
+# Mint initial token supply for testing
+npx hardhat mintTokens \
+  --tokenaddress $ETH_TOKEN_ADDRESS \
+  --amount 1000000000000000000000 \
+  --network sepolia
+Step 4: Claim Admin
+In this step, you will use the claimAdmin task to register your EOA as the administrator for the deployed token on Ethereum Sepolia. This process involves calling the RegistryModuleOwnerCustom contract, which will fetch the CCIP admin of the token and set it up as the admin in the registry.
+
+Claim AdminExpected Output
+copy to clipboard
+# Claim admin role
+npx hardhat claimAdmin \
+  --tokenaddress $ETH_TOKEN_ADDRESS \
+  --network sepolia
+Step 5: Accept Admin Role
+In this step, you will use the acceptAdminRole task to accept the admin role for the deployed token on Ethereum Sepolia. Once you have claimed the role, accepting the role finalizes your control over the token administration.
+
+Accept Admin RoleExpected Output
+copy to clipboard
+# Accept admin role
+npx hardhat acceptAdminRole \
+ --tokenaddress $ETH_TOKEN_ADDRESS \
+ --network sepolia
+Save the Phase 1 variables for cross-terminal access:
+
+Save Phase 1 VariablesExpected Output
+copy to clipboard
+# Save Phase 1 variables for cross-terminal use
+cat > ~/.phase1_vars << EOF
+export ETH_TOKEN_ADDRESS="$ETH_TOKEN_ADDRESS"
+export ETH_POOL_ADDRESS="$ETH_POOL_ADDRESS"
+EOF
+
+echo "=== Phase 1 Complete - EVM Setup ==="
+echo "✅ ETH Token: $ETH_TOKEN_ADDRESS"
+echo "✅ ETH Pool: $ETH_POOL_ADDRESS"
+echo "✅ Variables saved to ~/.phase1_vars"
+Phase 2: Solana Devnet Token Setup
+In this phase, you will create an SPL token, initialize the CCIP token pool, and complete CCIP registration before** setting up the SPL token multisig. This sequence is critical because the self-service registration requires you to hold the mint authority.
+
+Switch to Terminal 1 (Solana Starter Kit) Verify your location:
+
+copy to clipboard
+pwd
+# Should show: .../solana-starter-kit
+Load the Ethereum addresses from Phase 1:
+
+copy to clipboard
+source ~/.phase1_vars
+echo "Loaded Phase 1 variables: ETH_TOKEN_ADDRESS=$ETH_TOKEN_ADDRESS, ETH_POOL_ADDRESS=$ETH_POOL_ADDRESS"
+Step 1: Create SPL Token
+In this step, you will use the svm:token:create script to create an SPL token with Metaplex metadata support on Solana Devnet. This script leverages the TokenManager library to create a comprehensive token with metadata, initial supply, and proper configuration for CCIP integration.
+
+Create TokenExpected Output
+copy to clipboard
+# Create SPL token with default configuration
+yarn svm:token:create
+note
+Custom Configuration
+
+You can customize the token by adding parameters:
+
+copy to clipboard
+yarn svm:token:create \
+  --name "Cross Chain Token Production" \
+  --symbol "CCTP" \
+  --uri "https://your-ipfs-url/metadata.json"
+You can reuse this metadata or create your own to IPFS or another decentralized storage solution and update the create-token-metaplex.ts script to ensure your metadata file and token configuration are compatible. The default metadata URI provided is for demonstration purposes only.
+
+Set Environment Variables
+Set up environment variables for easier reference throughout the tutorial:
+
+Set Environment VariablesExpected Output
+note
+CCIP BurnMint Pool Program
+
+The CCIP BurnMint pool program is a self-service pool program that allows you to create a pool for your token. You can find the program ID in the CCIP Directory for:
+
+Solana Devnet
+Solana Mainnet
+copy to clipboard
+# Set your token mint address from the previous output
+export SOL_TOKEN_MINT="<REPLACE_WITH_YOUR_TOKEN_MINT_ADDRESS>"
+
+# Set your admin wallet (tutorial simplification - use governance multisig in production)
+export SOL_ADMIN_WALLET=$(solana address)
+
+# Set pool program (Chainlink self-service BurnMint pool program)
+export CCIP_POOL_PROGRAM=41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB
+Verify your environment variables:
+
+copy to clipboard
+# Display for verification
+echo "Token Mint: $SOL_TOKEN_MINT"
+echo "Admin Wallet: $SOL_ADMIN_WALLET"
+echo "Pool Program: $CCIP_POOL_PROGRAM"
+Step 2: Initialize CCIP Token Pool
+In this step, you will use the svm:pool:initialize script to initialize a CCIP token pool for your SPL token. This process creates the necessary on-chain state for cross-chain operations and establishes the Pool Signer PDA that will manage token operations.
+
+Initialize PoolExpected Output
+copy to clipboard
+# Initialize pool for your token
+yarn svm:pool:initialize \
+  --token-mint $SOL_TOKEN_MINT \
+  --burn-mint-pool-program $CCIP_POOL_PROGRAM
+Step 3: Verify Pool Creation
+In this step, you will use the svm:pool:get-info script to verify that your token pool was initialized correctly. This command queries the on-chain state and displays comprehensive information about your pool configuration, including the Pool Signer PDA and current ownership.
+
+Verify PoolExpected Output
+copy to clipboard
+# Verify pool creation
+yarn svm:pool:get-info \
+  --token-mint $SOL_TOKEN_MINT \
+  --burn-mint-pool-program $CCIP_POOL_PROGRAM
+Step 4: Create Pool Token Account
+In this step, you will use the svm:pool:create-token-account script to create an Associated Token Account (ATA) for the Pool Signer PDA. This ATA is required for the pool to hold and manage tokens during cross-chain transfer operations.
+
+Create Token AccountExpected Output
+copy to clipboard
+# Create ATA for Pool Signer PDA
+yarn svm:pool:create-token-account \
+  --token-mint $SOL_TOKEN_MINT \
+  --burn-mint-pool-program $CCIP_POOL_PROGRAM
+Step 5: Set Pool Environment Variables
+Set the Pool Signer PDA and Pool Config PDA from the Step 3 output above:
+
+Set Pool Env VariablesExpected Output
+copy to clipboard
+# Set Pool Signer PDA from the Step 3 output above
+export SOL_POOL_SIGNER_PDA="<REPLACE_WITH_YOUR_POOL_SIGNER_PDA>"
+
+# Set Pool Config PDA from the Step 3 output above
+export SOL_POOL_CONFIG_PDA="<REPLACE_WITH_YOUR_CONFIG_PDA>"
+Verify output:
+
+copy to clipboard
+echo "Pool Signer PDA: $SOL_POOL_SIGNER_PDA"
+echo "Pool Config PDA: $SOL_POOL_CONFIG_PDA"
+Step 6: Claim Admin
+In this step, you will use the svm:admin:propose-administrator and svm:admin:accept-admin-role scripts to register yourself as the CCIP administrator for the Solana token. This process establishes your control over the token's CCIP configuration on Solana.
+
+Propose AdminExpected Output
+copy to clipboard
+# Propose yourself as CCIP administrator (requires mint authority)
+
+yarn svm:admin:propose-administrator \
+ --token-mint $SOL_TOKEN_MINT
+
+caution
+Mint Authority Required
+
+Critical Sequence: This step MUST be completed while you still hold the mint authority. The Router's owner_propose_administrator instruction verifies that the caller is the token's mint authority holder.
+
+Step 7: Accept Admin Role
+In this step, you will use the svm:admin:accept-admin-role script to accept the proposed administrator role. This process establishes your control over the token's CCIP configuration on Solana.
+
+Accept Admin RoleExpected Output
+copy to clipboard
+# Accept the proposed administrator role
+yarn svm:admin:accept-admin-role \
+  --token-mint $SOL_TOKEN_MINT
+Step 8: Create SPL Token Multisig
+Now that CCIP registration is complete, create the SPL token multisig that will serve as the mint authority:
+
+Create MultisigExpected Output
+copy to clipboard
+# Create 1-of-2 multisig with Pool Signer PDA and admin wallet (tutorial setup)
+spl-token create-multisig 1 $SOL_POOL_SIGNER_PDA $SOL_ADMIN_WALLET
+note
+Mutlisig Command details
+
+The spl-token create-multisig command creates a multisig account that can be used as the mint authority for the token.
+
+The command takes the following arguments:
+
+1: The number of signers required to authorize a transaction.
+$SOL_POOL_SIGNER_PDA: The PDA of the pool signer.
+$SOL_ADMIN_WALLET: The wallet address of the admin.
+Set the multisig address environment variable:
+
+Set Multisig AddressExpected Output
+copy to clipboard
+# Set multisig address from the output above
+export SOL_MULTISIG_ADDRESS="<REPLACE_WITH_YOUR_MULTISIG_ADDRESS>"
+Verify output:
+
+copy to clipboard
+echo "Multisig Address: $SOL_MULTISIG_ADDRESS"
+Step 9: Transfer Mint Authority to Multisig
+Now transfer the mint authority from your wallet to the multisig:
+
+Transfer AuthorityExpected Output
+copy to clipboard
+# Transfer mint authority to multisig
+spl-token authorize $SOL_TOKEN_MINT mint $SOL_MULTISIG_ADDRESS
+Step 10: Verify Multisig Configuration
+Verify that the multisig has been properly configured and the mint authority has been transferred:
+
+Verify SetupExpected Output
+copy to clipboard
+# Check token mint authority
+spl-token display $SOL_TOKEN_MINT
+
+# Check multisig details
+spl-token display $SOL_MULTISIG_ADDRESS
+Save the Phase 2 variables for cross-terminal access:
+
+copy to clipboard
+# Save all variables from Phases 1 and 2 to complete vars file
+cat > ~/.ccip_complete_vars << EOF
+export ETH_TOKEN_ADDRESS="$ETH_TOKEN_ADDRESS"
+export ETH_POOL_ADDRESS="$ETH_POOL_ADDRESS"
+export SOL_TOKEN_MINT="$SOL_TOKEN_MINT"
+export SOL_ADMIN_WALLET="$SOL_ADMIN_WALLET"
+export CCIP_POOL_PROGRAM="$CCIP_POOL_PROGRAM"
+export SOL_POOL_SIGNER_PDA="$SOL_POOL_SIGNER_PDA"
+export SOL_POOL_CONFIG_PDA="$SOL_POOL_CONFIG_PDA"
+export SOL_MULTISIG_ADDRESS="$SOL_MULTISIG_ADDRESS"
+EOF
+
+echo "All variables saved to ~/.ccip_complete_vars for cross-terminal access"
+Phase 3: Cross-Chain Configuration
+In this step, you will configure bidirectional connectivity between the token pools on both chains. Each chain uses different tools: Solana uses Starter Kit scripts to configure its pool to recognize Ethereum tokens and pools, while Ethereum uses Hardhat tasks to configure its pool to recognize Solana tokens and pools.
+
+Step 1: Configure Solana -> Ethereum
+Initialize Chain Remote Configuration
+In this step, you will use the svm:pool:init-chain-remote-config script to initialize the configuration for Ethereum Sepolia as a remote chain. This creates the basic chain configuration with token information but without pool addresses (those will be added in the next step).
+
+Initialize ConfigExpected Output
+copy to clipboard
+# Initialize remote chain configuration for Ethereum Sepolia
+yarn svm:pool:init-chain-remote-config \
+  --token-mint $SOL_TOKEN_MINT \
+  --burn-mint-pool-program $CCIP_POOL_PROGRAM \
+  --remote-chain ethereum-sepolia \
+  --token-address $ETH_TOKEN_ADDRESS \
+  --decimals 9
+note
+Expected Error Message
+
+You will see "Error: Chain config not found" in the output - this is expected behavior since we are creating the configuration for the first time. The script will continue and successfully create the new configuration.
+
+Add Ethereum Pool Address
+In this step, you will use the svm:pool:edit-chain-remote-config script to update the previously created chain configuration with the Ethereum pool address. This completes the configuration by telling the Solana pool which Ethereum pool it should interact with for cross-chain transfers.
+
+Add Pool AddressExpected Output
+copy to clipboard
+# Add Ethereum pool address to the configuration
+yarn svm:pool:edit-chain-remote-config \
+  --token-mint $SOL_TOKEN_MINT \
+  --burn-mint-pool-program $CCIP_POOL_PROGRAM \
+  --remote-chain ethereum-sepolia \
+  --pool-addresses $ETH_POOL_ADDRESS \
+  --token-address $ETH_TOKEN_ADDRESS \
+  --decimals 9
+Verify Configuration
+In this step, you will use the svm:pool:get-chain-config script to verify that the Solana pool configuration for Ethereum Sepolia has been set up correctly with both the token address and pool address.
+
+Verify ConfigExpected Output
+copy to clipboard
+# Verify the chain configuration is complete
+yarn svm:pool:get-chain-config \
+  --token-mint $SOL_TOKEN_MINT \
+  --burn-mint-pool-program $CCIP_POOL_PROGRAM \
+  --remote-chain ethereum-sepolia
+Step 2: Configure Ethereum → Solana
+Switch to Terminal 2 (Smart Contract Examples)
+
+copy to clipboard
+pwd
+# Should show: .../smart-contract-examples/ccip/cct/hardhat
+Load all variables from previous phases:
+
+Load VariablesExpected Output
+copy to clipboard
+source ~/.ccip_complete_vars
+echo "Loaded variables:"
+echo "ETH_TOKEN_ADDRESS=$ETH_TOKEN_ADDRESS"
+echo "SOL_TOKEN_MINT=$SOL_TOKEN_MINT"
+echo "Pool Config PDA: $SOL_POOL_CONFIG_PDA"
+echo "Pool Signer PDA: $SOL_POOL_SIGNER_PDA"
+echo "Multisig Address: $SOL_MULTISIG_ADDRESS"
+echo "Admin Wallet: $SOL_ADMIN_WALLET"
+echo "Pool Program: $CCIP_POOL_PROGRAM"
+Configure Remote Chain
+In this step, you will use the applyChainUpdates Hardhat task to configure the Ethereum pool to recognize the Solana token and pool. This tells the Ethereum pool which Solana pool (via its Pool Config PDA) and token it should interact with for cross-chain transfers.
+
+Apply UpdatesExpected Output
+copy to clipboard
+# Configure Ethereum pool to recognize Solana chain
+npx hardhat applyChainUpdates \
+  --pooladdress $ETH_POOL_ADDRESS \
+  --remotechain solanaDevnet \
+  --remotepooladdresses $SOL_POOL_CONFIG_PDA \
+  --remotetokenaddress $SOL_TOKEN_MINT \
+  --network sepolia
+Verify Remote Chain Configuration
+Verify that the Ethereum pool is correctly configured to recognize the Solana chain:
+
+Verify ConfigurationExpected Output
+copy to clipboard
+# Verify Ethereum pool configuration
+npx hardhat getPoolConfig \
+  --pooladdress $ETH_POOL_ADDRESS \
+  --network sepolia
+Phase 4: Pool Registration
+In this step, you will register the token pools with their respective tokens on both chains. This is the final configuration step that enables cross-chain operations by linking tokens to their pools in the CCIP registry.
+
+Pool registration works differently on each platform:
+
+Ethereum: Links the token directly to its pool contract address
+Solana: Links the token to an Address Lookup Table containing all necessary pool accounts
+Step 1: Ethereum Sepolia Pool Registration
+Stay in Terminal 2 (Smart Contract Examples)
+
+copy to clipboard
+pwd
+# Should show: .../smart-contract-examples/ccip/cct/hardhat
+In this step, you will use the setPool Hardhat task to register the BurnMint token pool with the token in Ethereum's TokenAdminRegistry contract. This function sets the pool contract address for the token, enabling it for CCIP cross-chain transfers. Only the token administrator can call this function.
+
+Set PoolExpected Output
+copy to clipboard
+
+# Register token pool with TokenAdminRegistry contract
+
+npx hardhat setPool \
+ --tokenaddress $ETH_TOKEN_ADDRESS \
+ --pooladdress $ETH_POOL_ADDRESS \
+ --network sepolia
+
+Step 2: Solana Devnet Pool Registration
+Switch to Terminal 1 (Solana Starter Kit)
+
+copy to clipboard
+pwd
+# Should show: .../solana-starter-kit
+Create Address Lookup Table
+Create an Address Lookup Table (ALT) containing all required accounts for CCIP operations:
+
+Create ALTExpected Output
+copy to clipboard
+# Create Address Lookup Table with all required accounts + your multisig address
+yarn svm:admin:create-alt \
+  --token-mint $SOL_TOKEN_MINT \
+  --pool-program $CCIP_POOL_PROGRAM \
+  --additional-addresses $SOL_MULTISIG_ADDRESS
+Set ALT environment variable:
+
+Set ALTExpected Output
+copy to clipboard
+export SOL_ALT_ADDRESS="<REPLACE_WITH_YOUR_ALT_ADDRESS>"
+Verify output:
+
+copy to clipboard
+echo "ALT Address: $SOL_ALT_ADDRESS"
+Register Pool with Router
+Register your token pool with the CCIP Router using the Address Lookup Table:
+
+Set PoolExpected Output
+copy to clipboard
+# Register pool with CCIP Router using the ALT
+yarn svm:admin:set-pool \
+  --token-mint $SOL_TOKEN_MINT \
+  --lookup-table $SOL_ALT_ADDRESS \
+  --writable-indices 3,4,7
+Phase 5: Testing Cross-Chain Transfers
+Test the complete cross-chain token transfer functionality in both directions.
+
+Step 1: Transfer Solana → Ethereum
+Stay in Terminal 1 (Solana Starter Kit)
+
+Confirm you are in the correct directory:
+
+copy to clipboard
+pwd
+# Should show: .../solana-starter-kit
+Prepare for Testing
+Your Associated Token Account (ATA) was already created during token creation in Phase 1. Now verify your token balance and prepare for cross-chain transfers:
+
+Check Balance & DelegateExpected Output
+copy to clipboard
+# Check your current token balance (should show 1000 from Phase 1)
+spl-token balance $SOL_TOKEN_MINT
+
+# Delegate tokens for CCIP transfers
+
+yarn svm:token:delegate --token-mint $SOL_TOKEN_MINT
+
+# Verify the delegation was successful
+
+yarn svm:token:check --token-mint $SOL_TOKEN_MINT
+
+Execute Transfer
+Transfer CommandExpected Output
+copy to clipboard
+# Execute cross-chain transfer from Solana to Ethereum
+yarn svm:token-transfer --token-mint $SOL_TOKEN_MINT --token-amount 1000000 --receiver <REPLACE_WITH_YOUR_ETHEREUM_RECEIVER_ADDRESS>
+
+Monitor and Verify Transaction
+Upon successful execution, the system generates critical tracking identifiers for transaction monitoring and verification.
+
+Transaction Identifiers:
+
+Transaction Signature: sb2kHXW3M4P56WNNH74LviWcPmeYXjNA4f6opmt8iPrYF1cu5FC9grLhyu2XTEwkABQUrTdaJoDWc5CHe2gQL2u
+CCIP Message ID: 0x9c486ce15650d0bbff3f9cd8ead0510aadd854f7247bf9b775918a1296408aaa
+CCIP Explorer (Primary monitoring interface):
+
+copy to clipboard
+https://ccip.chain.link/msg/0x9c486ce15650d0bbff3f9cd8ead0510aadd854f7247bf9b775918a1296408aaa
+The CCIP Explorer provides comprehensive transaction visibility:
+
+Source chain (Solana) transaction confirmation
+CCIP message processing and routing
+Destination chain (Ethereum) message delivery
+Token minting completion on Ethereum
+Solana Explorer (Source chain verification):
+
+copy to clipboard
+https://explorer.solana.com/tx/sb2kHXW3M4P56WNNH74LviWcPmeYXjNA4f6opmt8iPrYF1cu5FC9grLhyu2XTEwkABQUrTdaJoDWc5CHe2gQL2u?cluster=devnet
+Step 2: Transfer Ethereum → Solana
+In Terminal 1 (Solana Starter Kit)
+
+Execute Transfer
+Transfer CommandExpected Output
+copy to clipboard
+# Execute cross-chain transfer from Ethereum to Solana
+yarn evm:transfer --token $ETH_TOKEN_ADDRESS --amount 1000000000000000000 --token-receiver $SOL_ADMIN_WALLET
+Note: You can replace the token receiver with another Solana address.
+
+Monitor and Verify Transaction
+Upon successful execution, the system generates distinct tracking identifiers for comprehensive monitoring across both blockchain networks.
+
+Transaction Identifiers:
+
+Ethereum Transaction Hash: 0xb2d48398a4d57dde2aaf0551209abad448b092602ca5087e0d108eadd8a8c319
+CCIP Message ID: 0x567f4cdb2e1c52f6aef6354bd9acbeac6761aa4b1a5e74a356785c2e67197d88
+CCIP Explorer (Primary monitoring interface):
+
+copy to clipboard
+https://ccip.chain.link/msg/0x567f4cdb2e1c52f6aef6354bd9acbeac6761aa4b1a5e74a356785c2e67197d88
+The CCIP Explorer provides comprehensive transaction visibility:
+
+Source chain (Ethereum) transaction confirmation
+CCIP message processing and routing
+Destination chain (Solana) message delivery
+Token minting completion on Solana network
+Ethereum Sepolia Explorer (Source chain verification):
+
+copy to clipboard
+https://sepolia.etherscan.io/tx/0xb2d48398a4d57dde2aaf0551209abad448b092602ca5087e0d108eadd8a8c319
+Optional: Verify Mint Authority Control
+Demonstrate Manual Minting Through Multisig
+This optional section demonstrates that transferring mint authority to the multisig doesn't mean "losing control" - you can still mint tokens manually through the Admin Wallet (the non-PDA signer in your multisig). This proves the multisig setup is working correctly and that you retain administrative capabilities.
+
+Admin MintExpected Output
+copy to clipboard
+# Demonstrate manual minting through the multisig
+# This proves you haven't "lost" mint authority - it's just managed through the multisig
+spl-token mint $SOL_TOKEN_MINT 1 \
+  --owner $SOL_MULTISIG_ADDRESS \
+  --multisig-signer $HOME/.config/solana/id.json
+note
+Key Location
+
+Important: This example uses $HOME/.config/solana/id.json as the key location. If your Solana keypair is stored elsewhere, adjust the --multisig-signer path accordingly. You can check your current keypair location with:
+
+copy to clipboard
+solana config get
+tip
+Understanding This Demonstration
+
+What This Proves: Successfully minting tokens through the multisig confirms that:
+
+Mint authority transfer was successful
+The multisig is properly configured (1-of-2 with Pool Signer PDA + Admin Wallet)
+You retain administrative control through your Admin Wallet
+The Pool Signer PDA can autonomously handle CCIP operations
+Key Insight: Since you're one of the multisig signers, you can still perform administrative mints. The Pool Signer PDA handles CCIP burns/mints automatically, while you handle manual operations.
+
+caution
+Production Considerations
+
+Tutorial vs Production: This tutorial uses your single wallet as the admin signer for simplicity. In production, replace the admin wallet with a proper governance multisig (Such as Squads) for enhanced security.
+
+Scope Limitation: This SPL token multisig only controls mint authority. For comprehensive governance (CCIP admin roles, pool ownership), implement separate governance infrastructure.
+
+To learn more, see the Production Multisig Tutorial.
+
+caution
+Educational Example Disclaimer
+
+This page includes an educational example to use a Chainlink system, product, or service and is provided to demonstrate how to interact with Chainlink's systems, products, and services to integrate them into your own. This template is provided "AS IS" and "AS AVAILABLE" without warranties of any kind, it has not been audited, and it may be missing key checks or error handling to make the usage of the system, product or service more clear. Do not use the code in this example in a production environment without completing your own audits and application of best practices. Neither Chainlink Labs, the Chainlink Foundation, nor Chainlink node operators are responsible for unintended outputs that are generated due to errors in code.

@@ -28,7 +28,7 @@ fn load_keypair_from_file() -> Result<Keypair, Box<dyn std::error::Error>> {
 const CHAINLINK_DECIMALS: f64 = 1_000_000_000_000_000_000.0;
 
 // Oracle program ID (from our deployed program)
-const ORACLE_PROGRAM_ID: &str = "9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1";
+const ORACLE_PROGRAM_ID: &str = "9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU";
 
 #[derive(Parser)]
 #[command(name = "chainlink-stablecoin-client")]
@@ -171,11 +171,11 @@ async fn main() -> Result<()> {
                 }
             };
             
-            // Step 5: Use the test feed ID to write to the same oracle account that stablecoin tests read from
-            // This is the feed ID from the stablecoin test: d1be62b7496ad4897b984db99243e0921906f66ded15149d993ef42c68b728c3
-            let test_feed_id_hex = "d1be62b7496ad4897b984db99243e0921906f66ded15149d993ef42c68b728c3";
-            let feed_id_bytes = hex::decode(test_feed_id_hex)
-                .map_err(|_| anyhow::anyhow!("Failed to decode test feed ID hex"))?;
+            // Step 5: Use the official SOL/USD feed ID consistently
+            // Convert the Chainlink feed ID to bytes for oracle storage
+            let feed_id_hex = chainlink_client.get_sol_usd_feed_id().to_hex_string();
+            let feed_id_bytes = hex::decode(&feed_id_hex[2..]) // Remove 0x prefix
+                .map_err(|_| anyhow::anyhow!("Failed to decode official SOL/USD feed ID hex"))?;
             let mut feed_id = [0u8; 32];
             feed_id.copy_from_slice(&feed_id_bytes[0..32]);
             
