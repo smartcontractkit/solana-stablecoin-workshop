@@ -150,10 +150,10 @@ cargo run -- update-oracle
 ```
 
 **Key Addresses to Save:**
-- **Oracle Program ID:** `9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU`
+- **Oracle Program ID:** `9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1`
 - **Price Feed PDA:** `HqqVks96kxdktt3jUvmoeF9dsc9pWgXVfYG27ri8Xi6C` *(derived from your oracle program)*
 
-**⚠️ Important:** The Price Feed PDA is derived from YOUR deployed oracle program ID. The address above is specific to program ID `9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU`. If you deploy a different oracle program, you'll get a different PDA address from the `update-oracle` command output.
+**⚠️ Important:** The Price Feed PDA is derived from YOUR deployed oracle program ID. The address above is specific to program ID `9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1`. If you deploy a different oracle program, you'll get a different PDA address from the `update-oracle` command output.
 
 ---
 
@@ -202,6 +202,32 @@ export CCIP_POOL_PROGRAM="41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB"
 
 **Key Address to Save:**
 - **Stablecoin Token Mint:** `81kUD5Tf7AhxDvLxaVfRxCpDvtXooTHFEPhVfpku26r6` *(example - use your actual generated address)*
+
+### Step 2.5: Test Stablecoin Program (Recommended)
+```bash
+# Make test script executable
+chmod +x test-individual.sh
+
+# Test oracle integration (3 tests)
+./test-individual.sh oracle
+
+# Test stablecoin program logic (4 tests)  
+./test-individual.sh stablecoin
+
+# Test complete integration (4 tests)
+./test-individual.sh integration
+
+# Or run all tests together (13 tests total)
+./test-individual.sh all
+```
+
+**Expected Results:**
+- ✅ **Oracle Tests:** 3 passing - Real Chainlink price integration
+- ✅ **Stablecoin Tests:** 4 passing - Program logic verification  
+- ✅ **Integration Tests:** 4 passing - Complete CPI functionality
+- ✅ **CCIP Tests:** 2 passing - Multisig authority verification
+
+**If Tests Fail:** See [Oracle Testing Troubleshooting](#6-oracle-testing-issues) section below.
 
 ---
 
@@ -603,13 +629,18 @@ yarn svm:token-transfer --receiver-address 0x[your-address]
 **A. Environment Variable Loading Issues:**
 ```bash
 # If you see "ANCHOR_PROVIDER_URL is not defined"
-cd oracle
-source .env
+# This is usually fixed by the .env symlinks, but if needed:
+cd cross-chain-stablecoin/stablecoin-program
 
-# Or run tests with explicit environment variables
-ANCHOR_PROVIDER_URL="https://api.devnet.solana.com" \
-ANCHOR_WALLET="/Users/$(whoami)/.config/solana/id.json" \
-yarn run ts-mocha -p ./tsconfig.json tests/1-oracle-verify-and-store.ts
+# Verify .env symlinks exist
+ls -la .env .env.example
+
+# If missing, recreate symlinks
+ln -sf ../../oracle/.env .env
+ln -sf ../../oracle/.env.example .env.example
+
+# Use the recommended test script instead of direct ts-mocha
+./test-individual.sh oracle
 ```
 
 **B. .env File Parsing Errors:**
@@ -619,21 +650,40 @@ yarn run ts-mocha -p ./tsconfig.json tests/1-oracle-verify-and-store.ts
 sed -i '' 's/DATASTREAMS_CLIENT_SECRET=\(.*\)/DATASTREAMS_CLIENT_SECRET="\1"/' oracle/.env
 ```
 
-**C. Alternative Testing Methods:**
+**C. Oracle Program ID Mismatch:**
 ```bash
-# Instead of full anchor test, use individual test files
-cd oracle
-NODE_NO_WARNINGS=1 yarn run ts-mocha -p ./tsconfig.json tests/1-oracle-verify-and-store.ts
+# If you see "AccountOwnedByWrongProgram" or "ConstraintAddress" errors
+# Check which oracle program owns your price feed
+solana account C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen --url devnet
 
-# Or test the oracle client directly (recommended)
-cd client
+# Update .env file with correct oracle program ID
+cd oracle
+sed -i '' 's|ORACLE_PROGRAM_ID=.*|ORACLE_PROGRAM_ID=9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1|' .env
+
+# Update stablecoin program source code (line 11 in lib.rs)
+# Then rebuild and redeploy
+cd ../cross-chain-stablecoin/stablecoin-program
+anchor build && anchor deploy --provider.cluster devnet
+```
+
+**D. Recommended Testing Method:**
+```bash
+# Use the test-individual.sh script (recommended)
+cd cross-chain-stablecoin/stablecoin-program
+./test-individual.sh oracle      # Oracle integration tests
+./test-individual.sh stablecoin  # Program logic tests  
+./test-individual.sh integration # Complete CPI tests
+./test-individual.sh all         # All tests together
+
+# Alternative: Test oracle client directly
+cd oracle/client
 cargo run -- update-oracle
 ```
 
-**D. Deployment Account Issues:**
+**E. Deployment Account Issues:**
 If you see `AccountNotFound` errors during testing, the oracle program is likely already deployed and working. Verify with:
 ```bash
-solana program show 9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU
+solana program show 9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1
 ```
 
 ---
@@ -847,7 +897,7 @@ anchor deploy --provider.cluster devnet
 
 #### Step 4: Update INSTRUCTIONS.md (This File)
 Update the program IDs throughout this file to match your deployments:
-- Replace `ORACLE_PROGRAM_ID=9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU` with your oracle program ID
+- Replace `ORACLE_PROGRAM_ID=9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1` with your oracle program ID
 - Replace `STABLECOIN_PROGRAM_ID=7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR` with your stablecoin program ID
 - Replace `REAL_ORACLE_PRICE_FEED=HqqVks96kxdktt3jUvmoeF9dsc9pWgXVfYG27ri8Xi6C` with your price feed PDA
 
@@ -865,7 +915,7 @@ Program log: Right: OLD_ORACLE_PROGRAM_ID
 ### 🎯 Alternative: Use Provided Example Programs
 
 If you want to skip this step, you can use the pre-deployed example programs:
-- **Oracle Program:** `9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU`
+- **Oracle Program:** `9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1`
 - **Stablecoin Program:** `7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR`
 
 These are already configured to work together and are used throughout this tutorial.
