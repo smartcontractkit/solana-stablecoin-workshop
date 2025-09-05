@@ -2,6 +2,10 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { StablecoinProgram } from "../target/types/stablecoin_program";
 
+// Load environment variables
+import dotenv from 'dotenv'
+dotenv.config()
+
 describe("stablecoin-program", () => {
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.AnchorProvider.env());
