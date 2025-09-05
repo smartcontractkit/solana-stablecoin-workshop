@@ -54,6 +54,66 @@ solana config get
 
 ---
 
+## 🔧 Environment Setup (Required Before Phase 1)
+
+### Step 0.1: Configure Environment Variables
+Before starting the deployment phases, you need to set up the environment configuration that will be used throughout the entire process.
+
+```bash
+cd ~/github/datastreams-backed-cross-chain-stablecoin
+```
+
+### Step 0.2: Review and Update .env File
+The project uses a phase-organized `.env` file located at `oracle/.env`. This file is symlinked to other directories for consistency.
+
+```bash
+# Check the current .env file
+cat oracle/.env
+
+# The file is organized by deployment phases:
+# - PHASE 1: Oracle Program Deployment (pre-filled)
+# - PHASE 2: Stablecoin Program Deployment (to be filled)
+# - PHASE 3: CCIP Integration (to be filled)
+# - PHASE 4: Ethereum Side Deployment (to be filled)
+```
+
+### Step 0.3: Important .env File Notes
+
+**⚠️ Special Characters in API Secrets:**
+If your `DATASTREAMS_CLIENT_SECRET` contains special characters (`&`, `<`, `>`, `*`, etc.), make sure it's properly quoted:
+
+```bash
+# ✅ Correct - quoted secret
+DATASTREAMS_CLIENT_SECRET="your-secret-with-special&characters<here>"
+
+# ❌ Wrong - unquoted secret (will cause parsing errors)
+DATASTREAMS_CLIENT_SECRET=your-secret-with-special&characters<here>
+```
+
+**📍 Pre-filled Values:**
+- `ORACLE_PROGRAM_ID`: Uses the example deployed oracle program
+- `ORACLE_PRICE_FEED_PDA`: Derived from the example oracle program
+- `SOL_ADMIN_WALLET`: Auto-populated with your current Solana wallet
+- `FEED_ID`: Chainlink SOL/USD feed ID for Data Streams
+
+**🔄 Values to Fill During Deployment:**
+- `SOL_TOKEN_MINT`: Generated in Phase 2
+- `SOL_POOL_CONFIG_PDA`, `SOL_POOL_SIGNER_PDA`: Generated in Phase 3
+- `ETH_TOKEN_ADDRESS`, `ETH_TOKEN_POOL`: Generated in Phase 4
+
+### Step 0.4: Verify Environment Loading
+```bash
+# Test that environment variables load correctly
+cd oracle
+source .env
+echo "ORACLE_PROGRAM_ID: $ORACLE_PROGRAM_ID"
+echo "ANCHOR_PROVIDER_URL: $ANCHOR_PROVIDER_URL"
+
+# If you see parsing errors, check for unquoted special characters
+```
+
+---
+
 ## 🏗️ Phase 1: Oracle Program Deployment
 
 ### Step 1.1: Clone and Setup Oracle Repository
@@ -101,7 +161,7 @@ cargo run -- update-oracle
 
 ### Step 2.1: Setup Stablecoin Program
 ```bash
-cd ~/github/example_verify/cross-chain-stablecoin/stablecoin-program
+cd ~/github/datastreams-backed-cross-chain-stablecoin/cross-chain-stablecoin/stablecoin-program
 ```
 
 ### Step 2.2: Configure Program for CCIP Compatibility
@@ -250,7 +310,7 @@ yarn svm:admin:set-pool \
 
 ### Step 4.1: Setup Ethereum Environment
 ```bash
-cd ~/github/example_verify/smart-contract-examples/ccip/cct/hardhat
+cd ~/github/datastreams-backed-cross-chain-stablecoin/smart-contract-examples/ccip/cct/hardhat
 
 # Create .env file
 cat > .env << EOF
@@ -363,7 +423,7 @@ yarn svm:pool:edit-chain-remote-config \
 
 ### Step 6.1: Update Oracle with Fresh Price Data
 ```bash
-cd ~/github/example_verify/oracle/client
+cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle/client
 cargo run -- update-oracle
 ```
 
@@ -498,7 +558,7 @@ yarn svm:token:delegate --token-mint $SOL_TOKEN_MINT
 #### 3. Oracle Price Feed Not Found
 **Solution:** Update oracle with fresh data
 ```bash
-cd ~/github/example_verify/oracle/client
+cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle/client
 cargo run -- update-oracle
 ```
 
@@ -519,6 +579,49 @@ yarn svm:token-transfer --destination-address 0x[your-address]
 
 # ✅ Correct - uses your specified address  
 yarn svm:token-transfer --receiver-address 0x[your-address]
+```
+
+#### 6. Oracle Testing Issues
+
+**Problem:** `anchor test` fails with deployment errors or environment variable issues
+**Root Cause:** The oracle program is already deployed, but `anchor test` tries to redeploy it
+
+**Solutions:**
+
+**A. Environment Variable Loading Issues:**
+```bash
+# If you see "ANCHOR_PROVIDER_URL is not defined"
+cd oracle
+source .env
+
+# Or run tests with explicit environment variables
+ANCHOR_PROVIDER_URL="https://api.devnet.solana.com" \
+ANCHOR_WALLET="/Users/$(whoami)/.config/solana/id.json" \
+yarn run ts-mocha -p ./tsconfig.json tests/1-oracle-verify-and-store.ts
+```
+
+**B. .env File Parsing Errors:**
+```bash
+# If you see "parse error near '&'" or similar
+# Check for unquoted special characters in DATASTREAMS_CLIENT_SECRET
+sed -i '' 's/DATASTREAMS_CLIENT_SECRET=\(.*\)/DATASTREAMS_CLIENT_SECRET="\1"/' oracle/.env
+```
+
+**C. Alternative Testing Methods:**
+```bash
+# Instead of full anchor test, use individual test files
+cd oracle
+NODE_NO_WARNINGS=1 yarn run ts-mocha -p ./tsconfig.json tests/1-oracle-verify-and-store.ts
+
+# Or test the oracle client directly (recommended)
+cd client
+cargo run -- update-oracle
+```
+
+**D. Deployment Account Issues:**
+If you see `AccountNotFound` errors during testing, the oracle program is likely already deployed and working. Verify with:
+```bash
+solana program show 9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU
 ```
 
 ---
@@ -596,7 +699,7 @@ yarn svm:token-transfer --receiver-address 0x[your-address]
 #### Step 1: Update Stablecoin Program Source Code
 Navigate to the stablecoin program source file:
 ```bash
-cd cross-chain-stablecoin/stablecoin-program/programs/stablecoin-program/src/lib.rs
+cd ~/github/datastreams-backed-cross-chain-stablecoin/cross-chain-stablecoin/stablecoin-program/programs/stablecoin-program/src/lib.rs
 ```
 
 Find line 11 and update the `ORACLE_PROGRAM_ID` constant:
@@ -619,14 +722,14 @@ REAL_ORACLE_PRICE_FEED=YOUR_PRICE_FEED_PDA_HERE
 
 **📍 To find your Price Feed PDA:**
 ```bash
-cd oracle/client
+cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle/client
 cargo run -- update-oracle
 # Look for: "📍 PriceFeed PDA: YOUR_PDA_HERE"
 ```
 
 #### Step 3: Rebuild and Redeploy Stablecoin Program
 ```bash
-cd cross-chain-stablecoin/stablecoin-program
+cd ~/github/datastreams-backed-cross-chain-stablecoin/cross-chain-stablecoin/stablecoin-program
 anchor build
 anchor deploy --provider.cluster devnet
 ```
