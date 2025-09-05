@@ -263,7 +263,7 @@ anchor test --skip-local-validator
 
 **Current Deployment:**
 - **Program ID:** `7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR`
-- **Oracle Program ID:** `9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU`
+- **Oracle Program ID:** `9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1`
 
 ### 2. Oracle Integration
 
@@ -385,7 +385,7 @@ ANCHOR_PROVIDER_URL=https://api.devnet.solana.com
 ANCHOR_WALLET=/Users/$(whoami)/.config/solana/id.json
 
 # Program IDs & Addresses
-ORACLE_PROGRAM_ID=9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU
+ORACLE_PROGRAM_ID=9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1
 STABLECOIN_PROGRAM_ID=7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR
 REAL_ORACLE_PRICE_FEED=HqqVks96kxdktt3jUvmoeF9dsc9pWgXVfYG27ri8Xi6C
 

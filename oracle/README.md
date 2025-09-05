@@ -138,7 +138,7 @@ pub struct PriceFeed {
 ```
 
 **Current Deployment:**
-- **Program ID:** `9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU`
+- **Program ID:** `9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1`
 - **Price Feed PDA:** `HqqVks96kxdktt3jUvmoeF9dsc9pWgXVfYG27ri8Xi6C`
 
 ### 2. Rust Client (`client/src/`)
