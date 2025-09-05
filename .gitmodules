@@ -1,0 +1,6 @@
+[submodule "smart-contract-examples"]
+	path = smart-contract-examples
+	url = https://github.com/smartcontractkit/smart-contract-examples.git
+[submodule "solana-starter-kit"]
+	path = solana-starter-kit
+	url = https://github.com/smartcontractkit/solana-starter-kit
