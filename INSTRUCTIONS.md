@@ -320,7 +320,19 @@ ETHERSCAN_API_KEY=[your-etherscan-api-key]
 EOF
 ```
 
-### Step 4.2: Deploy ERC20 Token for Oracle-Backed Stablecoin
+### Step 4.2: Compile Contracts
+```bash
+npx hardhat compile
+```
+
+**Expected Output:**
+```
+Generating typings for: 57 artifacts in dir: typechain-types for target: ethers-v6
+Successfully generated 172 typings!
+Compiled 58 Solidity files successfully (evm target: paris).
+```
+
+### Step 4.3: Deploy ERC20 Token for Oracle-Backed Stablecoin
 ```bash
 npx hardhat deployToken \
   --network sepolia \
@@ -339,7 +351,7 @@ Token deployed to: 0xF1a6916111Ad79459b643ec561537E485Bf5CE46
 **Key Address to Save:**
 - **Ethereum Token:** `0xF1a6916111Ad79459b643ec561537E485Bf5CE46` *(example - your address will be different)*
 
-### Step 4.3: Deploy TokenPool
+### Step 4.4: Deploy TokenPool
 ```bash
 npx hardhat deployTokenPool \
   --network sepolia \
@@ -356,7 +368,7 @@ Token pool deployed to: 0x238522396b383092C1B49d88797Ead39266a0515
 **Key Address to Save:**
 - **Ethereum TokenPool:** `0x238522396b383092C1B49d88797Ead39266a0515` *(example - your address will be different)*
 
-### Step 4.4: Claim and Accept Admin Role
+### Step 4.5: Claim and Accept Admin Role
 ```bash
 # Claim admin
 npx hardhat claimAdmin \
@@ -369,7 +381,7 @@ npx hardhat acceptAdminRole \
   --tokenaddress 0xA7A69221BaE843E129c72d49b730e3b23152a605
 ```
 
-### Step 4.5: Register Pool with TokenAdminRegistry
+### Step 4.6: Register Pool with TokenAdminRegistry
 ```bash
 npx hardhat setPool \
   --network sepolia \
@@ -377,7 +389,7 @@ npx hardhat setPool \
   --pooladdress 0x66D8997EF281D76c7c60f7e7f283A90D15C60839
 ```
 
-### Step 4.6: Configure Cross-Chain Connectivity (Ethereum → Solana)
+### Step 4.7: Configure Cross-Chain Connectivity (Ethereum → Solana)
 ```bash
 npx hardhat applyChainUpdates \
   --network sepolia \
@@ -626,6 +638,103 @@ solana program show 9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU
 
 ---
 
+## ⚙️ Anchor Framework Best Practices & Workflow
+
+This section outlines the proper Anchor development workflow to prevent common deployment issues and ensure consistent development experience.
+
+### 🎯 Proper Anchor Deployment Workflow
+
+**The Golden Rule:** Always sync your `Anchor.toml` with deployed program IDs
+
+```bash
+# 1. Build the program
+anchor build
+
+# 2. Deploy to devnet
+anchor deploy --provider.cluster devnet
+
+# 3. CRITICAL: Sync the program ID in Anchor.toml
+anchor keys sync
+
+# 4. Verify the sync worked
+cat Anchor.toml | grep -A 2 "\[programs.devnet\]"
+```
+
+### 🔧 Shared Retry Utility
+
+All scripts and tests now use a shared retry utility to handle Solana network instability:
+
+**Location:** `cross-chain-stablecoin/stablecoin-program/utils/retry-helper.ts`
+
+**Features:**
+- **Exponential backoff:** 2s, 4s, 8s delays
+- **Automatic blockhash refresh** on each retry
+- **Transaction confirmation** waiting
+- **Detailed error logging**
+
+**Usage in your scripts:**
+```typescript
+import { retryTransaction } from "./utils/retry-helper.ts"
+
+// Wrap any transaction call
+const signature = await retryTransaction(
+  connection,
+  async (blockhash) => {
+    return await program.methods
+      .yourMethod()
+      .accounts({ /* accounts */ })
+      .rpc({ skipPreflight: false })
+  }
+)
+```
+
+### 🚨 Common Issues & Root Cause Analysis
+
+#### Issue #1: Program ID Mismatches
+**Problem:** `Anchor.toml` shows different program ID than deployed program
+**Root Cause:** Not running `anchor keys sync` after deployment
+**Solution:** Always run `anchor keys sync` after `anchor deploy`
+
+#### Issue #2: TypeScript Module Resolution Errors
+**Problem:** `Cannot find module './target/types/program_name'`
+**Root Cause:** Program not deployed yet, so IDL files don't exist
+**Solution:** Deploy the program first, then run TypeScript scripts
+
+#### Issue #3: "Blockhash not found" Errors
+**Problem:** Intermittent transaction failures on Solana devnet
+**Root Cause:** Network instability and stale blockhashes
+**Solution:** Use the shared retry utility (automatically applied to all scripts)
+
+### 🎯 Development Sequence
+
+**For New Programs:**
+1. `anchor build` (compile)
+2. `anchor deploy` (deploy to devnet)
+3. `anchor keys sync` (update Anchor.toml)
+4. Run TypeScript scripts/tests
+
+**For Existing Programs:**
+1. Verify program is deployed: `solana program show <PROGRAM_ID>`
+2. Run scripts directly (no need to redeploy)
+3. Use retry utility for network stability
+
+### 📋 Code Quality Standards
+
+**All scripts include:**
+- ✅ Shared retry utility for network stability
+- ✅ Environment variable loading from `.env`
+- ✅ Proper error handling and logging
+- ✅ TypeScript with `.ts` imports
+- ✅ No hardcoded values (except security constraints)
+
+**All test files:**
+- ✅ Import retry utility: `import { retryTransaction } from "../utils/retry-helper.ts"`
+- ✅ Wrap transaction calls with retry logic
+- ✅ Load mock/real data from environment variables
+- ✅ Clean separation of unit vs integration tests
+
+---
+
 ## 🎯 System Architecture
 
 ### Data Flow
@@ -704,11 +813,13 @@ cd ~/github/datastreams-backed-cross-chain-stablecoin/cross-chain-stablecoin/sta
 
 Find line 11 and update the `ORACLE_PROGRAM_ID` constant:
 ```rust
-// Oracle program ID (your deployed oracle)
+// Oracle program ID (static for workshop - matches deployed oracle)
 const ORACLE_PROGRAM_ID: Pubkey = pubkey!("YOUR_ORACLE_PROGRAM_ID_HERE");
 ```
 
 Replace `YOUR_ORACLE_PROGRAM_ID_HERE` with your actual deployed oracle program ID.
+
+**📝 Note:** The oracle program ID is hardcoded in the stablecoin program for security and simplicity. This ensures the stablecoin can only interact with the verified oracle program.
 
 #### Step 2: Update Environment Configuration
 Update your `.env` file with your oracle program details:
