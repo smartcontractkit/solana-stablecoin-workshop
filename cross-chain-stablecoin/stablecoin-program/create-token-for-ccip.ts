@@ -2,13 +2,14 @@ import * as anchor from "@coral-xyz/anchor"
 import { Program } from "@coral-xyz/anchor"
 import { PublicKey, SystemProgram, SYSVAR_RENT_PUBKEY, Keypair } from "@solana/web3.js"
 import { TOKEN_PROGRAM_ID } from "@solana/spl-token"
-import { StablecoinProgram } from "./target/types/stablecoin_program"
+import { retryTransaction } from "./utils/retry-helper.ts"
+// import { StablecoinProgram } from "./target/types/stablecoin_program"
 
 async function createTokenForCCIP() {
   // Setup
   const provider = anchor.AnchorProvider.env()
   anchor.setProvider(provider)
-  const program = anchor.workspace.StablecoinProgram as Program<StablecoinProgram>
+  const program = anchor.workspace.StablecoinProgram as Program<any>
   const payer = provider.wallet.publicKey
 
   console.log("🏗️ Creating token for CCIP setup...")
@@ -22,18 +23,24 @@ async function createTokenForCCIP() {
   console.log("🪙 New mint address:", stablecoinMint.toString())
 
   try {
-    // Create token with wallet authority (for CCIP setup)
-    const tx = await program.methods
-      .initializeMint(6) // 6 decimals
-      .accounts({
-        mint: stablecoinMint,
-        payer: payer,
-      })
-      .signers([mintKeypair])
-      .rpc({
-        commitment: "confirmed",
-        skipPreflight: false,
-      })
+    // Create token with wallet authority (for CCIP setup) - with retry mechanism
+    const tx = await retryTransaction(
+      provider.connection,
+      async (blockhash) => {
+        return await program.methods
+          .initializeMint(6) // 6 decimals
+          .accounts({
+            mint: stablecoinMint,
+            payer: payer,
+          })
+          .signers([mintKeypair])
+          .rpc({
+            commitment: "confirmed",
+            skipPreflight: false,
+          })
+      },
+      3 // maxRetries
+    )
 
     console.log("✅ Token created successfully!")
     console.log("🔗 Transaction:", tx)

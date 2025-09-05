@@ -9,6 +9,7 @@ import {
   createMultisig
 } from "@solana/spl-token"
 import { StablecoinProgram } from "../target/types/stablecoin_program"
+import { retryTransaction } from "../utils/retry-helper.ts"
 
 // Load environment variables
 import dotenv from 'dotenv'
@@ -33,37 +34,7 @@ function findPoolSignerPDA(tokenMint: PublicKey, poolProgramId: PublicKey): [Pub
 
 // We'll create these dynamically in the test setup
 
-// Enhanced retry helper for blockhash issues
-async function retryTransaction(
-  connection: anchor.web3.Connection,
-  fn: (blockhash: string) => Promise<string>, 
-  maxRetries = 3
-): Promise<string> {
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      const { blockhash } = await connection.getLatestBlockhash('confirmed')
-      const signature = await fn(blockhash)
-      
-      // Wait for confirmation
-      const latestBlockhash = await connection.getLatestBlockhash('confirmed')
-      await connection.confirmTransaction({
-        signature,
-        blockhash: latestBlockhash.blockhash,
-        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-      }, 'confirmed')
-      
-      return signature
-    } catch (error: any) {
-      console.log(`⚠️ Attempt ${i + 1} failed: ${error.message}`)
-      if (i === maxRetries - 1) throw error
-      
-      const delay = Math.pow(2, i) * 2000 // 2s, 4s, 8s
-      console.log(`⏳ Waiting ${delay/1000}s before retry...`)
-      await new Promise(resolve => setTimeout(resolve, delay))
-    }
-  }
-  throw new Error("All retry attempts failed")
-}
+// Retry helper now imported from shared utility
 
 describe("🔮 Oracle Unit Tests - Real Chainlink Data", () => {
   console.log("🔮 Testing Oracle Program with Real Chainlink Data Streams")
