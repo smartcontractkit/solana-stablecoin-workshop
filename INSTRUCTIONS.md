@@ -155,6 +155,33 @@ cargo run -- update-oracle
 
 **⚠️ Important:** The Price Feed PDA is derived from YOUR deployed oracle program ID. The address above is specific to program ID `9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1`. If you deploy a different oracle program, you'll get a different PDA address from the `update-oracle` command output.
 
+### Step 1.4: Derive Stablecoin Program PDAs (For Later Use)
+```bash
+# Navigate to stablecoin program directory
+cd ~/github/datastreams-backed-cross-chain-stablecoin/cross-chain-stablecoin/stablecoin-program
+
+# Derive PDAs that will be needed for multisig setup in Phase 3
+npx ts-node utils/derive-pdas.ts
+
+# Update .env file with the mint authority PDA
+cd ../../oracle
+echo "SOL_MINT_AUTHORITY_PDA=[copy-mint-authority-pda-from-above]" >> .env
+```
+
+**Expected Output:**
+```
+🔑 Deriving Program PDAs...
+
+📋 Stablecoin Program PDAs:
+   🏦 Mint Authority PDA: 9YourActualPDAAddressHere123456789
+   🏛️ Collateral Vault PDA: AnotherPDAAddressHere123456789
+
+✅ Use the Mint Authority PDA in your multisig creation command
+```
+
+**Key Address to Save:**
+- **Mint Authority PDA:** `9YourActualPDAAddressHere123456789` *(needed later for Phase 3 multisig)*
+
 ---
 
 ## 🪙 Phase 2: Stablecoin Program Deployment
@@ -278,13 +305,32 @@ yarn svm:admin:accept-admin-role \
   --token-mint $SOL_TOKEN_MINT
 ```
 
-### Step 3.5: Create SPL Token Multisig (Critical for CCIP + Oracle Integration)
+### Step 3.5: Load Mint Authority PDA from Environment
 ```bash
-# Create 1-of-3 multisig with Pool Signer PDA, Admin Wallet, and Oracle PDA
+# Load the mint authority PDA from .env (set in Step 2.4)
+cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
+source .env
+echo "🔑 Mint Authority PDA: $SOL_MINT_AUTHORITY_PDA"
+
+# Verify it's set correctly
+if [ -z "$SOL_MINT_AUTHORITY_PDA" ]; then
+  echo "❌ SOL_MINT_AUTHORITY_PDA not set. Please complete Step 2.4 first."
+  exit 1
+fi
+```
+
+**Expected Output:**
+```
+🔑 Mint Authority PDA: 9YourActualPDAAddressHere123456789
+```
+
+### Step 3.6: Create SPL Token Multisig (Critical for CCIP + Oracle Integration)
+```bash
+# Create 1-of-3 multisig with Pool Signer PDA, Admin Wallet, and Stablecoin Mint Authority PDA
 spl-token create-multisig 1 \
   F5KLpcP7eJvkJnyvoZNUYB26oYDq5EATAWRSPj8oVVtH \
-  [your-wallet-address] \
-  [oracle-mint-authority-pda]
+  $(solana address) \
+  $SOL_MINT_AUTHORITY_PDA
 ```
 
 **Expected Output:**
@@ -296,14 +342,14 @@ Multisig Address: 2dGyhXZ1Pp64XTCNuLZkUzYK86bet26suFYfkAeVLXDz
 **Key Address to Save:**
 - **Multisig Address:** `2dGyhXZ1Pp64XTCNuLZkUzYK86bet26suFYfkAeVLXDz`
 
-### Step 3.6: Transfer Mint Authority to Multisig
+### Step 3.7: Transfer Mint Authority to Multisig
 ```bash
 export SOL_MULTISIG_ADDRESS="2dGyhXZ1Pp64XTCNuLZkUzYK86bet26suFYfkAeVLXDz"
 
 spl-token authorize $SOL_TOKEN_MINT mint $SOL_MULTISIG_ADDRESS
 ```
 
-### Step 3.7: Create Address Lookup Table (ALT)
+### Step 3.8: Create Address Lookup Table (ALT)
 ```bash
 yarn svm:admin:create-alt \
   --token-mint $SOL_TOKEN_MINT \
@@ -320,7 +366,7 @@ ALT Address: Fhv8v1LaLwZmpXJrdijDmr8J4CGCiYrmtTP2zjPJEpgM
 **Key Address to Save:**
 - **ALT Address:** `Fhv8v1LaLwZmpXJrdijDmr8J4CGCiYrmtTP2zjPJEpgM`
 
-### Step 3.8: Register Pool with CCIP Router
+### Step 3.9: Register Pool with CCIP Router
 ```bash
 export SOL_ALT_ADDRESS="Fhv8v1LaLwZmpXJrdijDmr8J4CGCiYrmtTP2zjPJEpgM"
 
