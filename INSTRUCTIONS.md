@@ -155,32 +155,27 @@ cargo run -- update-oracle
 
 **⚠️ Important:** The Price Feed PDA is derived from YOUR deployed oracle program ID. The address above is specific to program ID `9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1`. If you deploy a different oracle program, you'll get a different PDA address from the `update-oracle` command output.
 
-### Step 1.4: Derive Stablecoin Program PDAs (For Later Use)
+### Step 1.4: Update Oracle Price Feed PDA in Environment
 ```bash
-# Navigate to stablecoin program directory
-cd ~/github/datastreams-backed-cross-chain-stablecoin/cross-chain-stablecoin/stablecoin-program
+# Update .env file with the oracle price feed PDA from Step 1.3 output
+cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
 
-# Derive PDAs that will be needed for multisig setup in Phase 3
-npx ts-node utils/derive-pdas.ts
+# Update the ORACLE_PRICE_FEED_PDA with the actual PDA from your oracle deployment
+# (Use the PDA address from Step 1.3 output: "📍 PriceFeed PDA: ...")
+sed -i '' 's|ORACLE_PRICE_FEED_PDA=.*|ORACLE_PRICE_FEED_PDA=HqqVks96kxdktt3jUvmoeF9dsc9pWgXVfYG27ri8Xi6C|' .env
 
-# Update .env file with the mint authority PDA
-cd ../../oracle
-echo "SOL_MINT_AUTHORITY_PDA=[copy-mint-authority-pda-from-above]" >> .env
+# Verify the update
+echo "✅ Updated Oracle Price Feed PDA in .env:"
+grep "ORACLE_PRICE_FEED_PDA" .env
 ```
 
 **Expected Output:**
 ```
-🔑 Deriving Program PDAs...
-
-📋 Stablecoin Program PDAs:
-   🏦 Mint Authority PDA: 9YourActualPDAAddressHere123456789
-   🏛️ Collateral Vault PDA: AnotherPDAAddressHere123456789
-
-✅ Use the Mint Authority PDA in your multisig creation command
+✅ Updated Oracle Price Feed PDA in .env:
+ORACLE_PRICE_FEED_PDA=HqqVks96kxdktt3jUvmoeF9dsc9pWgXVfYG27ri8Xi6C
 ```
 
-**Key Address to Save:**
-- **Mint Authority PDA:** `9YourActualPDAAddressHere123456789` *(needed later for Phase 3 multisig)*
+**⚠️ Important:** Replace `HqqVks96kxdktt3jUvmoeF9dsc9pWgXVfYG27ri8Xi6C` with your actual Price Feed PDA from Step 1.3 output.
 
 ---
 
@@ -205,7 +200,29 @@ anchor deploy --provider.cluster devnet
 **Key Address to Save:**
 - **Stablecoin Program ID:** `7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR`
 
-### Step 2.4: Create Initial Oracle-Backed Stablecoin Token
+### Step 2.4: Derive Stablecoin Mint Authority PDA
+```bash
+# Derive the stablecoin program's mint authority PDA (needed for multisig in Phase 3)
+npx ts-node utils/derive-pdas.ts
+
+# Update .env file with the mint authority PDA
+cd ../../oracle
+echo "SOL_MINT_AUTHORITY_PDA=[copy-mint-authority-pda-from-above]" >> .env
+```
+
+**Expected Output:**
+```
+🔑 Deriving Program PDAs...
+
+📋 Stablecoin Program PDAs:
+   🏦 Mint Authority PDA: 9YourActualPDAAddressHere123456789
+   🏛️ Collateral Vault PDA: AnotherPDAAddressHere123456789
+```
+
+**Key Address to Save:**
+- **Mint Authority PDA:** `9YourActualPDAAddressHere123456789` *(needed for Phase 3 multisig)*
+
+### Step 2.5: Create Initial Oracle-Backed Stablecoin Token
 ```bash
 # Create token with wallet authority (required for CCIP setup)
 ANCHOR_PROVIDER_URL="https://api.devnet.solana.com" \
@@ -230,7 +247,7 @@ export CCIP_POOL_PROGRAM="41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB"
 **Key Address to Save:**
 - **Stablecoin Token Mint:** `81kUD5Tf7AhxDvLxaVfRxCpDvtXooTHFEPhVfpku26r6` *(example - use your actual generated address)*
 
-### Step 2.5: Test Stablecoin Program (Recommended)
+### Step 2.6: Test Stablecoin Program (Recommended)
 ```bash
 # Make test script executable
 chmod +x test-individual.sh
