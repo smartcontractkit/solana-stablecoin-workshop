@@ -139,8 +139,12 @@ echo "ANCHOR_PROVIDER_URL: $ANCHOR_PROVIDER_URL"
 
 ## 🏗️ Phase 1: Oracle Program Deployment
 
+### Step 1.1: Setup Oracle Program
+```bash
+cd oracle
+```
 
-### Step 1.1: Build and Deploy Oracle Program
+### Step 1.2: Build and Deploy Oracle Program
 ```bash
 # Build the oracle program
 anchor build
@@ -152,7 +156,7 @@ anchor deploy --provider.cluster devnet
 # Example: 9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1
 ```
 
-### Step 1.2: Initialize Oracle Price Feed
+### Step 1.3: Initialize Oracle Price Feed
 ```bash
 cd client
 cargo run -- update-oracle
@@ -172,14 +176,14 @@ cargo run -- update-oracle
 
 **⚠️ Important:** The Price Feed PDA is derived from YOUR deployed oracle program ID. The address above is specific to program ID `9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1`. If you deploy a different oracle program, you'll get a different PDA address from the `update-oracle` command output.
 
-### Step 1.3: Update Oracle Price Feed PDA in Environment
+### Step 1.4: Update Oracle Price Feed PDA in Environment
 ```bash
-# Update .env file with the oracle price feed PDA from Step 1.2 output
+# Update .env file with the oracle price feed PDA from Step 1.3 output
 cd oracle
 
 # Update the ORACLE_PRICE_FEED_PDA with the actual PDA from your oracle deployment
-# (Use the PDA address from Step 1.2 output: "📍 PriceFeed PDA: ...")
-sed -i '' 's|ORACLE_PRICE_FEED_PDA=.*|ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.2]|' .env
+# (Use the PDA address from Step 1.3 output: "📍 PriceFeed PDA: ...")
+sed -i '' 's|ORACLE_PRICE_FEED_PDA=.*|ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.3]|' .env
 
 # Verify the update
 echo "✅ Updated Oracle Price Feed PDA in .env:"
