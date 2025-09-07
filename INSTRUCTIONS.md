@@ -454,12 +454,25 @@ yarn svm:admin:set-pool \
 ```bash
 cd smart-contract-examples/ccip/cct/hardhat
 
-# Create .env file
-cat > .env << EOF
-ETHEREUM_SEPOLIA_RPC_URL=https://1rpc.io/sepolia
-PRIVATE_KEY=0x[your-private-key]
-ETHERSCAN_API_KEY=[your-etherscan-api-key]
-EOF
+# Load environment variables from project root
+# (The .env symlink is already configured to point to ../../../../oracle/.env)
+source .env
+
+# Verify Ethereum variables are set
+echo "🔗 Ethereum RPC: $ETHEREUM_SEPOLIA_RPC_URL"
+echo "🔑 Private Key: ${PRIVATE_KEY:0:10}..." # Show only first 10 chars for security
+echo "🔍 Etherscan API: ${ETHERSCAN_API_KEY:0:10}..."
+```
+
+**📝 Note:** If any Ethereum variables show as empty, update your root `.env` file:
+```bash
+# Navigate back to project root to update .env
+cd ../../../../
+echo "PRIVATE_KEY=0x[your-private-key-here]" >> .env
+echo "ETHERSCAN_API_KEY=[your-etherscan-api-key-here]" >> .env
+# Then return to hardhat directory
+cd smart-contract-examples/ccip/cct/hardhat
+source .env
 ```
 
 ### Step 4.2: Compile Contracts
