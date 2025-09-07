@@ -1,4 +1,5 @@
 // Import required dependencies for Anchor, Solana, and Data Streams
+#![allow(deprecated)]
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
     program::{get_return_data, invoke},
