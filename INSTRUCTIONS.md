@@ -79,7 +79,7 @@ cross-chain-stablecoin/stablecoin-program/.env -> ../../oracle/.env
 smart-contract-examples/ccip/cct/hardhat/.env -> ../../../../../oracle/.env
 ```
 
-**✨ The symlinks are already set up!** When you rename `.env.example` to `.env`, all directories will automatically use the same centralized configuration.
+**✨ The symlinks are already set up!** When you copy `.env.example` to `oracle/.env`, all directories will automatically use the same centralized configuration through symlinks.
 
 ### Step 0.3: Review .env File Structure
 ```bash
@@ -369,7 +369,7 @@ yarn svm:pool:initialize \
 - **Pool Signer PDA:** `[your-pool-signer-pda]` *(copy this address)*
 
 ```bash
-# Update .env with the pool addresses from above
+# Update .env with the pool addresses (using symlink)
 echo "SOL_POOL_CONFIG_PDA=[your-pool-config-pda-from-above]" >> .env
 echo "SOL_POOL_SIGNER_PDA=[your-pool-signer-pda-from-above]" >> .env
 source .env
@@ -408,13 +408,16 @@ Signature: [transaction-signature]
 
 ### Step 3.6: Transfer Mint Authority to Multisig
 ```bash
-# Update .env with the multisig address from Step 3.5
-cd oracle
+# Update .env with the multisig address from Step 3.5 (using symlink)
 echo "SOL_MULTISIG_ADDRESS=[your-multisig-address-from-above]" >> .env
 
 # Load variables and transfer authority
 source .env
 spl-token authorize $SOL_TOKEN_MINT mint $SOL_MULTISIG_ADDRESS
+
+# Verify the transfer was successful
+echo "✅ Verifying mint authority transfer:"
+spl-token display $SOL_TOKEN_MINT | grep "Mint authority"
 ```
 
 ### Step 3.7: Create Address Lookup Table (ALT)
