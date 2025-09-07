@@ -64,30 +64,22 @@ cd ~/github/datastreams-backed-cross-chain-stablecoin
 ```
 
 ### Step 0.2: Setup Environment Files
-The project uses a centralized `.env` file located at `oracle/.env` that is symlinked to other directories for consistency.
+The project uses a centralized environment system with symlinks already configured for consistency across directories.
 
 ```bash
-# Copy the example file to create your .env
-cp .env.example oracle/.env
-
-# Create symlinks for consistency across directories
-cd cross-chain-stablecoin/stablecoin-program
-ln -sf ../../oracle/.env .env
-ln -sf ../../oracle/.env.example .env.example
-
-cd ../../smart-contract-examples/ccip/cct/hardhat  
-ln -sf ../../../../../oracle/.env .env
-ln -sf ../../../../../oracle/.env.example .env.example
-
-cd ../../../../
+# Simply rename the example file to create your .env
+# This will rename ALL symlinked .env.example files to .env automatically
+mv .env.example .env
 ```
 
-**File Structure:**
+**📁 Pre-configured File Structure:**
 ```
-oracle/.env                    # Main environment file
+oracle/.env                    # Main environment file (created from .env.example)
 cross-chain-stablecoin/stablecoin-program/.env -> ../../oracle/.env
 smart-contract-examples/ccip/cct/hardhat/.env -> ../../../../../oracle/.env
 ```
+
+**✨ The symlinks are already set up!** When you rename `.env.example` to `.env`, all directories will automatically use the same centralized configuration.
 
 ### Step 0.3: Review .env File Structure
 ```bash
@@ -128,9 +120,12 @@ DATASTREAMS_CLIENT_SECRET=your-secret-with-special&characters<here>
 ### Step 0.5: Verify Environment Loading
 ```bash
 # Test that environment variables load correctly
-cd oracle
 source .env
 echo "ORACLE_PROGRAM_ID: $ORACLE_PROGRAM_ID"
+
+# Verify symlinks are working
+ls -la cross-chain-stablecoin/stablecoin-program/.env
+ls -la smart-contract-examples/ccip/cct/hardhat/.env
 echo "ANCHOR_PROVIDER_URL: $ANCHOR_PROVIDER_URL"
 
 # If you see parsing errors, check for unquoted special characters
