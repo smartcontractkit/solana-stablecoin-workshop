@@ -454,15 +454,19 @@ yarn svm:admin:set-pool \
 ```bash
 cd smart-contract-examples/ccip/cct/hardhat
 
-# Load environment variables from project root
+# Load and export environment variables for Hardhat
 # (The .env symlink is already configured to point to ../../../../oracle/.env)
+set -a  # Automatically export all variables
 source .env
+set +a  # Stop auto-exporting
 
 # Verify Ethereum variables are set
 echo "🔗 Ethereum RPC: $ETHEREUM_SEPOLIA_RPC_URL"
 echo "🔑 Private Key: ${PRIVATE_KEY:0:10}..." # Show only first 10 chars for security
 echo "🔍 Etherscan API: ${ETHERSCAN_API_KEY:0:10}..."
 ```
+
+**ℹ️ What `set -a` does:** This command exports all variables to child processes (like Hardhat), ensuring they're available to Node.js.
 
 **📝 Note:** If any Ethereum variables show as empty, update your root `.env` file:
 ```bash
