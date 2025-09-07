@@ -155,7 +155,20 @@ anchor deploy --provider.cluster devnet
 # Example: 9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1
 ```
 
-### Step 1.3: Initialize Oracle Price Feed
+### Step 1.3: Update Oracle Program ID in Environment
+```bash
+# Update .env file with your deployed Oracle Program ID
+# Replace [your-oracle-program-id] with the actual program ID from Step 1.2 output
+sed -i '' 's|ORACLE_PROGRAM_ID=.*|ORACLE_PROGRAM_ID=[your-oracle-program-id]|' .env
+
+# Verify the update
+echo "✅ Updated Oracle Program ID in .env:"
+grep "ORACLE_PROGRAM_ID" .env
+```
+
+**⚠️ Important:** The client reads `ORACLE_PROGRAM_ID` from the `.env` file, so this step is required for the oracle client to work with your deployed program.
+
+### Step 1.4: Initialize Oracle Price Feed
 ```bash
 cd client
 cargo run -- update-oracle
@@ -175,14 +188,14 @@ cargo run -- update-oracle
 
 **⚠️ Important:** The Price Feed PDA is derived from YOUR deployed oracle program ID. The address above is specific to program ID `9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1`. If you deploy a different oracle program, you'll get a different PDA address from the `update-oracle` command output.
 
-### Step 1.4: Update Oracle Price Feed PDA in Environment
+### Step 1.5: Update Oracle Price Feed PDA in Environment
 ```bash
-# Update .env file with the oracle price feed PDA from Step 1.3 output
+# Update .env file with the oracle price feed PDA from Step 1.4 output
 cd oracle
 
 # Update the ORACLE_PRICE_FEED_PDA with the actual PDA from your oracle deployment
-# (Use the PDA address from Step 1.3 output: "📍 PriceFeed PDA: ...")
-sed -i '' 's|ORACLE_PRICE_FEED_PDA=.*|ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.3]|' .env
+# (Use the PDA address from Step 1.4 output: "📍 PriceFeed PDA: ...")
+sed -i '' 's|ORACLE_PRICE_FEED_PDA=.*|ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.4]|' .env
 
 # Verify the update
 echo "✅ Updated Oracle Price Feed PDA in .env:"
