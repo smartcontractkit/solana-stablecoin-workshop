@@ -162,7 +162,7 @@ cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
 
 # Update the ORACLE_PRICE_FEED_PDA with the actual PDA from your oracle deployment
 # (Use the PDA address from Step 1.3 output: "📍 PriceFeed PDA: ...")
-sed -i '' 's|ORACLE_PRICE_FEED_PDA=.*|ORACLE_PRICE_FEED_PDA=HqqVks96kxdktt3jUvmoeF9dsc9pWgXVfYG27ri8Xi6C|' .env
+sed -i '' 's|ORACLE_PRICE_FEED_PDA=.*|ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.3]|' .env
 
 # Verify the update
 echo "✅ Updated Oracle Price Feed PDA in .env:"
@@ -172,10 +172,8 @@ grep "ORACLE_PRICE_FEED_PDA" .env
 **Expected Output:**
 ```
 ✅ Updated Oracle Price Feed PDA in .env:
-ORACLE_PRICE_FEED_PDA=HqqVks96kxdktt3jUvmoeF9dsc9pWgXVfYG27ri8Xi6C
+ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.3]
 ```
-
-**⚠️ Important:** Replace `HqqVks96kxdktt3jUvmoeF9dsc9pWgXVfYG27ri8Xi6C` with your actual Price Feed PDA from Step 1.3 output.
 
 ---
 
@@ -198,7 +196,13 @@ anchor deploy --provider.cluster devnet
 ```
 
 **Key Address to Save:**
-- **Stablecoin Program ID:** `7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR`
+- **Stablecoin Program ID:** `[your-stablecoin-program-id]` *(copy this address)*
+
+```bash
+# Update .env with the stablecoin program ID
+cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
+echo "STABLECOIN_PROGRAM_ID=[your-stablecoin-program-id-from-above]" >> .env
+```
 
 ### Step 2.4: Derive Stablecoin Mint Authority PDA
 ```bash
@@ -240,17 +244,21 @@ npx ts-node create-token-for-ccip.ts
 **Expected Output:**
 ```
 ✅ Token created successfully!
-🪙 New mint address: 81kUD5Tf7AhxDvLxaVfRxCpDvtXooTHFEPhVfpku26r6
-🔗 Transaction: 2EMYvp7Wfdcdk4tGAKMMrkceyrVp5ooTWvZwdbRi2aXzjXmvF1vTG33AmavxPKRZ9VAwqTw1PihudW1yVv3y5oz6
-
-📋 CCIP Setup Variables:
-export SOL_TOKEN_MINT="81kUD5Tf7AhxDvLxaVfRxCpDvtXooTHFEPhVfpku26r6"
-export SOL_ADMIN_WALLET=$(solana address)
-export CCIP_POOL_PROGRAM="41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB"
+🪙 New mint address: [your-token-mint-address]
+🔗 Transaction: [transaction-hash]
 ```
 
 **Key Address to Save:**
-- **Stablecoin Token Mint:** `81kUD5Tf7AhxDvLxaVfRxCpDvtXooTHFEPhVfpku26r6` *(example - use your actual generated address)*
+- **Stablecoin Token Mint:** `[your-token-mint-address]` *(copy this address)*
+
+```bash
+# Update .env with the token mint and other required variables
+cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
+echo "SOL_TOKEN_MINT=[your-token-mint-address-from-above]" >> .env
+echo "SOL_ADMIN_WALLET=$(solana address)" >> .env
+echo "CCIP_POOL_PROGRAM=41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB" >> .env
+source .env
+```
 
 ### Step 2.6: Test Stablecoin Program (Recommended)
 ```bash
@@ -290,10 +298,15 @@ cd solana-starter-kit
 yarn install
 ```
 
-### Step 3.2: Set Environment Variables
+### Step 3.2: Load Environment Variables
 ```bash
-export SOL_TOKEN_MINT="8vg7CL4WByjVp2xR9gwai4WpsKRJUkF2okjg7ScoiYfn"
-export CCIP_POOL_PROGRAM="41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB"
+# Load variables from .env (set in previous phases)
+cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
+source .env
+
+# Verify required variables are set
+echo "🪙 Token Mint: $SOL_TOKEN_MINT"
+echo "🏊 Pool Program: $CCIP_POOL_PROGRAM"
 ```
 
 ### Step 3.3: Initialize CCIP Token Pool
@@ -306,14 +319,21 @@ yarn svm:pool:initialize \
 **Expected Output:**
 ```
 ✅ POOL INITIALIZED SUCCESSFULLY
-📍 Pool State PDA: 7ThMdCYGARo2kF8ZoAcMqNLpJSSfTW3Uu2q2JCwHFg27
-📍 Pool Signer PDA: 91nQ1VwEWdZ8jnr1WwDLWdHH4sy2tGzfZgAzbyzRgPy4
-🔗 Transaction: nKhgg6NdMCs7LGLF5SX7ty3SpmaCy7yEpeWzxomxZaovt4nAnSxzZasVJ63FtaVi2N2VAZD4iBhiHZ3kxTjLReu
+📍 Pool State PDA: [your-pool-config-pda]
+📍 Pool Signer PDA: [your-pool-signer-pda]
+🔗 Transaction: [transaction-hash]
 ```
 
 **Key Addresses to Save:**
-- **Pool Config PDA:** `7ThMdCYGARo2kF8ZoAcMqNLpJSSfTW3Uu2q2JCwHFg27` *(your actual address will be different)*
-- **Pool Signer PDA:** `91nQ1VwEWdZ8jnr1WwDLWdHH4sy2tGzfZgAzbyzRgPy4` *(your actual address will be different)*
+- **Pool Config PDA:** `[your-pool-config-pda]` *(copy this address)*
+- **Pool Signer PDA:** `[your-pool-signer-pda]` *(copy this address)*
+
+```bash
+# Update .env with the pool addresses from above
+echo "SOL_POOL_CONFIG_PDA=[your-pool-config-pda-from-above]" >> .env
+echo "SOL_POOL_SIGNER_PDA=[your-pool-signer-pda-from-above]" >> .env
+source .env
+```
 
 ### Step 3.4: Set Up CCIP Administration
 ```bash
@@ -350,25 +370,29 @@ fi
 ```bash
 # Create 1-of-3 multisig with Pool Signer PDA, Admin Wallet, and Stablecoin Mint Authority PDA
 spl-token create-multisig 1 \
-  F5KLpcP7eJvkJnyvoZNUYB26oYDq5EATAWRSPj8oVVtH \
-  $(solana address) \
+  $SOL_POOL_SIGNER_PDA \
+  $SOL_ADMIN_WALLET \
   $SOL_MINT_AUTHORITY_PDA
 ```
 
 **Expected Output:**
 ```
-Creating 1/3 multisig EfaszTZgjf6mZJY6VbYRRabpAJVCKYxmaBGadmX5FtQw under program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+Creating 1/3 multisig [your-multisig-address] under program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
 
-Signature: goUAqKf77wSmL6EAqD9uUuGj64m2wRuRWjBNEw85MHrBAeQHMd7Ld3qw35GKFk3zUYgVn8PYkKMhyT3frcDR7jK
+Signature: [transaction-signature]
 ```
 
 **Key Address to Save:**
-- **Multisig Address:** `EfaszTZgjf6mZJY6VbYRRabpAJVCKYxmaBGadmX5FtQw` *(use your actual generated address)*
+- **Multisig Address:** `[your-multisig-address]` *(copy this for the next step)*
 
 ### Step 3.7: Transfer Mint Authority to Multisig
 ```bash
-export SOL_MULTISIG_ADDRESS="2dGyhXZ1Pp64XTCNuLZkUzYK86bet26suFYfkAeVLXDz"
+# Update .env with the multisig address from Step 3.6
+cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
+echo "SOL_MULTISIG_ADDRESS=[your-multisig-address-from-above]" >> .env
 
+# Load variables and transfer authority
+source .env
 spl-token authorize $SOL_TOKEN_MINT mint $SOL_MULTISIG_ADDRESS
 ```
 
@@ -383,15 +407,17 @@ yarn svm:admin:create-alt \
 **Expected Output:**
 ```
 ✅ ALT created successfully!
-ALT Address: Fhv8v1LaLwZmpXJrdijDmr8J4CGCiYrmtTP2zjPJEpgM
+ALT Address: [your-alt-address]
 ```
 
 **Key Address to Save:**
-- **ALT Address:** `Fhv8v1LaLwZmpXJrdijDmr8J4CGCiYrmtTP2zjPJEpgM`
+- **ALT Address:** `[your-alt-address]` *(copy this for the next step)*
 
 ### Step 3.9: Register Pool with CCIP Router
 ```bash
-export SOL_ALT_ADDRESS="Fhv8v1LaLwZmpXJrdijDmr8J4CGCiYrmtTP2zjPJEpgM"
+# Update .env with the ALT address from Step 3.8
+echo "SOL_ALT_ADDRESS=[your-alt-address-from-above]" >> .env
+source .env
 
 yarn svm:admin:set-pool \
   --token-mint $SOL_TOKEN_MINT \
@@ -440,58 +466,72 @@ npx hardhat deployToken \
 
 **Expected Output:**
 ```
-Token deployed to: 0xF1a6916111Ad79459b643ec561537E485Bf5CE46
+Token deployed to: [your-ethereum-token-address]
 ```
 
 **Key Address to Save:**
-- **Ethereum Token:** `0xF1a6916111Ad79459b643ec561537E485Bf5CE46` *(example - your address will be different)*
+- **Ethereum Token:** `[your-ethereum-token-address]` *(copy this address)*
+
+```bash
+# Update .env with the Ethereum token address
+cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
+echo "ETH_TOKEN_ADDRESS=[your-ethereum-token-address-from-above]" >> .env
+```
 
 ### Step 4.4: Deploy TokenPool
 ```bash
+# Load the Ethereum token address and deploy pool
+source .env
 npx hardhat deployTokenPool \
   --network sepolia \
-  --tokenaddress 0xA7A69221BaE843E129c72d49b730e3b23152a605 \
+  --tokenaddress $ETH_TOKEN_ADDRESS \
   --pooltype burnMint \
   --localtokendecimals 6
 ```
 
 **Expected Output:**
 ```
-Token pool deployed to: 0x238522396b383092C1B49d88797Ead39266a0515
+Token pool deployed to: [your-ethereum-token-pool-address]
 ```
 
 **Key Address to Save:**
-- **Ethereum TokenPool:** `0x238522396b383092C1B49d88797Ead39266a0515` *(example - your address will be different)*
+- **Ethereum TokenPool:** `[your-ethereum-token-pool-address]` *(copy this address)*
+
+```bash
+# Update .env with the token pool address
+echo "ETH_TOKEN_POOL=[your-ethereum-token-pool-address-from-above]" >> .env
+source .env
+```
 
 ### Step 4.5: Claim and Accept Admin Role
 ```bash
 # Claim admin
 npx hardhat claimAdmin \
   --network sepolia \
-  --tokenaddress 0xA7A69221BaE843E129c72d49b730e3b23152a605
+  --tokenaddress $ETH_TOKEN_ADDRESS
 
 # Accept admin role
 npx hardhat acceptAdminRole \
   --network sepolia \
-  --tokenaddress 0xA7A69221BaE843E129c72d49b730e3b23152a605
+  --tokenaddress $ETH_TOKEN_ADDRESS
 ```
 
 ### Step 4.6: Register Pool with TokenAdminRegistry
 ```bash
 npx hardhat setPool \
   --network sepolia \
-  --tokenaddress 0xA7A69221BaE843E129c72d49b730e3b23152a605 \
-  --pooladdress 0x66D8997EF281D76c7c60f7e7f283A90D15C60839
+  --tokenaddress $ETH_TOKEN_ADDRESS \
+  --pooladdress $ETH_TOKEN_POOL
 ```
 
 ### Step 4.7: Configure Cross-Chain Connectivity (Ethereum → Solana)
 ```bash
 npx hardhat applyChainUpdates \
   --network sepolia \
-  --pooladdress 0x66D8997EF281D76c7c60f7e7f283A90D15C60839 \
+  --pooladdress $ETH_TOKEN_POOL \
   --remotechain solanaDevnet \
-  --remotetokenaddress 8vg7CL4WByjVp2xR9gwai4WpsKRJUkF2okjg7ScoiYfn \
-  --remotepooladdresses HtFNeEoKEsgy5VXQe6oj4VnRxdK3iUNkpvKWGPGG1RRN
+  --remotetokenaddress $SOL_TOKEN_MINT \
+  --remotepooladdresses $SOL_POOL_CONFIG_PDA
 ```
 
 ---
@@ -502,12 +542,15 @@ npx hardhat applyChainUpdates \
 ```bash
 cd ~/github/solana-starter-kit
 
+# Load environment variables
+source ~/github/datastreams-backed-cross-chain-stablecoin/oracle/.env
+
 # Initialize chain remote config
 yarn svm:pool:init-chain-remote-config \
   --token-mint $SOL_TOKEN_MINT \
   --burn-mint-pool-program $CCIP_POOL_PROGRAM \
   --remote-chain ethereum-sepolia \
-  --token-address "0xF1a6916111Ad79459b643ec561537E485Bf5CE46" \
+  --token-address $ETH_TOKEN_ADDRESS \
   --decimals 6
 ```
 
@@ -519,8 +562,8 @@ yarn svm:pool:edit-chain-remote-config \
   --token-mint $SOL_TOKEN_MINT \
   --burn-mint-pool-program $CCIP_POOL_PROGRAM \
   --remote-chain ethereum-sepolia \
-  --pool-addresses "0x238522396b383092C1B49d88797Ead39266a0515" \
-  --token-address "0xF1a6916111Ad79459b643ec561537E485Bf5CE46" \
+  --pool-addresses $ETH_TOKEN_POOL \
+  --token-address $ETH_TOKEN_ADDRESS \
   --decimals 6
 ```
 
@@ -536,6 +579,9 @@ cargo run -- update-oracle
 
 ### Step 6.2: Mint Oracle-Backed Stablecoin Tokens
 ```bash
+# Load environment variables
+source .env
+
 # Create token account
 spl-token create-account $SOL_TOKEN_MINT
 
@@ -553,8 +599,6 @@ Signature: [transaction-hash]
 
 ### Step 6.3: Create Pool Token Account (Required for CCIP)
 ```bash
-export SOL_POOL_SIGNER_PDA="91nQ1VwEWdZ8jnr1WwDLWdHH4sy2tGzfZgAzbyzRgPy4"
-
 spl-token create-account $SOL_TOKEN_MINT \
   --owner $SOL_POOL_SIGNER_PDA \
   --fee-payer ~/.config/solana/id.json
@@ -562,11 +606,16 @@ spl-token create-account $SOL_TOKEN_MINT \
 
 **Expected Output:**
 ```
-Creating account 5gu6sECivkuEK457rbuJXc5rVXtfkpjoyyQirsr3MLag
+Creating account [your-pool-token-account-address]
 ```
 
 **Key Address to Save:**
-- **Pool Token Account:** `5gu6sECivkuEK457rbuJXc5rVXtfkpjoyyQirsr3MLag` *(example - your address will be different)*
+- **Pool Token Account:** `[your-pool-token-account-address]` *(copy this address)*
+
+```bash
+# Update .env with the pool token account
+echo "POOL_TOKEN_ACCOUNT=[your-pool-token-account-address-from-above]" >> .env
+```
 
 ### Step 6.4: Delegate Token Authority to CCIP
 ```bash
@@ -590,11 +639,15 @@ spl-token balance $SOL_TOKEN_MINT
 
 ### Step 7.2: Execute Cross-Chain Transfer (Solana → Ethereum)
 ```bash
+# Set your Ethereum receiver address
+echo "ETH_RECEIVER_ADDRESS=[your-ethereum-wallet-address]" >> .env
+source .env
+
 yarn svm:token-transfer \
   --token-mint $SOL_TOKEN_MINT \
   --amount 1000000 \
   --destination-chain ethereum-sepolia \
-  --receiver-address 0x4fed0A5B65eac383D36E65733786386709B86be8
+  --receiver-address $ETH_RECEIVER_ADDRESS
 ```
 
 **⚠️ Important:** Use `--receiver-address` (not `--destination-address`) to specify the Ethereum recipient address.
@@ -602,9 +655,9 @@ yarn svm:token-transfer \
 **Expected Output:**
 ```
 ✅ TOKEN TRANSFER SENT SUCCESSFULLY
-EVM Receiver Address: 0x4fed0A5B65eac383D36E65733786386709B86be8
-Transaction Signature: 61gA2Xky5NGpaJ7kCJuqu97MttpWEQC8GEJ5k5iAmavJoJ9RtwEzqQyAFW53JDAakFWdn93EYMyRTsikDVV1JjJa
-CCIP Message ID: 0xe90dbe206ed5df7b05daacffee132166297e18bda1cbf80d6a1ca38dccf05a0b
+EVM Receiver Address: [your-ethereum-wallet-address]
+Transaction Signature: [transaction-signature]
+CCIP Message ID: [ccip-message-id]
 ✅ Sent 1000000 tokens (1 token with 6 decimals)
 ```
 
@@ -616,30 +669,31 @@ CCIP Message ID: 0xe90dbe206ed5df7b05daacffee132166297e18bda1cbf80d6a1ca38dccf05
 
 ## 📊 Key Addresses Summary
 
-### Solana Addresses
+### View Your Configuration
 ```bash
-# Programs
-ORACLE_PROGRAM_ID="9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1"
-STABLECOIN_PROGRAM_ID="7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR"
-CCIP_POOL_PROGRAM="41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB"
+# Load and display all your addresses
+cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
+source .env
 
-# Token and Accounts
-SOL_TOKEN_MINT="8vg7CL4WByjVp2xR9gwai4WpsKRJUkF2okjg7ScoiYfn"
-SOL_MULTISIG_ADDRESS="2dGyhXZ1Pp64XTCNuLZkUzYK86bet26suFYfkAeVLXDz"
-SOL_POOL_CONFIG_PDA="HtFNeEoKEsgy5VXQe6oj4VnRxdK3iUNkpvKWGPGG1RRN"
-SOL_POOL_SIGNER_PDA="F5KLpcP7eJvkJnyvoZNUYB26oYDq5EATAWRSPj8oVVtH"
-SOL_ALT_ADDRESS="Fhv8v1LaLwZmpXJrdijDmr8J4CGCiYrmtTP2zjPJEpgM"
-POOL_TOKEN_ACCOUNT="FJfZNAdMBHncZ6bZkL6PEnq8awApudVYM1fXYgSJdeAq"
+echo "=== 🏗️ PROGRAM IDs ==="
+echo "Oracle Program:     $ORACLE_PROGRAM_ID"
+echo "Stablecoin Program: $STABLECOIN_PROGRAM_ID"
+echo "CCIP Pool Program:  $CCIP_POOL_PROGRAM"
 
-# Oracle
-ORACLE_PRICE_FEED="C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen"
-```
+echo -e "\n=== 🪙 TOKEN & ACCOUNTS ==="
+echo "Token Mint:         $SOL_TOKEN_MINT"
+echo "Multisig Address:   $SOL_MULTISIG_ADDRESS"
+echo "Pool Config PDA:    $SOL_POOL_CONFIG_PDA"
+echo "Pool Signer PDA:    $SOL_POOL_SIGNER_PDA"
+echo "ALT Address:        $SOL_ALT_ADDRESS"
+echo "Mint Authority PDA: $SOL_MINT_AUTHORITY_PDA"
 
-### Ethereum Addresses
-```bash
-# Contracts
-ETH_TOKEN_ADDRESS="0xA7A69221BaE843E129c72d49b730e3b23152a605"
-ETH_TOKEN_POOL="0x66D8997EF281D76c7c60f7e7f283A90D15C60839"
+echo -e "\n=== 🔮 ORACLE ==="
+echo "Price Feed PDA:     $ORACLE_PRICE_FEED_PDA"
+
+echo -e "\n=== 🌐 ETHEREUM ==="
+echo "Token Address:      $ETH_TOKEN_ADDRESS"
+echo "Token Pool:         $ETH_TOKEN_POOL"
 ```
 
 ---
@@ -678,14 +732,14 @@ spl-token mint $SOL_TOKEN_MINT [amount] \
 ```
 
 #### 5. Cross-Chain Transfer Goes to Wrong Address
-**Problem:** Transfer shows hardcoded address `0x9d087fC03ae39b088326b67fA3C788236645b717` instead of your address
+**Problem:** Transfer shows hardcoded fallback address instead of your intended receiver
 **Solution:** Use `--receiver-address` instead of `--destination-address`
 ```bash
 # ❌ Wrong - uses hardcoded fallback address
-yarn svm:token-transfer --destination-address 0x[your-address]
+yarn svm:token-transfer --destination-address $ETH_RECEIVER_ADDRESS
 
 # ✅ Correct - uses your specified address  
-yarn svm:token-transfer --receiver-address 0x[your-address]
+yarn svm:token-transfer --receiver-address $ETH_RECEIVER_ADDRESS
 ```
 
 #### 6. Oracle Testing Issues
@@ -723,11 +777,12 @@ sed -i '' 's/DATASTREAMS_CLIENT_SECRET=\(.*\)/DATASTREAMS_CLIENT_SECRET="\1"/' o
 ```bash
 # If you see "AccountOwnedByWrongProgram" or "ConstraintAddress" errors
 # Check which oracle program owns your price feed
-solana account C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen --url devnet
+source .env
+solana account $ORACLE_PRICE_FEED_PDA --url devnet
 
-# Update .env file with correct oracle program ID
+# Update .env file with correct oracle program ID if needed
 cd oracle
-sed -i '' 's|ORACLE_PROGRAM_ID=.*|ORACLE_PROGRAM_ID=9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1|' .env
+sed -i '' 's|ORACLE_PROGRAM_ID=.*|ORACLE_PROGRAM_ID=[your-correct-oracle-program-id]|' .env
 
 # Update stablecoin program source code (line 11 in lib.rs)
 # Then rebuild and redeploy
@@ -752,7 +807,8 @@ cargo run -- update-oracle
 **E. Deployment Account Issues:**
 If you see `AccountNotFound` errors during testing, the oracle program is likely already deployed and working. Verify with:
 ```bash
-solana program show 9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1
+source .env
+solana program show $ORACLE_PROGRAM_ID
 ```
 
 ---
