@@ -63,21 +63,45 @@ Before starting the deployment phases, you need to set up the environment config
 cd ~/github/datastreams-backed-cross-chain-stablecoin
 ```
 
-### Step 0.2: Review and Update .env File
-The project uses a phase-organized `.env` file located at `oracle/.env`. This file is symlinked to other directories for consistency.
+### Step 0.2: Setup Environment Files
+The project uses a centralized `.env` file located at `oracle/.env` that is symlinked to other directories for consistency.
 
+```bash
+# Copy the example file to create your .env
+cp .env.example oracle/.env
+
+# Create symlinks for consistency across directories
+cd cross-chain-stablecoin/stablecoin-program
+ln -sf ../../oracle/.env .env
+ln -sf ../../oracle/.env.example .env.example
+
+cd ../../smart-contract-examples/ccip/cct/hardhat  
+ln -sf ../../../../../oracle/.env .env
+ln -sf ../../../../../oracle/.env.example .env.example
+
+cd ../../../../
+```
+
+**File Structure:**
+```
+oracle/.env                    # Main environment file
+cross-chain-stablecoin/stablecoin-program/.env -> ../../oracle/.env
+smart-contract-examples/ccip/cct/hardhat/.env -> ../../../../../oracle/.env
+```
+
+### Step 0.3: Review .env File Structure
 ```bash
 # Check the current .env file
 cat oracle/.env
 
 # The file is organized by deployment phases:
-# - PHASE 1: Oracle Program Deployment (pre-filled)
-# - PHASE 2: Stablecoin Program Deployment (to be filled)
-# - PHASE 3: CCIP Integration (to be filled)
-# - PHASE 4: Ethereum Side Deployment (to be filled)
+# - PHASE 1: Oracle Program Deployment (to be filled during deployment)
+# - PHASE 2: Stablecoin Program Deployment (to be filled during deployment)
+# - PHASE 3: CCIP Integration (to be filled during deployment)
+# - PHASE 4: Ethereum Side Deployment (to be filled during deployment)
 ```
 
-### Step 0.3: Important .env File Notes
+### Step 0.4: Important .env File Notes
 
 **⚠️ Special Characters in API Secrets:**
 If your `DATASTREAMS_CLIENT_SECRET` contains special characters (`&`, `<`, `>`, `*`, etc.), make sure it's properly quoted:
@@ -101,7 +125,7 @@ DATASTREAMS_CLIENT_SECRET=your-secret-with-special&characters<here>
 - `SOL_POOL_CONFIG_PDA`, `SOL_POOL_SIGNER_PDA`: Generated in Phase 3
 - `ETH_TOKEN_ADDRESS`, `ETH_TOKEN_POOL`: Generated in Phase 4
 
-### Step 0.4: Verify Environment Loading
+### Step 0.5: Verify Environment Loading
 ```bash
 # Test that environment variables load correctly
 cd oracle
@@ -1024,7 +1048,7 @@ anchor deploy --provider.cluster devnet
 Update the program IDs throughout this file to match your deployments:
 - Replace `ORACLE_PROGRAM_ID=9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1` with your oracle program ID
 - Replace `STABLECOIN_PROGRAM_ID=7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR` with your stablecoin program ID
-- Replace `REAL_ORACLE_PRICE_FEED=HqqVks96kxdktt3jUvmoeF9dsc9pWgXVfYG27ri8Xi6C` with your price feed PDA
+- Replace `ORACLE_PRICE_FEED_PDA=[your-oracle-price-feed-pda]` with your price feed PDA
 
 ### 🚨 Why This Is Required
 
