@@ -352,12 +352,13 @@ spl-token create-multisig 1 \
 
 **Expected Output:**
 ```
-Creating 1-of-3 multisig
-Multisig Address: 2dGyhXZ1Pp64XTCNuLZkUzYK86bet26suFYfkAeVLXDz
+Creating 1/3 multisig EfaszTZgjf6mZJY6VbYRRabpAJVCKYxmaBGadmX5FtQw under program TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA
+
+Signature: goUAqKf77wSmL6EAqD9uUuGj64m2wRuRWjBNEw85MHrBAeQHMd7Ld3qw35GKFk3zUYgVn8PYkKMhyT3frcDR7jK
 ```
 
 **Key Address to Save:**
-- **Multisig Address:** `2dGyhXZ1Pp64XTCNuLZkUzYK86bet26suFYfkAeVLXDz`
+- **Multisig Address:** `EfaszTZgjf6mZJY6VbYRRabpAJVCKYxmaBGadmX5FtQw` *(use your actual generated address)*
 
 ### Step 3.7: Transfer Mint Authority to Multisig
 ```bash
