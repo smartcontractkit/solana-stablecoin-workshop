@@ -455,9 +455,8 @@ yarn svm:admin:set-pool \
 cd smart-contract-examples/ccip/cct/hardhat
 
 # Load and export environment variables for Hardhat
-# (The .env symlink is already configured to point to ../../../../oracle/.env)
 set -a  # Automatically export all variables
-source .env
+source ../../../../.env
 set +a  # Stop auto-exporting
 
 # Verify Ethereum variables are set
