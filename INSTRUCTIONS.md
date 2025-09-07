@@ -40,7 +40,7 @@ npm install -g yarn
 ### Required Accounts
 - **Solana Wallet** with devnet SOL
 - **Ethereum Wallet** with Sepolia ETH
-- **Chainlink Data Streams API** access (for production)
+- **Chainlink Data Streams** access
 
 ### Environment Setup
 ```bash
@@ -56,11 +56,10 @@ solana config get
 
 ## 🔧 Environment Setup (Required Before Phase 1)
 
-### Step 0.1: Configure Environment Variables
-Before starting the deployment phases, you need to set up the environment configuration that will be used throughout the entire process.
-
+### Step 0.1: Clone the Workshop Repository
 ```bash
-cd datastreams-backed-cross-chain-stablecoin
+git clone https://github.com/smartcontractkit/solana-stablecoin-workshop
+cd solana-stablecoin-workshop
 ```
 
 ### Step 0.2: Setup Environment Files
@@ -87,13 +86,16 @@ smart-contract-examples/ccip/cct/hardhat/.env -> ../../../../../oracle/.env
 cat oracle/.env
 
 # The file is organized by deployment phases:
-# - PHASE 1: Oracle Program Deployment (to be filled during deployment)
-# - PHASE 2: Stablecoin Program Deployment (to be filled during deployment)
-# - PHASE 3: CCIP Integration (to be filled during deployment)
-# - PHASE 4: Ethereum Side Deployment (to be filled during deployment)
+# - PHASE 1: Oracle Program Deployment (partially pre-filled, requires DATASTREAMS credentials from instructor)
+# - PHASE 2: Stablecoin Program Deployment (to be filled along the way)
+# - PHASE 3: CCIP Integration (to be filled along the way)
+# - PHASE 4: Ethereum Side Deployment (to be filled along the way)
 ```
 
 ### Step 0.4: Important .env File Notes
+
+**🔑 Chainlink Data Streams Credentials:**
+You'll need to obtain `DATASTREAMS_CLIENT_ID` and `DATASTREAMS_CLIENT_SECRET` from your instructor. These credentials are required for accessing Chainlink Data Streams in Phase 1.
 
 **⚠️ Special Characters in API Secrets:**
 If your `DATASTREAMS_CLIENT_SECRET` contains special characters (`&`, `<`, `>`, `*`, etc.), make sure it's properly quoted:
@@ -107,12 +109,14 @@ DATASTREAMS_CLIENT_SECRET=your-secret-with-special&characters<here>
 ```
 
 **📍 Pre-filled Values:**
-- `ORACLE_PROGRAM_ID`: Uses the example deployed oracle program
-- `ORACLE_PRICE_FEED_PDA`: Derived from the example oracle program
 - `SOL_ADMIN_WALLET`: Auto-populated with your current Solana wallet
 - `FEED_ID`: Chainlink SOL/USD feed ID for Data Streams
+- `DATASTREAMS_*`: Chainlink Data Streams configuration (requires instructor credentials)
+- `ETHEREUM_SEPOLIA_RPC_URL`: Public Ethereum testnet endpoint
+- `CCIP_POOL_PROGRAM`: Static CCIP pool program ID
 
 **🔄 Values to Fill During Deployment:**
+- `ORACLE_PROGRAM_ID`, `ORACLE_PRICE_FEED_PDA`: Generated in Phase 1
 - `SOL_TOKEN_MINT`: Generated in Phase 2
 - `SOL_POOL_CONFIG_PDA`, `SOL_POOL_SIGNER_PDA`: Generated in Phase 3
 - `ETH_TOKEN_ADDRESS`, `ETH_TOKEN_POOL`: Generated in Phase 4
@@ -135,14 +139,8 @@ echo "ANCHOR_PROVIDER_URL: $ANCHOR_PROVIDER_URL"
 
 ## 🏗️ Phase 1: Oracle Program Deployment
 
-### Step 1.1: Clone and Setup Oracle Repository
-```bash
-cd ..
-git clone <oracle-repository-url>
-cd oracle
-```
 
-### Step 1.2: Build and Deploy Oracle Program
+### Step 1.1: Build and Deploy Oracle Program
 ```bash
 # Build the oracle program
 anchor build
@@ -154,7 +152,7 @@ anchor deploy --provider.cluster devnet
 # Example: 9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1
 ```
 
-### Step 1.3: Initialize Oracle Price Feed
+### Step 1.2: Initialize Oracle Price Feed
 ```bash
 cd client
 cargo run -- update-oracle
@@ -174,14 +172,14 @@ cargo run -- update-oracle
 
 **⚠️ Important:** The Price Feed PDA is derived from YOUR deployed oracle program ID. The address above is specific to program ID `9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1`. If you deploy a different oracle program, you'll get a different PDA address from the `update-oracle` command output.
 
-### Step 1.4: Update Oracle Price Feed PDA in Environment
+### Step 1.3: Update Oracle Price Feed PDA in Environment
 ```bash
-# Update .env file with the oracle price feed PDA from Step 1.3 output
+# Update .env file with the oracle price feed PDA from Step 1.2 output
 cd oracle
 
 # Update the ORACLE_PRICE_FEED_PDA with the actual PDA from your oracle deployment
-# (Use the PDA address from Step 1.3 output: "📍 PriceFeed PDA: ...")
-sed -i '' 's|ORACLE_PRICE_FEED_PDA=.*|ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.3]|' .env
+# (Use the PDA address from Step 1.2 output: "📍 PriceFeed PDA: ...")
+sed -i '' 's|ORACLE_PRICE_FEED_PDA=.*|ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.2]|' .env
 
 # Verify the update
 echo "✅ Updated Oracle Price Feed PDA in .env:"
