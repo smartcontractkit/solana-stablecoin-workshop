@@ -212,11 +212,16 @@ echo "SOL_MINT_AUTHORITY_PDA=[copy-mint-authority-pda-from-above]" >> .env
 
 **Expected Output:**
 ```
-🔑 Deriving Program PDAs...
+🔑 Deriving Stablecoin Program Mint Authority PDA...
 
-📋 Stablecoin Program PDAs:
+📋 Stablecoin Program PDA:
    🏦 Mint Authority PDA: 9YourActualPDAAddressHere123456789
-   🏛️ Collateral Vault PDA: AnotherPDAAddressHere123456789
+
+📋 Environment Variable to Update:
+   SOL_MINT_AUTHORITY_PDA="9YourActualPDAAddressHere123456789"
+
+✅ Use this PDA in your multisig creation command
+ℹ️  Note: Collateral Vault PDA is derived automatically by the program
 ```
 
 **Key Address to Save:**

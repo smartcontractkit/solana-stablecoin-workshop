@@ -15,32 +15,27 @@ const ORACLE_PROGRAM_ID = new PublicKey(
 );
 
 function main() {
-  console.log("🔑 Deriving Program PDAs...\n");
+  console.log("🔑 Deriving Stablecoin Program Mint Authority PDA...\n");
 
-  // Derive Stablecoin Program PDAs
+  // Derive Mint Authority PDA (needed for multisig)
   const [mintAuthorityPda] = PublicKey.findProgramAddressSync(
     [Buffer.from('mint_authority')],
     STABLECOIN_PROGRAM_ID
   );
 
-  const [collateralVaultPda] = PublicKey.findProgramAddressSync(
-    [Buffer.from('collateral_vault')],
-    STABLECOIN_PROGRAM_ID
-  );
-
   // Display results
-  console.log("📋 Stablecoin Program PDAs:");
+  console.log("📋 Stablecoin Program PDA:");
   console.log(`   🏦 Mint Authority PDA: ${mintAuthorityPda.toString()}`);
-  console.log(`   🏛️ Collateral Vault PDA: ${collateralVaultPda.toString()}`);
   
-  console.log("\n📋 Environment Variables to Update:");
+  console.log("\n📋 Environment Variable to Update:");
   console.log(`   SOL_MINT_AUTHORITY_PDA="${mintAuthorityPda.toString()}"`);
-  console.log(`   SOL_COLLATERAL_VAULT_PDA="${collateralVaultPda.toString()}"`);
 
-  console.log("\n✅ Use the Mint Authority PDA in your multisig creation command");
+  console.log("\n✅ Use this PDA in your multisig creation command");
+  console.log("ℹ️  Note: Collateral Vault PDA is derived automatically by the program");
 }
 
-if (require.main === module) {
+// Run main function if this file is executed directly
+if (import.meta.url === `file://${process.argv[1]}`) {
   main();
 }
 
