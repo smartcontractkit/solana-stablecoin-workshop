@@ -60,7 +60,7 @@ solana config get
 Before starting the deployment phases, you need to set up the environment configuration that will be used throughout the entire process.
 
 ```bash
-cd ~/github/datastreams-backed-cross-chain-stablecoin
+cd datastreams-backed-cross-chain-stablecoin
 ```
 
 ### Step 0.2: Setup Environment Files
@@ -137,7 +137,7 @@ echo "ANCHOR_PROVIDER_URL: $ANCHOR_PROVIDER_URL"
 
 ### Step 1.1: Clone and Setup Oracle Repository
 ```bash
-cd ~/github
+cd ..
 git clone <oracle-repository-url>
 cd oracle
 ```
@@ -177,7 +177,7 @@ cargo run -- update-oracle
 ### Step 1.4: Update Oracle Price Feed PDA in Environment
 ```bash
 # Update .env file with the oracle price feed PDA from Step 1.3 output
-cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
+cd oracle
 
 # Update the ORACLE_PRICE_FEED_PDA with the actual PDA from your oracle deployment
 # (Use the PDA address from Step 1.3 output: "📍 PriceFeed PDA: ...")
@@ -200,7 +200,7 @@ ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.3]
 
 ### Step 2.1: Setup Stablecoin Program
 ```bash
-cd ~/github/datastreams-backed-cross-chain-stablecoin/cross-chain-stablecoin/stablecoin-program
+cd cross-chain-stablecoin/stablecoin-program
 ```
 
 ### Step 2.2: Configure Program for CCIP Compatibility
@@ -219,7 +219,7 @@ anchor deploy --provider.cluster devnet
 
 ```bash
 # Update .env with the stablecoin program ID
-cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
+cd oracle
 echo "STABLECOIN_PROGRAM_ID=[your-stablecoin-program-id-from-above]" >> .env
 ```
 
@@ -272,7 +272,7 @@ npx ts-node create-token-for-ccip.ts
 
 ```bash
 # Update .env with the token mint and other required variables
-cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
+cd oracle
 echo "SOL_TOKEN_MINT=[your-token-mint-address-from-above]" >> .env
 echo "SOL_ADMIN_WALLET=$(solana address)" >> .env
 echo "CCIP_POOL_PROGRAM=41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB" >> .env
@@ -311,7 +311,7 @@ chmod +x test-individual.sh
 
 ### Step 3.1: Setup Solana Starter Kit
 ```bash
-cd ~/github
+cd ..
 git clone https://github.com/smartcontractkit/solana-starter-kit.git
 cd solana-starter-kit
 yarn install
@@ -320,7 +320,7 @@ yarn install
 ### Step 3.2: Load Environment Variables
 ```bash
 # Load variables from .env (set in previous phases)
-cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
+cd oracle
 source .env
 
 # Verify required variables are set
@@ -369,7 +369,7 @@ yarn svm:admin:accept-admin-role \
 ### Step 3.5: Load Mint Authority PDA from Environment
 ```bash
 # Load the mint authority PDA from .env (set in Step 2.4)
-cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
+cd oracle
 source .env
 echo "🔑 Mint Authority PDA: $SOL_MINT_AUTHORITY_PDA"
 
@@ -407,7 +407,7 @@ Signature: [transaction-signature]
 ### Step 3.7: Transfer Mint Authority to Multisig
 ```bash
 # Update .env with the multisig address from Step 3.6
-cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
+cd oracle
 echo "SOL_MULTISIG_ADDRESS=[your-multisig-address-from-above]" >> .env
 
 # Load variables and transfer authority
@@ -450,7 +450,7 @@ yarn svm:admin:set-pool \
 
 ### Step 4.1: Setup Ethereum Environment
 ```bash
-cd ~/github/datastreams-backed-cross-chain-stablecoin/smart-contract-examples/ccip/cct/hardhat
+cd smart-contract-examples/ccip/cct/hardhat
 
 # Create .env file
 cat > .env << EOF
@@ -493,7 +493,7 @@ Token deployed to: [your-ethereum-token-address]
 
 ```bash
 # Update .env with the Ethereum token address
-cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
+cd oracle
 echo "ETH_TOKEN_ADDRESS=[your-ethereum-token-address-from-above]" >> .env
 ```
 
@@ -559,10 +559,10 @@ npx hardhat applyChainUpdates \
 
 ### Step 5.1: Configure Solana → Ethereum Connectivity
 ```bash
-cd ~/github/solana-starter-kit
+cd solana-starter-kit
 
 # Load environment variables
-source ~/github/datastreams-backed-cross-chain-stablecoin/oracle/.env
+source oracle/.env
 
 # Initialize chain remote config
 yarn svm:pool:init-chain-remote-config \
@@ -592,7 +592,7 @@ yarn svm:pool:edit-chain-remote-config \
 
 ### Step 6.1: Update Oracle with Fresh Price Data
 ```bash
-cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle/client
+cd oracle/client
 cargo run -- update-oracle
 ```
 
@@ -691,7 +691,7 @@ CCIP Message ID: [ccip-message-id]
 ### View Your Configuration
 ```bash
 # Load and display all your addresses
-cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle
+cd oracle
 source .env
 
 echo "=== 🏗️ PROGRAM IDs ==="
@@ -738,7 +738,7 @@ yarn svm:token:delegate --token-mint $SOL_TOKEN_MINT
 #### 3. Oracle Price Feed Not Found
 **Solution:** Update oracle with fresh data
 ```bash
-cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle/client
+cd oracle/client
 cargo run -- update-oracle
 ```
 
@@ -1002,7 +1002,7 @@ const signature = await retryTransaction(
 #### Step 1: Update Stablecoin Program Source Code
 Navigate to the stablecoin program source file:
 ```bash
-cd ~/github/datastreams-backed-cross-chain-stablecoin/cross-chain-stablecoin/stablecoin-program/programs/stablecoin-program/src/lib.rs
+cd cross-chain-stablecoin/stablecoin-program/programs/stablecoin-program/src/lib.rs
 ```
 
 Find line 11 and update the `ORACLE_PROGRAM_ID` constant:
@@ -1027,14 +1027,14 @@ REAL_ORACLE_PRICE_FEED=YOUR_PRICE_FEED_PDA_HERE
 
 **📍 To find your Price Feed PDA:**
 ```bash
-cd ~/github/datastreams-backed-cross-chain-stablecoin/oracle/client
+cd oracle/client
 cargo run -- update-oracle
 # Look for: "📍 PriceFeed PDA: YOUR_PDA_HERE"
 ```
 
 #### Step 3: Rebuild and Redeploy Stablecoin Program
 ```bash
-cd ~/github/datastreams-backed-cross-chain-stablecoin/cross-chain-stablecoin/stablecoin-program
+cd cross-chain-stablecoin/stablecoin-program
 anchor build
 anchor deploy --provider.cluster devnet
 ```
