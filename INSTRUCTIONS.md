@@ -66,9 +66,8 @@ cd solana-stablecoin-workshop
 The project uses a centralized environment system with symlinks already configured for consistency across directories.
 
 ```bash
-# Simply rename the example file to create your .env
-# This will rename ALL symlinked .env.example files to .env automatically
-mv .env.example .env
+# Copy the example file to create your .env (preserves .env.example in git)
+cp oracle/.env.example oracle/.env
 ```
 
 **📁 Pre-configured File Structure:**
