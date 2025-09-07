@@ -67,12 +67,14 @@ The project uses a centralized environment system with symlinks already configur
 
 ```bash
 # Copy the example file to create your .env (preserves .env.example in git)
-cp oracle/.env.example oracle/.env
+cp .env.example oracle/.env
 ```
 
 **📁 Pre-configured File Structure:**
 ```
+.env.example                   # Template file at project root
 oracle/.env                    # Main environment file (created from .env.example)
+.env -> oracle/.env            # Root symlink for convenience
 cross-chain-stablecoin/stablecoin-program/.env -> ../../oracle/.env
 smart-contract-examples/ccip/cct/hardhat/.env -> ../../../../../oracle/.env
 ```
@@ -81,8 +83,8 @@ smart-contract-examples/ccip/cct/hardhat/.env -> ../../../../../oracle/.env
 
 ### Step 0.3: Review .env File Structure
 ```bash
-# Check the current .env file
-cat oracle/.env
+# Check the current .env file (located at project root, symlinked throughout)
+cat .env
 
 # The file is organized by deployment phases:
 # - PHASE 1: Oracle Program Deployment (partially pre-filled, requires DATASTREAMS credentials from instructor)
@@ -265,7 +267,6 @@ echo "SOL_MINT_AUTHORITY_PDA=[copy-mint-authority-pda-from-above]" >> .env
    SOL_MINT_AUTHORITY_PDA="9YourActualPDAAddressHere123456789"
 
 ✅ Use this PDA in your multisig creation command
-ℹ️  Note: Collateral Vault PDA is derived automatically by the program
 ```
 
 **Key Address to Save:**
@@ -331,9 +332,10 @@ chmod +x test-individual.sh
 
 ### Step 3.1: Setup Solana Starter Kit
 ```bash
-cd ..
-git clone https://github.com/smartcontractkit/solana-starter-kit.git
+# Navigate to the existing solana-starter-kit submodule
 cd solana-starter-kit
+
+# Install dependencies
 yarn install
 ```
 
