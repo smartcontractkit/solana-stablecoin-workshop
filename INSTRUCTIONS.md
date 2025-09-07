@@ -342,8 +342,7 @@ yarn install
 ### Step 3.2: Load Environment Variables
 ```bash
 # Load variables from .env (set in previous phases)
-cd oracle
-source .env
+source ../.env
 
 # Verify required variables are set
 echo "🪙 Token Mint: $SOL_TOKEN_MINT"
@@ -381,33 +380,14 @@ source .env
 # Propose administrator
 yarn svm:admin:propose-administrator \
   --token-mint $SOL_TOKEN_MINT \
-  --administrator [your-wallet-address]
+  --administrator $SOL_ADMIN_WALLET
 
 # Accept admin role
 yarn svm:admin:accept-admin-role \
   --token-mint $SOL_TOKEN_MINT
 ```
 
-### Step 3.5: Load Mint Authority PDA from Environment
-```bash
-# Load the mint authority PDA from .env (set in Step 2.4)
-cd oracle
-source .env
-echo "🔑 Mint Authority PDA: $SOL_MINT_AUTHORITY_PDA"
-
-# Verify it's set correctly
-if [ -z "$SOL_MINT_AUTHORITY_PDA" ]; then
-  echo "❌ SOL_MINT_AUTHORITY_PDA not set. Please complete Step 2.4 first."
-  exit 1
-fi
-```
-
-**Expected Output:**
-```
-🔑 Mint Authority PDA: 9YourActualPDAAddressHere123456789
-```
-
-### Step 3.6: Create SPL Token Multisig (Critical for CCIP + Oracle Integration)
+### Step 3.5: Create SPL Token Multisig (Critical for CCIP + Oracle Integration)
 ```bash
 # Create 1-of-3 multisig with Pool Signer PDA, Admin Wallet, and Stablecoin Mint Authority PDA
 spl-token create-multisig 1 \
@@ -426,9 +406,9 @@ Signature: [transaction-signature]
 **Key Address to Save:**
 - **Multisig Address:** `[your-multisig-address]` *(copy this for the next step)*
 
-### Step 3.7: Transfer Mint Authority to Multisig
+### Step 3.6: Transfer Mint Authority to Multisig
 ```bash
-# Update .env with the multisig address from Step 3.6
+# Update .env with the multisig address from Step 3.5
 cd oracle
 echo "SOL_MULTISIG_ADDRESS=[your-multisig-address-from-above]" >> .env
 
@@ -437,7 +417,7 @@ source .env
 spl-token authorize $SOL_TOKEN_MINT mint $SOL_MULTISIG_ADDRESS
 ```
 
-### Step 3.8: Create Address Lookup Table (ALT)
+### Step 3.7: Create Address Lookup Table (ALT)
 ```bash
 yarn svm:admin:create-alt \
   --token-mint $SOL_TOKEN_MINT \
@@ -454,9 +434,9 @@ ALT Address: [your-alt-address]
 **Key Address to Save:**
 - **ALT Address:** `[your-alt-address]` *(copy this for the next step)*
 
-### Step 3.9: Register Pool with CCIP Router
+### Step 3.8: Register Pool with CCIP Router
 ```bash
-# Update .env with the ALT address from Step 3.8
+# Update .env with the ALT address from Step 3.7
 echo "SOL_ALT_ADDRESS=[your-alt-address-from-above]" >> .env
 source .env
 
