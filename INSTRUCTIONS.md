@@ -161,7 +161,7 @@ anchor deploy --provider.cluster devnet
 ```bash
 # Update .env file with your deployed Oracle Program ID
 # Replace [your-oracle-program-id] with the actual program ID from Step 1.2 output
-sed -i '' 's|ORACLE_PROGRAM_ID=.*|ORACLE_PROGRAM_ID=[your-oracle-program-id]|' .env
+echo "ORACLE_PROGRAM_ID=[your-oracle-program-id]" >> .env
 
 # Verify the update
 echo "✅ Updated Oracle Program ID in .env:"
@@ -199,12 +199,10 @@ Each workshop participant will get their own unique addresses:
 
 ### Step 1.5: Update Oracle Price Feed PDA in Environment
 ```bash
-# Update .env file with the oracle price feed PDA from Step 1.4 output
-cd oracle
-
+# Update .env file with the oracle price feed PDA from Step 1.4 output (using symlink)
 # Update the ORACLE_PRICE_FEED_PDA with the actual PDA from your oracle deployment
 # (Use the PDA address from Step 1.4 output: "📍 PriceFeed PDA: ...")
-sed -i '' 's|ORACLE_PRICE_FEED_PDA=.*|ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.4]|' .env
+echo "ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.4]" >> .env
 
 # Verify the update
 echo "✅ Updated Oracle Price Feed PDA in .env:"
@@ -245,6 +243,10 @@ anchor deploy --provider.cluster devnet
 ```bash
 # Update .env with the stablecoin program ID (using symlink)
 echo "STABLECOIN_PROGRAM_ID=[your-stablecoin-program-id-from-above]" >> .env
+
+# Verify the update
+echo "✅ Updated Stablecoin Program ID in .env:"
+grep "STABLECOIN_PROGRAM_ID" .env
 ```
 
 ### Step 2.4: Derive Stablecoin Mint Authority PDA
@@ -254,6 +256,10 @@ npx ts-node utils/derive-pdas.ts
 
 # Update .env file with the mint authority PDA (using symlink)
 echo "SOL_MINT_AUTHORITY_PDA=[copy-mint-authority-pda-from-above]" >> .env
+
+# Verify the update
+echo "✅ Updated Mint Authority PDA in .env:"
+grep "SOL_MINT_AUTHORITY_PDA" .env
 ```
 
 **Expected Output:**
