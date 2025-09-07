@@ -152,7 +152,7 @@ pub mod oracle {
         )?;
 
         // After successful verification, store the price
-        if let Some((_program_id, return_data)) = get_return_data() {
+        if let Some((_program_id, _return_data)) = get_return_data() {
             msg!("Report verified successfully, storing price data");
             
             // Update the PriceFeed account with the verified price

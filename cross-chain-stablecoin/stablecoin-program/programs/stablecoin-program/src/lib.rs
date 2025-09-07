@@ -213,7 +213,7 @@ pub mod stablecoin_program {
     pub fn burn_and_withdraw(
         ctx: Context<BurnAndWithdraw>,
         burn_amount: u64,
-        feed_id: [u8; 32],
+        _feed_id: [u8; 32],
     ) -> Result<()> {
         let stablecoin_usd_amount = burn_amount as f64 / 10u64.pow(ctx.accounts.mint.decimals as u32) as f64;
         msg!("Burning {} raw units ({:.6} USD stablecoins) and withdrawing collateral", burn_amount, stablecoin_usd_amount);
