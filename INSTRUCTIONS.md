@@ -203,10 +203,6 @@ Each workshop participant will get their own unique addresses:
 # Update the ORACLE_PRICE_FEED_PDA with the actual PDA from your oracle deployment
 # (Use the PDA address from Step 1.4 output: "📍 PriceFeed PDA: ...")
 echo "ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.4]" >> .env
-
-# Verify the update
-echo "✅ Updated Oracle Price Feed PDA in .env:"
-grep "ORACLE_PRICE_FEED_PDA" .env
 ```
 
 **📝 Checkpoint:** Your `.env` file should now contain YOUR unique Oracle Program ID and Price Feed PDA. These addresses are specific to your deployment and different from other workshop participants.
@@ -243,10 +239,6 @@ anchor deploy --provider.cluster devnet
 ```bash
 # Update .env with the stablecoin program ID (using symlink)
 echo "STABLECOIN_PROGRAM_ID=[your-stablecoin-program-id-from-above]" >> .env
-
-# Verify the update
-echo "✅ Updated Stablecoin Program ID in .env:"
-grep "STABLECOIN_PROGRAM_ID" .env
 ```
 
 ### Step 2.4: Derive Stablecoin Mint Authority PDA
@@ -256,10 +248,6 @@ npx ts-node utils/derive-pdas.ts
 
 # Update .env file with the mint authority PDA (using symlink)
 echo "SOL_MINT_AUTHORITY_PDA=[copy-mint-authority-pda-from-above]" >> .env
-
-# Verify the update
-echo "✅ Updated Mint Authority PDA in .env:"
-grep "SOL_MINT_AUTHORITY_PDA" .env
 ```
 
 **Expected Output:**
@@ -306,31 +294,6 @@ echo "CCIP_POOL_PROGRAM=41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB" >> .env
 source .env
 ```
 
-### Step 2.6: Test Stablecoin Program (Recommended)
-```bash
-# Make test script executable
-chmod +x test-individual.sh
-
-# Test oracle integration (3 tests)
-./test-individual.sh oracle
-
-# Test stablecoin program logic (4 tests)  
-./test-individual.sh stablecoin
-
-# Test complete integration (4 tests)
-./test-individual.sh integration
-
-# Or run all tests together (13 tests total)
-./test-individual.sh all
-```
-
-**Expected Results:**
-- ✅ **Oracle Tests:** 3 passing - Real Chainlink price integration
-- ✅ **Stablecoin Tests:** 4 passing - Program logic verification  
-- ✅ **Integration Tests:** 4 passing - Complete CPI functionality
-- ✅ **CCIP Tests:** 2 passing - Multisig authority verification
-
-**If Tests Fail:** See [Oracle Testing Troubleshooting](#6-oracle-testing-issues) section below.
 
 ---
 
@@ -741,6 +704,72 @@ echo -e "\n=== 🌐 ETHEREUM ==="
 echo "Token Address:      $ETH_TOKEN_ADDRESS"
 echo "Token Pool:         $ETH_TOKEN_POOL"
 ```
+
+---
+
+## 🧪 Testing (Optional but Recommended)
+
+After completing the deployment, you can run comprehensive tests to verify all components are working correctly.
+
+### Test Prerequisites
+```bash
+# Navigate to the stablecoin program directory
+cd cross-chain-stablecoin/stablecoin-program
+
+# Make test script executable
+chmod +x test-individual.sh
+```
+
+### Test Categories
+
+#### Test Oracle Integration (3 tests)
+```bash
+./test-individual.sh oracle
+```
+**Tests:** Real Chainlink price integration and oracle program functionality
+
+#### Test Stablecoin Program Logic (4 tests)
+```bash
+./test-individual.sh stablecoin
+```
+**Tests:** Program logic verification and token operations
+
+#### Test Complete Integration (4 tests)
+```bash
+./test-individual.sh integration
+```
+**Tests:** Complete CPI functionality between oracle and stablecoin programs
+
+#### Test CCIP Multisig Authority (2 tests)
+```bash
+./test-individual.sh ccip
+```
+**Tests:** Multisig authority verification for CCIP operations
+
+#### Run All Tests Together (13 tests total)
+```bash
+./test-individual.sh all
+```
+
+### Expected Results
+- ✅ **Oracle Tests:** 3 passing - Real Chainlink price integration
+- ✅ **Stablecoin Tests:** 4 passing - Program logic verification  
+- ✅ **Integration Tests:** 4 passing - Complete CPI functionality
+- ✅ **CCIP Tests:** 2 passing - Multisig authority verification
+
+### Test Parameters and Configuration
+
+**📋 Parameter Source:** All test parameters are automatically loaded from your `.env` file, including:
+- `ORACLE_PROGRAM_ID` - Your deployed oracle program
+- `STABLECOIN_PROGRAM_ID` - Your deployed stablecoin program  
+- `ORACLE_PRICE_FEED_PDA` - Your oracle price feed PDA
+- `SOL_TOKEN_MINT` - Your token mint address
+- `SOL_MULTISIG_ADDRESS` - Your multisig address
+- `DATASTREAMS_*` - Chainlink Data Streams credentials
+
+**🔄 No Manual Configuration Required:** The tests use the same environment variables you set during deployment, ensuring consistency between your deployed programs and test execution.
+
+**If Tests Fail:** See the [Oracle Testing Troubleshooting](#6-oracle-testing-issues) section below for detailed solutions.
 
 ---
 
