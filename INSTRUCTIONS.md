@@ -608,22 +608,29 @@ cargo run -- update-oracle
 
 ### Step 6.2: Mint Oracle-Backed Stablecoin Tokens
 ```bash
+# Update oracle with fresh price data
+cd ../../oracle/client
+cargo run -- update-oracle
+cd ../../cross-chain-stablecoin/stablecoin-program
+
 # Load environment variables
 source .env
 
 # Create token account
 spl-token create-account $SOL_TOKEN_MINT
 
-# Mint tokens using multisig (1-of-3, our wallet is a signer)
-spl-token mint $SOL_TOKEN_MINT 10000000 \
-  --owner $SOL_MULTISIG_ADDRESS \
-  --multisig-signer ~/.config/solana/id.json
+# Mint oracle-backed stablecoins using real Chainlink price data
+npx ts-node mint-oracle-backed.ts
 ```
 
 **Expected Output:**
 ```
-Minting 10000000 tokens (10 tokens with 6 decimals)
-Signature: [transaction-hash]
+🔮 Minting oracle-backed stablecoins...
+💰 Collateral: 0.1 SOL (100,000,000 lamports)
+📊 Using real SOL/USD price from Chainlink Data Streams
+✅ Oracle-backed minting successful!
+🔗 Transaction: [transaction-hash]
+💰 Tokens minted: ~21.4 USD worth (based on current SOL price)
 ```
 
 ### Step 6.3: Create Pool Token Account (Required for CCIP)

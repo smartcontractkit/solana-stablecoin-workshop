@@ -150,7 +150,7 @@ describe("🔮 Oracle Unit Tests - Real Chainlink Data", () => {
 
     console.log("💎 Depositing:", collateralAmount.toString(), "lamports (0.1 SOL)")
     console.log("📋 Using REAL Feed ID from oracle")
-    console.log("📊 Oracle Price Feed:", REAL_ORACLE_PRICE_FEED.toString())
+    console.log("📊 Oracle Price Feed:", ORACLE_PRICE_FEED.toString())
 
     try {
       const tx = await retryTransaction(
@@ -270,7 +270,7 @@ describe("🔮 Oracle Unit Tests - Real Chainlink Data", () => {
     console.log("")
     console.log("🔗 Integration Points:")
     console.log(`   📊 Oracle Program: ${ORACLE_PROGRAM_ID.toString()}`)
-    console.log(`   📋 Price Feed: ${REAL_ORACLE_PRICE_FEED.toString()}`)
+    console.log(`   📋 Price Feed: ${ORACLE_PRICE_FEED.toString()}`)
     console.log(`   🪙 Stablecoin Program: ${program.programId.toString()}`)
     console.log("═══════════════════════════════════════════════════════════")
   })
