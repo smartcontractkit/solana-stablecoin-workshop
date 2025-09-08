@@ -19,7 +19,7 @@ dotenv.config()
 const ORACLE_PROGRAM_ID = new PublicKey(process.env.ORACLE_PROGRAM_ID || "9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU")
 // Official SOL/USD Feed ID from Chainlink Data Streams docs
 const REAL_FEED_ID = [0, 3, 211, 56, 234, 42, 195, 190, 158, 2, 96, 51, 177, 170, 96, 22, 115, 195, 123, 171, 94, 19, 133, 28, 89, 150, 111, 159, 130, 7, 84, 214]
-const REAL_ORACLE_PRICE_FEED = new PublicKey(process.env.ORACLE_PRICE_FEED_PDA || "C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen")
+const ORACLE_PRICE_FEED = new PublicKey(process.env.ORACLE_PRICE_FEED_PDA || "C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen")
 
 // CCIP Pool Program ID (Chainlink's self-service BurnMint pool program)
 const CCIP_POOL_PROGRAM_ID = new PublicKey("41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB")
@@ -56,7 +56,7 @@ describe("🔮 Oracle Unit Tests - Real Chainlink Data", () => {
 
   console.log("🔑 Stablecoin Program ID:", program.programId.toString())
   console.log("🔑 Oracle Program ID:", ORACLE_PROGRAM_ID.toString())
-  console.log("📊 Real Oracle Price Feed:", REAL_ORACLE_PRICE_FEED.toString())
+    console.log("📊 Real Oracle Price Feed:", ORACLE_PRICE_FEED.toString())
   console.log("👤 Payer:", payer.toString())
 
   before("🏗️ Setup Test Environment", async () => {
@@ -79,11 +79,11 @@ describe("🔮 Oracle Unit Tests - Real Chainlink Data", () => {
     console.log("🏛️ Collateral Vault PDA:", collateralVault.toString())
 
     // Verify oracle price feed exists
-    const oracleFeedInfo = await provider.connection.getAccountInfo(REAL_ORACLE_PRICE_FEED)
+    const oracleFeedInfo = await provider.connection.getAccountInfo(ORACLE_PRICE_FEED)
     if (!oracleFeedInfo) {
       throw new Error("Oracle price feed not found! Run oracle test first.")
     }
-    console.log("✅ Oracle price feed confirmed:", REAL_ORACLE_PRICE_FEED.toString())
+    console.log("✅ Oracle price feed confirmed:", ORACLE_PRICE_FEED.toString())
   })
 
   it("🏗️ Setup: Create Mint with Multisig Authority (CCIP-Compatible)", async () => {
@@ -166,7 +166,7 @@ describe("🔮 Oracle Unit Tests - Real Chainlink Data", () => {
               collateralVault: collateralVault,
               user: payer,
               oracleProgram: ORACLE_PROGRAM_ID,
-              oraclePriceFeed: REAL_ORACLE_PRICE_FEED,
+              oraclePriceFeed: ORACLE_PRICE_FEED,
               tokenProgram: TOKEN_PROGRAM_ID,
               associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
               systemProgram: SystemProgram.programId,
@@ -239,7 +239,7 @@ describe("🔮 Oracle Unit Tests - Real Chainlink Data", () => {
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
 
     // Read the oracle price feed account directly
-    const oracleFeedInfo = await provider.connection.getAccountInfo(REAL_ORACLE_PRICE_FEED)
+    const oracleFeedInfo = await provider.connection.getAccountInfo(ORACLE_PRICE_FEED)
     
     if (oracleFeedInfo) {
       console.log("✅ Oracle price feed account exists")

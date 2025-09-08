@@ -21,7 +21,7 @@ dotenv.config()
 const ORACLE_PROGRAM_ID = new PublicKey(process.env.ORACLE_PROGRAM_ID || "9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU")
 // Official SOL/USD Feed ID from Chainlink Data Streams docs
 const REAL_FEED_ID = [0, 3, 211, 56, 234, 42, 195, 190, 158, 2, 96, 51, 177, 170, 96, 22, 115, 195, 123, 171, 94, 19, 133, 28, 89, 150, 111, 159, 130, 7, 84, 214]
-const REAL_ORACLE_PRICE_FEED = new PublicKey(process.env.ORACLE_PRICE_FEED_PDA || "C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen")
+const ORACLE_PRICE_FEED = new PublicKey(process.env.ORACLE_PRICE_FEED_PDA || "C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen")
 
 // CCIP Pool Program ID (Chainlink's self-service BurnMint pool program)
 const CCIP_POOL_PROGRAM_ID = new PublicKey("41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB")
@@ -78,11 +78,11 @@ describe("🔗 Oracle-Stablecoin Integration Tests", () => {
     console.log("🏛️ Collateral Vault PDA:", collateralVault.toString())
 
     // Verify oracle price feed exists
-    const oracleFeedInfo = await connection.getAccountInfo(REAL_ORACLE_PRICE_FEED)
+    const oracleFeedInfo = await connection.getAccountInfo(ORACLE_PRICE_FEED)
     if (!oracleFeedInfo) {
       throw new Error("Oracle price feed not found! Run oracle client first: cd ../oracle/client && cargo run -- update-oracle")
     }
-    console.log("✅ Oracle price feed confirmed:", REAL_ORACLE_PRICE_FEED.toString())
+    console.log("✅ Oracle price feed confirmed:", ORACLE_PRICE_FEED.toString())
   })
 
   it("🏗️ Setup: Create Mint with Multisig Authority (CCIP-Compatible)", async () => {
@@ -145,7 +145,7 @@ describe("🔗 Oracle-Stablecoin Integration Tests", () => {
 
     const collateralAmount = new BN(50_000_000) // 0.05 SOL
     console.log("💎 Depositing:", collateralAmount.toString(), "lamports (0.05 SOL)")
-    console.log("📊 Oracle Price Feed:", REAL_ORACLE_PRICE_FEED.toString())
+    console.log("📊 Oracle Price Feed:", ORACLE_PRICE_FEED.toString())
 
     const depositAndMint = async (blockhash: string): Promise<string> => {
               return await program.methods
@@ -158,7 +158,7 @@ describe("🔗 Oracle-Stablecoin Integration Tests", () => {
           collateralVault: collateralVault,
           user: payer,
           oracleProgram: ORACLE_PROGRAM_ID,
-          oraclePriceFeed: REAL_ORACLE_PRICE_FEED,
+          oraclePriceFeed: ORACLE_PRICE_FEED,
           tokenProgram: TOKEN_PROGRAM_ID,
           associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
@@ -188,7 +188,7 @@ describe("🔗 Oracle-Stablecoin Integration Tests", () => {
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
     
     // Verify oracle price feed exists and has data
-    const oracleAccountInfo = await connection.getAccountInfo(REAL_ORACLE_PRICE_FEED)
+    const oracleAccountInfo = await connection.getAccountInfo(ORACLE_PRICE_FEED)
     console.log("✅ Oracle price feed exists:", oracleAccountInfo !== null)
     if (oracleAccountInfo) {
       console.log("📏 Oracle data length:", oracleAccountInfo.data.length)
@@ -247,7 +247,7 @@ describe("🔗 Oracle-Stablecoin Integration Tests", () => {
           collateralVault: collateralVault,
           user: payer,
           oracleProgram: ORACLE_PROGRAM_ID,
-          oraclePriceFeed: REAL_ORACLE_PRICE_FEED,
+          oraclePriceFeed: ORACLE_PRICE_FEED,
           tokenProgram: TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
         })
@@ -285,7 +285,7 @@ describe("🔗 Oracle-Stablecoin Integration Tests", () => {
     console.log("")
     console.log("🔗 Integration Points:")
     console.log(`   📊 Oracle Program: ${ORACLE_PROGRAM_ID.toString()}`)
-    console.log(`   📋 Price Feed: ${REAL_ORACLE_PRICE_FEED.toString()}`)
+    console.log(`   📋 Price Feed: ${ORACLE_PRICE_FEED.toString()}`)
     console.log(`   🪙 Stablecoin Program: ${program.programId.toString()}`)
     console.log(`   🔐 Multisig Authority: ${multisigAuthority?.toString() || 'N/A'}`)
     console.log(`   🪙 Stablecoin Mint: ${stablecoinMint?.toString() || 'N/A'}`)
