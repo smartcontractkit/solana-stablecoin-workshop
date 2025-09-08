@@ -273,6 +273,9 @@ Program Id: [your-updated-stablecoin-program-id]
 
 ### Step 2.5: Derive Stablecoin Mint Authority PDA
 ```bash
+# Install Node.js dependencies for PDA derivation script
+npm install
+
 # Derive the stablecoin program's mint authority PDA (needed for multisig in Phase 3)
 npx ts-node utils/derive-pdas.ts
 
