@@ -21,7 +21,7 @@ dotenv.config()
 const ORACLE_PROGRAM_ID = new PublicKey(process.env.ORACLE_PROGRAM_ID || "9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU")
 // Official SOL/USD Feed ID from Chainlink Data Streams docs
 const REAL_FEED_ID = [0, 3, 211, 56, 234, 42, 195, 190, 158, 2, 96, 51, 177, 170, 96, 22, 115, 195, 123, 171, 94, 19, 133, 28, 89, 150, 111, 159, 130, 7, 84, 214]
-const REAL_ORACLE_PRICE_FEED = new PublicKey(process.env.REAL_ORACLE_PRICE_FEED || "C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen")
+const REAL_ORACLE_PRICE_FEED = new PublicKey(process.env.ORACLE_PRICE_FEED_PDA || "C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen")
 
 // CCIP Pool Program ID (Chainlink's self-service BurnMint pool program)
 const CCIP_POOL_PROGRAM_ID = new PublicKey("41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB")

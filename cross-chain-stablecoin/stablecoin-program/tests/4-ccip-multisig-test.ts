@@ -84,7 +84,7 @@ describe("🌉 CCIP Multisig Integration Test", () => {
           collateralVault: collateralVault,
           user: payer.publicKey,
           oracleProgram: new PublicKey(process.env.ORACLE_PROGRAM_ID || "9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU"), // Real oracle from .env
-          oraclePriceFeed: new PublicKey(process.env.REAL_ORACLE_PRICE_FEED || "C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen"), // Real feed from .env
+          oraclePriceFeed: new PublicKey(process.env.ORACLE_PRICE_FEED_PDA || "C9wfvvoRntdnfFrPbeNtZ74ChXuKo6zJq7QGdyWZPBen"), // Real feed from .env
           tokenProgram: TOKEN_PROGRAM_ID,
           associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
           systemProgram: SystemProgram.programId,
