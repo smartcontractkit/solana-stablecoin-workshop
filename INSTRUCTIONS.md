@@ -60,26 +60,36 @@ solana config get
 ```bash
 git clone https://github.com/smartcontractkit/solana-stablecoin-workshop
 cd solana-stablecoin-workshop
+
+# Initialize and update all submodules (required for CCIP integration)
+git submodule update --init --recursive
 ```
+
+**📦 Submodule Initialization:**
+The repository contains two essential submodules:
+- `smart-contract-examples/` - Contains Chainlink CCIP Hardhat contracts
+- `solana-starter-kit/` - Contains Solana CCIP integration scripts
+
+**Note:** Git clone creates empty submodule directories by default. The `git submodule update --init --recursive` command downloads all the actual submodule content.
 
 ### Step 0.2: Setup Environment Files
 The project uses a centralized environment system with symlinks already configured for consistency across directories.
 
 ```bash
-# Copy the example file to create your .env at the project root
-cp .env.example .env
+# Copy the example file to create your .env at the project root (preserves symlink structure)
+cp -P .env.example .env
 ```
 
 **📁 Pre-configured File Structure:**
 ```
-.env.example                   # Template file at project root
-.env                          # Main environment file (created from .env.example)
-oracle/.env -> ../.env        # Oracle symlink points to root
+.env.example                   # Template file at project root (master source)
+.env -> .env.example          # Main environment file (symlink to template)
+oracle/.env -> ../.env        # Oracle symlink points to root .env
 cross-chain-stablecoin/stablecoin-program/.env -> ../../.env
 smart-contract-examples/ccip/cct/hardhat/.env -> ../../../../.env
 ```
 
-**✨ The symlinks are already set up!** When you copy `.env.example` to `.env` at the root, all directories will automatically use the same centralized configuration through symlinks.
+**✨ Unified Environment Management!** When you use `cp -P .env.example .env`, the `.env` becomes a symlink to `.env.example`. All subdirectories' `.env` files are already symlinked to the root `.env`, creating a unified chain: `subdirs/.env → root/.env → root/.env.example`. Any updates you make to the root `.env` automatically propagate to all directories instantly!
 
 ### Step 0.3: Review .env File Structure
 ```bash
