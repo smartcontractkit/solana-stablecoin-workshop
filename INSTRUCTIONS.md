@@ -66,20 +66,20 @@ cd solana-stablecoin-workshop
 The project uses a centralized environment system with symlinks already configured for consistency across directories.
 
 ```bash
-# Copy the example file to create your .env (preserves .env.example in git)
-cp .env.example oracle/.env
+# Copy the example file to create your .env at the project root
+cp .env.example .env
 ```
 
 **📁 Pre-configured File Structure:**
 ```
 .env.example                   # Template file at project root
-oracle/.env                    # Main environment file (created from .env.example)
-.env -> oracle/.env            # Root symlink for convenience
-cross-chain-stablecoin/stablecoin-program/.env -> ../../oracle/.env
-smart-contract-examples/ccip/cct/hardhat/.env -> ../../../../../oracle/.env
+.env                          # Main environment file (created from .env.example)
+oracle/.env -> ../.env        # Oracle symlink points to root
+cross-chain-stablecoin/stablecoin-program/.env -> ../../.env
+smart-contract-examples/ccip/cct/hardhat/.env -> ../../../../.env
 ```
 
-**✨ The symlinks are already set up!** When you copy `.env.example` to `oracle/.env`, all directories will automatically use the same centralized configuration through symlinks.
+**✨ The symlinks are already set up!** When you copy `.env.example` to `.env` at the root, all directories will automatically use the same centralized configuration through symlinks.
 
 ### Step 0.3: Review .env File Structure
 ```bash
@@ -571,7 +571,7 @@ npx hardhat applyChainUpdates \
 cd solana-starter-kit
 
 # Load environment variables
-source oracle/.env
+source ../.env
 
 # Initialize chain remote config
 yarn svm:pool:init-chain-remote-config \
@@ -875,8 +875,8 @@ cd cross-chain-stablecoin/stablecoin-program
 ls -la .env .env.example
 
 # If missing, recreate symlinks
-ln -sf ../../oracle/.env .env
-ln -sf ../../oracle/.env.example .env.example
+ln -sf ../../.env .env
+ln -sf ../../.env.example .env.example
 
 # Use the recommended test script instead of direct ts-mocha
 ./test-individual.sh oracle
@@ -886,7 +886,7 @@ ln -sf ../../oracle/.env.example .env.example
 ```bash
 # If you see "parse error near '&'" or similar
 # Check for unquoted special characters in DATASTREAMS_CLIENT_SECRET
-sed -i '' 's/DATASTREAMS_CLIENT_SECRET=\(.*\)/DATASTREAMS_CLIENT_SECRET="\1"/' oracle/.env
+sed -i '' 's/DATASTREAMS_CLIENT_SECRET=\(.*\)/DATASTREAMS_CLIENT_SECRET="\1"/' .env
 ```
 
 **C. Oracle Program ID Mismatch:**
