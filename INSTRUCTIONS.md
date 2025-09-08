@@ -160,8 +160,8 @@ anchor deploy --provider.cluster devnet
 ### Step 1.3: Update Oracle Program ID in Environment
 ```bash
 # Update .env file with your deployed Oracle Program ID
-# Replace [your-oracle-program-id] with the actual program ID from Step 1.2 output
-echo "ORACLE_PROGRAM_ID=[your-oracle-program-id]" >> .env
+# Replace the placeholder with the actual program ID from Step 1.2 output
+sed -i '' 's/ORACLE_PROGRAM_ID=.*/ORACLE_PROGRAM_ID=[your-oracle-program-id]/' .env
 
 # Verify the update
 echo "✅ Updated Oracle Program ID in .env:"
@@ -199,10 +199,10 @@ Each workshop participant will get their own unique addresses:
 
 ### Step 1.5: Update Oracle Price Feed PDA in Environment
 ```bash
-# Update .env file with the oracle price feed PDA from Step 1.4 output (using symlink)
-# Update the ORACLE_PRICE_FEED_PDA with the actual PDA from your oracle deployment
+# Update .env file with the oracle price feed PDA from Step 1.4 output
+# Replace the placeholder with the actual PDA from your oracle deployment
 # (Use the PDA address from Step 1.4 output: "📍 PriceFeed PDA: ...")
-echo "ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.4]" >> .env
+sed -i '' 's/ORACLE_PRICE_FEED_PDA=.*/ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.4]/' .env
 ```
 
 **📝 Checkpoint:** Your `.env` file should now contain YOUR unique Oracle Program ID and Price Feed PDA. These addresses are specific to your deployment and different from other workshop participants.
@@ -237,8 +237,8 @@ anchor deploy --provider.cluster devnet
 - **Stablecoin Program ID:** `[your-stablecoin-program-id]` *(copy this address)*
 
 ```bash
-# Update .env with the stablecoin program ID (using symlink)
-echo "STABLECOIN_PROGRAM_ID=[your-stablecoin-program-id-from-above]" >> .env
+# Update .env with the stablecoin program ID
+sed -i '' 's/STABLECOIN_PROGRAM_ID=.*/STABLECOIN_PROGRAM_ID=[your-stablecoin-program-id-from-above]/' .env
 ```
 
 ### Step 2.4: Update Stablecoin Program for Your Oracle (Critical)
@@ -266,8 +266,8 @@ Program Id: [your-updated-stablecoin-program-id]
 # Derive the stablecoin program's mint authority PDA (needed for multisig in Phase 3)
 npx ts-node utils/derive-pdas.ts
 
-# Update .env file with the mint authority PDA (using symlink)
-echo "SOL_MINT_AUTHORITY_PDA=[copy-mint-authority-pda-from-above]" >> .env
+# Update .env file with the mint authority PDA
+sed -i '' 's/SOL_MINT_AUTHORITY_PDA=.*/SOL_MINT_AUTHORITY_PDA=[copy-mint-authority-pda-from-above]/' .env
 ```
 
 **Expected Output:**
@@ -307,9 +307,9 @@ npx ts-node create-token-for-ccip.ts
 - **Stablecoin Token Mint:** `[your-token-mint-address]` *(copy this address)*
 
 ```bash
-# Update .env with the token mint and other required variables (using symlink)
-echo "SOL_TOKEN_MINT=[your-token-mint-address-from-above]" >> .env
-echo "SOL_ADMIN_WALLET=$(solana address)" >> .env
+# Update .env with the token mint and other required variables
+sed -i '' "s/SOL_TOKEN_MINT=.*/SOL_TOKEN_MINT=[your-token-mint-address-from-above]/" .env
+sed -i '' "s/SOL_ADMIN_WALLET=.*/SOL_ADMIN_WALLET=$(solana address)/" .env
 echo "CCIP_POOL_PROGRAM=41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB" >> .env
 source .env
 ```
@@ -503,8 +503,7 @@ Token deployed to: [your-ethereum-token-address]
 
 ```bash
 # Update .env with the Ethereum token address
-cd oracle
-echo "ETH_TOKEN_ADDRESS=[your-ethereum-token-address-from-above]" >> .env
+sed -i '' 's/ETH_TOKEN_ADDRESS=.*/ETH_TOKEN_ADDRESS=[your-ethereum-token-address-from-above]/' ../../../../.env
 ```
 
 ### Step 4.4: Deploy TokenPool
@@ -528,7 +527,7 @@ Token pool deployed to: [your-ethereum-token-pool-address]
 
 ```bash
 # Update .env with the token pool address
-echo "ETH_TOKEN_POOL=[your-ethereum-token-pool-address-from-above]" >> .env
+sed -i '' 's/ETH_TOKEN_POOL=.*/ETH_TOKEN_POOL=[your-ethereum-token-pool-address-from-above]/' ../../../../.env
 source .env
 ```
 
