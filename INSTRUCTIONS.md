@@ -241,7 +241,27 @@ anchor deploy --provider.cluster devnet
 echo "STABLECOIN_PROGRAM_ID=[your-stablecoin-program-id-from-above]" >> .env
 ```
 
-### Step 2.4: Derive Stablecoin Mint Authority PDA
+### Step 2.4: Update Stablecoin Program for Your Oracle (Critical)
+```bash
+# Update the stablecoin program to recognize your oracle
+cd programs/stablecoin-program/src/
+sed -i '' "s/9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1/$ORACLE_PROGRAM_ID/" lib.rs
+
+# Rebuild and redeploy with your oracle program ID
+cd ../../..
+anchor build
+anchor deploy --provider.cluster devnet
+```
+
+**⚠️ Why This Step is Required:** The stablecoin program has a security constraint that only allows interaction with a specific oracle program. Since you deployed your own oracle in Phase 1, you must update this constraint to recognize your oracle as legitimate.
+
+**Expected Output:**
+```
+✅ Stablecoin program updated and redeployed successfully!
+Program Id: [your-updated-stablecoin-program-id]
+```
+
+### Step 2.5: Derive Stablecoin Mint Authority PDA
 ```bash
 # Derive the stablecoin program's mint authority PDA (needed for multisig in Phase 3)
 npx ts-node utils/derive-pdas.ts
@@ -266,7 +286,7 @@ echo "SOL_MINT_AUTHORITY_PDA=[copy-mint-authority-pda-from-above]" >> .env
 **Key Address to Save:**
 - **Mint Authority PDA:** `9YourActualPDAAddressHere123456789` *(needed for Phase 3 multisig)*
 
-### Step 2.5: Create Initial Oracle-Backed Stablecoin Token
+### Step 2.6: Create Initial Oracle-Backed Stablecoin Token
 ```bash
 # Create token with wallet authority (required for CCIP setup)
 ANCHOR_PROVIDER_URL="https://api.devnet.solana.com" \
@@ -757,26 +777,16 @@ chmod +x test-individual.sh
 - ✅ **Stablecoin Tests:** 4 passing - Program logic verification  
 - ✅ **CCIP Tests:** 2 passing - Multisig authority verification
 
-#### ⚠️ **Oracle Tests (2/3 passing - Expected Behavior):**
+#### ✅ **Oracle Tests (3/3 passing):**
 - ✅ **Setup Test:** Mint creation with multisig authority
 - ✅ **Data Structure Test:** Oracle price feed validation  
-- ❌ **Integration Test:** Oracle CPI constraint failure (expected)
+- ✅ **Integration Test:** Oracle CPI cross-program invocation
 
-#### 🔍 **Understanding the Oracle Test Failure:**
-
-The Oracle Integration test will show this **expected** error:
-```
-Left:  9w1TEJRgUafEcVDVWH4ejGVkETvvd1C77WE8gVcHfUfU  (your deployed oracle)
-Right: 9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1  (hardcoded in stablecoin program)
-```
-
-**This is by design!** The stablecoin program has a hardcoded security constraint that only allows interaction with a specific oracle program. This demonstrates:
+**All oracle tests should pass** after completing Step 2.4 (updating the stablecoin program for your oracle). This demonstrates:
 
 - ✅ **Environment variables are loading correctly** (your oracle program ID is read from `.env`)
-- ✅ **Security constraints are working** (prevents unauthorized oracle programs)
-- ✅ **Cross-program invocation is attempted** (the CPI call reaches the constraint check)
-
-**Key Insight:** This "failure" actually proves the testing system is working correctly - it's reading your unique oracle program ID from `.env` and correctly rejecting it due to the security constraint.
+- ✅ **Security constraints are working** (allows your authorized oracle program)
+- ✅ **Cross-program invocation succeeds** (the CPI call completes successfully)
 
 ### Test Parameters and Configuration
 
@@ -790,22 +800,9 @@ Right: 9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1  (hardcoded in stablecoin pr
 
 **🔄 No Manual Configuration Required:** The tests use the same environment variables you set during deployment, ensuring consistency between your deployed programs and test execution.
 
-### 🔧 **Optional: Enable Full Oracle Integration Testing**
+### 🎯 **All Tests Should Pass**
 
-If you want all 3 oracle tests to pass (for advanced users), you can update the hardcoded constraint:
-
-1. **Update the stablecoin program source:**
-   ```bash
-   # Edit programs/stablecoin-program/src/lib.rs line 12
-   # Change the hardcoded oracle program ID to match your .env
-   ```
-
-2. **Rebuild and redeploy:**
-   ```bash
-   anchor build && anchor deploy --provider.cluster devnet
-   ```
-
-**Note:** This is optional and not required for the workshop. The current behavior demonstrates proper security constraints.
+After completing Step 2.4 (updating the stablecoin program for your oracle), all tests should pass successfully. This demonstrates that your oracle and stablecoin programs are properly integrated and working together.
 
 **If Other Tests Fail:** See the [Oracle Testing Troubleshooting](#6-oracle-testing-issues) section below for detailed solutions.
 
@@ -889,17 +886,18 @@ sed -i '' 's/DATASTREAMS_CLIENT_SECRET=\(.*\)/DATASTREAMS_CLIENT_SECRET="\1"/' o
 **C. Oracle Program ID Mismatch:**
 ```bash
 # If you see "AccountOwnedByWrongProgram" or "ConstraintAddress" errors
-# Check which oracle program owns your price feed
+# This usually means Step 2.4 was skipped or failed
+# Re-run the oracle program update step:
+
+cd cross-chain-stablecoin/stablecoin-program
 source .env
-solana account $ORACLE_PRICE_FEED_PDA --url devnet
 
-# Update .env file with correct oracle program ID if needed
-cd oracle
-sed -i '' 's|ORACLE_PROGRAM_ID=.*|ORACLE_PROGRAM_ID=[your-correct-oracle-program-id]|' .env
+# Update stablecoin program source code
+cd programs/stablecoin-program/src/
+sed -i '' "s/9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1/$ORACLE_PROGRAM_ID/" lib.rs
 
-# Update stablecoin program source code (line 11 in lib.rs)
-# Then rebuild and redeploy
-cd ../cross-chain-stablecoin/stablecoin-program
+# Rebuild and redeploy
+cd ../../..
 anchor build && anchor deploy --provider.cluster devnet
 ```
 
