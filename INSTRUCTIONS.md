@@ -101,7 +101,7 @@ smart-contract-examples/ccip/cct/hardhat/.env -> ../../../../.env
 ### Step 0.3: Review .env File Structure
 ```bash
 # Check the current .env file (located at project root, symlinked throughout)
-cat .env
+vim .env
 
 # The file is organized by deployment phases:
 # - PHASE 1: Oracle Program Deployment (partially pre-filled, requires DATASTREAMS credentials from instructor)
@@ -1008,7 +1008,8 @@ anchor deploy --provider.cluster devnet
 anchor keys sync
 
 # 4. Verify the sync worked
-cat Anchor.toml | grep -A 2 "\[programs.devnet\]"
+vim Anchor.toml
+# Look for the [programs.devnet] section to verify program IDs are synced
 ```
 
 ### 🔧 Shared Retry Utility
