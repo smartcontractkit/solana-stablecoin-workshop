@@ -176,11 +176,23 @@ anchor deploy --provider.cluster devnet
 
 ### Step 1.3: Update Oracle Program ID in Environment
 ```bash
-# Update .env file with your deployed Oracle Program ID
-# Replace the placeholder with the actual program ID from Step 1.2 output
-sed -i '' 's/ORACLE_PROGRAM_ID=.*/ORACLE_PROGRAM_ID=[your-oracle-program-id]/' .env
+# Edit the .env file to add your deployed Oracle Program ID
+vim .env
+# Or use nano if you prefer: nano .env
+```
 
-# Verify the update
+**📝 What to update:**
+Find the line `ORACLE_PROGRAM_ID=` and update it with your program ID from Step 1.2:
+```bash
+# Before:
+ORACLE_PROGRAM_ID=
+
+# After (example):
+ORACLE_PROGRAM_ID=9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1
+```
+
+**Verify the update:**
+```bash
 echo "✅ Updated Oracle Program ID in .env:"
 grep "ORACLE_PROGRAM_ID" .env
 ```
@@ -216,10 +228,18 @@ Each workshop participant will get their own unique addresses:
 
 ### Step 1.5: Update Oracle Price Feed PDA in Environment
 ```bash
-# Update .env file with the oracle price feed PDA from Step 1.4 output
-# Replace the placeholder with the actual PDA from your oracle deployment
-# (Use the PDA address from Step 1.4 output: "📍 PriceFeed PDA: ...")
-sed -i '' 's/ORACLE_PRICE_FEED_PDA=.*/ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.4]/' .env
+# Edit the .env file to add your oracle price feed PDA from Step 1.4 output
+vim .env
+```
+
+**📝 What to update:**
+Find the line `ORACLE_PRICE_FEED_PDA=` and update it with the PDA from Step 1.4 output:
+```bash
+# Before:
+ORACLE_PRICE_FEED_PDA=
+
+# After (use the PDA from Step 1.4 "📍 PriceFeed PDA: ..."):
+ORACLE_PRICE_FEED_PDA=HqqVks96kxdktt3jUvmoeF9dsc9pWgXVfYG27ri8Xi6C
 ```
 
 **📝 Checkpoint:** Your `.env` file should now contain YOUR unique Oracle Program ID and Price Feed PDA. These addresses are specific to your deployment and different from other workshop participants.
@@ -255,7 +275,8 @@ anchor deploy --provider.cluster devnet
 
 ```bash
 # Update .env with the stablecoin program ID
-sed -i '' 's/STABLECOIN_PROGRAM_ID=.*/STABLECOIN_PROGRAM_ID=[your-stablecoin-program-id-from-above]/' .env
+vim .env
+# Find STABLECOIN_PROGRAM_ID= and add your program ID from the deployment output above
 ```
 
 ### Step 2.4: Update Stablecoin Program for Your Oracle (Critical)
@@ -287,7 +308,8 @@ npm install
 npx ts-node utils/derive-pdas.ts
 
 # Update .env file with the mint authority PDA
-sed -i '' 's/SOL_MINT_AUTHORITY_PDA=.*/SOL_MINT_AUTHORITY_PDA=[copy-mint-authority-pda-from-above]/' .env
+vim .env
+# Find SOL_MINT_AUTHORITY_PDA= and add the mint authority PDA from the output above
 ```
 
 **Expected Output:**
@@ -328,9 +350,13 @@ npx ts-node create-token-for-ccip.ts
 
 ```bash
 # Update .env with the token mint and other required variables
-sed -i '' "s/SOL_TOKEN_MINT=.*/SOL_TOKEN_MINT=[your-token-mint-address-from-above]/" .env
-sed -i '' "s/SOL_ADMIN_WALLET=.*/SOL_ADMIN_WALLET=$(solana address)/" .env
-echo "CCIP_POOL_PROGRAM=41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB" >> .env
+vim .env
+# Find and update these lines:
+# SOL_TOKEN_MINT=[your-token-mint-address-from-above]
+# SOL_ADMIN_WALLET=[your-solana-wallet-address]
+# Add this line if not present: CCIP_POOL_PROGRAM=41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB
+
+# Load the updated variables
 source .env
 ```
 
@@ -351,7 +377,7 @@ yarn install
 ### Step 3.2: Load Environment Variables
 ```bash
 # Load variables from .env (set in previous phases)
-source ../.env
+source .env
 
 # Verify required variables are set
 echo "🪙 Token Mint: $SOL_TOKEN_MINT"
@@ -378,9 +404,13 @@ yarn svm:pool:initialize \
 - **Pool Signer PDA:** `[your-pool-signer-pda]` *(copy this address)*
 
 ```bash
-# Update .env with the pool addresses (using symlink)
-echo "SOL_POOL_CONFIG_PDA=[your-pool-config-pda-from-above]" >> .env
-echo "SOL_POOL_SIGNER_PDA=[your-pool-signer-pda-from-above]" >> .env
+# Update .env with the pool addresses
+vim .env
+# Add these lines with your actual addresses from the output above:
+# SOL_POOL_CONFIG_PDA=[your-pool-config-pda-from-above]
+# SOL_POOL_SIGNER_PDA=[your-pool-signer-pda-from-above]
+
+# Load the updated variables
 source .env
 ```
 
@@ -417,8 +447,10 @@ Signature: [transaction-signature]
 
 ### Step 3.6: Transfer Mint Authority to Multisig
 ```bash
-# Update .env with the multisig address from Step 3.5 (using symlink)
-echo "SOL_MULTISIG_ADDRESS=[your-multisig-address-from-above]" >> .env
+# Update .env with the multisig address from Step 3.5
+vim .env
+# Add this line with your actual multisig address from above:
+# SOL_MULTISIG_ADDRESS=[your-multisig-address-from-above]
 
 # Load variables and transfer authority
 source .env
@@ -449,7 +481,11 @@ ALT Address: [your-alt-address]
 ### Step 3.8: Register Pool with CCIP Router
 ```bash
 # Update .env with the ALT address from Step 3.7
-echo "SOL_ALT_ADDRESS=[your-alt-address-from-above]" >> .env
+vim .env
+# Add this line with your actual ALT address from above:
+# SOL_ALT_ADDRESS=[your-alt-address-from-above]
+
+# Load the updated variables
 source .env
 
 yarn svm:admin:set-pool \
@@ -482,8 +518,12 @@ echo "🔍 Etherscan API: ${ETHERSCAN_API_KEY:0:10}..."
 **📝 Note:** If any Ethereum variables show as empty, update your root `.env` file:
 ```bash
 # Update .env file (symlinked to root) directly
-echo "PRIVATE_KEY=0x[your-private-key-here]" >> .env
-echo "ETHERSCAN_API_KEY=[your-etherscan-api-key-here]" >> .env
+vim .env
+# Add these lines with your actual credentials:
+# PRIVATE_KEY=0x[your-private-key-here]
+# ETHERSCAN_API_KEY=[your-etherscan-api-key-here]
+
+# Load the updated variables
 source .env
 ```
 
@@ -520,7 +560,8 @@ Token deployed to: [your-ethereum-token-address]
 
 ```bash
 # Update .env with the Ethereum token address
-sed -i '' 's/ETH_TOKEN_ADDRESS=.*/ETH_TOKEN_ADDRESS=[your-ethereum-token-address-from-above]/' ../../../../.env
+vim .env
+# Find ETH_TOKEN_ADDRESS= and add your token address from the deployment output above
 ```
 
 ### Step 4.4: Deploy TokenPool
@@ -544,7 +585,10 @@ Token pool deployed to: [your-ethereum-token-pool-address]
 
 ```bash
 # Update .env with the token pool address
-sed -i '' 's/ETH_TOKEN_POOL=.*/ETH_TOKEN_POOL=[your-ethereum-token-pool-address-from-above]/' ../../../../.env
+vim .env
+# Find ETH_TOKEN_POOL= and add your token pool address from the deployment output above
+
+# Load the updated variables
 source .env
 ```
 
@@ -588,7 +632,7 @@ npx hardhat applyChainUpdates \
 cd solana-starter-kit
 
 # Load environment variables
-source ../.env
+source .env
 
 # Initialize chain remote config
 yarn svm:pool:init-chain-remote-config \
@@ -624,9 +668,7 @@ cargo run -- update-oracle
 
 ### Step 6.2: Mint Oracle-Backed Stablecoin Tokens
 ```bash
-# Update oracle with fresh price data
-cd ../../oracle/client
-cargo run -- update-oracle
+# Navigate to stablecoin program directory
 cd ../../cross-chain-stablecoin/stablecoin-program
 
 # Load environment variables
@@ -666,11 +708,20 @@ Creating account [your-pool-token-account-address]
 
 ```bash
 # Update .env with the pool token account
-echo "POOL_TOKEN_ACCOUNT=[your-pool-token-account-address-from-above]" >> .env
+vim .env
+# Add this line with your actual pool token account address from above:
+# POOL_TOKEN_ACCOUNT=[your-pool-token-account-address-from-above]
 ```
 
 ### Step 6.4: Delegate Token Authority to CCIP
 ```bash
+# Navigate to solana-starter-kit for CCIP operations
+cd ../../solana-starter-kit
+
+# Load environment variables
+source .env
+
+# Delegate token authority to CCIP
 yarn svm:token:delegate --token-mint $SOL_TOKEN_MINT
 ```
 
@@ -692,7 +743,11 @@ spl-token balance $SOL_TOKEN_MINT
 ### Step 7.2: Execute Cross-Chain Transfer (Solana → Ethereum)
 ```bash
 # Set your Ethereum receiver address
-echo "ETH_RECEIVER_ADDRESS=[your-ethereum-wallet-address]" >> .env
+vim .env
+# Add this line with your Ethereum wallet address:
+# ETH_RECEIVER_ADDRESS=[your-ethereum-wallet-address]
+
+# Load the updated variables
 source .env
 
 yarn svm:token-transfer \
@@ -903,7 +958,9 @@ ln -sf ../../.env.example .env.example
 ```bash
 # If you see "parse error near '&'" or similar
 # Check for unquoted special characters in DATASTREAMS_CLIENT_SECRET
-sed -i '' 's/DATASTREAMS_CLIENT_SECRET=\(.*\)/DATASTREAMS_CLIENT_SECRET="\1"/' .env
+vim .env
+# Find DATASTREAMS_CLIENT_SECRET= and make sure the value is quoted:
+# DATASTREAMS_CLIENT_SECRET="your-secret-with-special&characters<here>"
 ```
 
 **C. Oracle Program ID Mismatch:**
@@ -1137,14 +1194,14 @@ Update your `.env` file with your oracle program details:
 ORACLE_PROGRAM_ID=YOUR_ORACLE_PROGRAM_ID_HERE
 
 # Your oracle price feed PDA (derived from your oracle program)
-REAL_ORACLE_PRICE_FEED=YOUR_PRICE_FEED_PDA_HERE
+ORACLE_PRICE_FEED_PDA=YOUR_PRICE_FEED_PDA_HERE
 ```
 
 **📍 To find your Price Feed PDA:**
 ```bash
 cd oracle/client
 cargo run -- update-oracle
-# Look for: "📍 PriceFeed PDA: YOUR_PDA_HERE"
+# Look for: "📍 PriceFeed PDA: [your-actual-pda-address]"
 ```
 
 #### Step 3: Rebuild and Redeploy Stablecoin Program
