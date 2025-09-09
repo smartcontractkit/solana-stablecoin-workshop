@@ -736,9 +736,16 @@ cd ../../cross-chain-stablecoin/stablecoin-program
 ```
 
 ```bash
-# Load environment variables
+# Load environment variables and configure Anchor wallet
 source .env
+export ANCHOR_WALLET="/Users/$(whoami)/.config/solana/id.json"
 ```
+
+**📝 What `ANCHOR_WALLET` does:**
+- **Keypair Loading**: Tells Anchor which wallet file to use for signing transactions
+- **Transaction Authority**: This wallet will be the transaction payer and signer
+- **Dynamic Path**: `$(whoami)` automatically gets your current username
+- **Default Location**: Points to your default Solana CLI wallet
 
 ```bash
 # Create token account
