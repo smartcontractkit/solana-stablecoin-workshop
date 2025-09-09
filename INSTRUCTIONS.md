@@ -527,7 +527,16 @@ vim .env
 source .env
 ```
 
-### Step 4.2: Compile Contracts
+### Step 4.2: Install Dependencies and Setup ESM
+```bash
+# Install Node.js dependencies
+npm install
+
+# Configure project for ESM (required by Hardhat)
+npm pkg set type="module"
+```
+
+### Step 4.3: Compile Contracts
 ```bash
 npx hardhat compile
 ```
@@ -539,7 +548,7 @@ Successfully generated 172 typings!
 Compiled 58 Solidity files successfully (evm target: paris).
 ```
 
-### Step 4.3: Deploy ERC20 Token for Oracle-Backed Stablecoin
+### Step 4.4: Deploy ERC20 Token for Oracle-Backed Stablecoin
 ```bash
 npx hardhat deployToken \
   --network sepolia \
@@ -564,7 +573,7 @@ vim .env
 # Find ETH_TOKEN_ADDRESS= and add your token address from the deployment output above
 ```
 
-### Step 4.4: Deploy TokenPool
+### Step 4.5: Deploy TokenPool
 ```bash
 # Load the Ethereum token address and deploy pool
 source .env
@@ -592,7 +601,7 @@ vim .env
 source .env
 ```
 
-### Step 4.5: Claim and Accept Admin Role
+### Step 4.6: Claim and Accept Admin Role
 ```bash
 # Claim admin
 npx hardhat claimAdmin \
@@ -605,7 +614,7 @@ npx hardhat acceptAdminRole \
   --tokenaddress $ETH_TOKEN_ADDRESS
 ```
 
-### Step 4.6: Register Pool with TokenAdminRegistry
+### Step 4.7: Register Pool with TokenAdminRegistry
 ```bash
 npx hardhat setPool \
   --network sepolia \
@@ -613,7 +622,7 @@ npx hardhat setPool \
   --pooladdress $ETH_TOKEN_POOL
 ```
 
-### Step 4.7: Configure Cross-Chain Connectivity (Ethereum → Solana)
+### Step 4.8: Configure Cross-Chain Connectivity (Ethereum → Solana)
 ```bash
 npx hardhat applyChainUpdates \
   --network sepolia \
