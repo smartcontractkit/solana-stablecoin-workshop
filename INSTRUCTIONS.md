@@ -85,6 +85,7 @@ cp .env.example .env
 ln -sf ../.env oracle/.env
 ln -sf ../../.env cross-chain-stablecoin/stablecoin-program/.env
 ln -sf ../../../../.env smart-contract-examples/ccip/cct/hardhat/.env
+ln -sf ../.env solana-starter-kit/.env
 ```
 
 
@@ -128,8 +129,8 @@ DATASTREAMS_CLIENT_SECRET="your-secret-with-special&characters<here>"
 DATASTREAMS_CLIENT_SECRET=your-secret-with-special&characters<here>
 ```
 
-**📍 Pre-filled Values:**
-- `SOL_ADMIN_WALLET`: Auto-populated with your current Solana wallet
+**📍 Values to Fill Before We Start:**
+- `SOL_ADMIN_WALLET`: Populate itwith your current Solana wallet
 - `FEED_ID`: Chainlink SOL/USD feed ID for Data Streams
 - `DATASTREAMS_*`: Chainlink Data Streams configuration (requires instructor credentials)
 - `ETHEREUM_SEPOLIA_RPC_URL`: Public Ethereum testnet endpoint
@@ -145,7 +146,7 @@ DATASTREAMS_CLIENT_SECRET=your-secret-with-special&characters<here>
 ```bash
 # Test that environment variables load correctly
 source .env
-echo "ORACLE_PROGRAM_ID: $ORACLE_PROGRAM_ID"
+echo "FEED_ID: $FEED_ID"
 ```
 
 ```bash
@@ -197,15 +198,12 @@ ORACLE_PROGRAM_ID=
 ORACLE_PROGRAM_ID=9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1
 ```
 
-**Verify the update:**
-```bash
-echo "✅ Updated Oracle Program ID in .env:"
-grep "ORACLE_PROGRAM_ID" .env
-```
-
 **⚠️ Important:** The client reads `ORACLE_PROGRAM_ID` from the `.env` file, so this step is required for the oracle client to work with your deployed program.
 
 ### Step 1.4: Initialize Oracle Price Feed
+```bash
+source .env
+```
 ```bash
 cd client
 cargo run -- update-oracle
@@ -250,12 +248,6 @@ ORACLE_PRICE_FEED_PDA=HqqVks96kxdktt3jUvmoeF9dsc9pWgXVfYG27ri8Xi6C
 
 **📝 Checkpoint:** Your `.env` file should now contain YOUR unique Oracle Program ID and Price Feed PDA. These addresses are specific to your deployment and different from other workshop participants.
 
-**Expected Output:**
-```
-✅ Updated Oracle Price Feed PDA in .env:
-ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.3]
-```
-
 ---
 
 ## 🪙 Phase 2: Stablecoin Program Deployment
@@ -263,7 +255,7 @@ ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.3]
 ### Step 2.1: Setup Stablecoin Program
 ```bash
 # Navigate to stablecoin program (from oracle directory)
-cd ../cross-chain-stablecoin/stablecoin-program
+cd ../../cross-chain-stablecoin/stablecoin-program
 ```
 
 ### Step 2.2: Configure Program for CCIP Compatibility
@@ -304,12 +296,6 @@ anchor deploy --provider.cluster devnet
 # Update .env with the stablecoin program ID
 vim .env
 # Find STABLECOIN_PROGRAM_ID= and add your program ID from the deployment output above
-```
-
-**Expected Output:**
-```
-✅ Stablecoin program updated and redeployed successfully!
-Program Id: [your-updated-stablecoin-program-id]
 ```
 
 ### Step 2.5: Derive Stablecoin Mint Authority PDA
@@ -487,12 +473,6 @@ source .env
 spl-token authorize $SOL_TOKEN_MINT mint $SOL_MULTISIG_ADDRESS
 ```
 
-```bash
-# Verify the transfer was successful
-echo "✅ Verifying mint authority transfer:"
-spl-token display $SOL_TOKEN_MINT | grep "Mint authority"
-```
-
 ### Step 3.7: Create Address Lookup Table (ALT)
 ```bash
 yarn svm:admin:create-alt \
@@ -582,7 +562,39 @@ Successfully generated 172 typings!
 Compiled 58 Solidity files successfully (evm target: paris).
 ```
 
-### Step 4.4: Deploy ERC20 Token for Oracle-Backed Stablecoin
+### Step 4.4: Setup Ethereum Wallet and Get Testnet ETH
+
+**⚠️ Prerequisites for Ethereum Deployment:**
+
+Before deploying contracts, ensure you have:
+
+1. **Private Key in .env file:**
+```bash
+# Edit your .env file to add your Ethereum private key
+vim .env
+# Add this line with your actual private key:
+# PRIVATE_KEY=0x[your-64-character-private-key-here]
+```
+
+2. **Testnet ETH for gas fees:**
+   - Visit: https://faucet.chain.link/
+   - Connect your Ethereum wallet
+   - Request Sepolia ETH (you'll need ~0.01 ETH for deployments)
+   - Wait for the transaction to confirm
+
+3. **Verify setup:**
+```bash
+# Reload environment variables
+set -a
+source .env
+set +a
+
+# Check your setup
+echo "🔑 Private Key: ${PRIVATE_KEY:0:10}..."
+echo "🔗 RPC URL: $ETHEREUM_SEPOLIA_RPC_URL"
+```
+
+### Step 4.5: Deploy ERC20 Token for Oracle-Backed Stablecoin
 ```bash
 npx hardhat deployToken \
   --network sepolia \
@@ -607,7 +619,7 @@ vim .env
 # Find ETH_TOKEN_ADDRESS= and add your token address from the deployment output above
 ```
 
-### Step 4.5: Deploy TokenPool
+### Step 4.6: Deploy TokenPool
 ```bash
 # Load the Ethereum token address
 source .env
@@ -639,7 +651,7 @@ vim .env
 source .env
 ```
 
-### Step 4.6: Claim and Accept Admin Role
+### Step 4.7: Claim and Accept Admin Role
 ```bash
 # Claim admin
 npx hardhat claimAdmin \
@@ -654,7 +666,7 @@ npx hardhat acceptAdminRole \
   --tokenaddress $ETH_TOKEN_ADDRESS
 ```
 
-### Step 4.7: Register Pool with TokenAdminRegistry
+### Step 4.8: Register Pool with TokenAdminRegistry
 ```bash
 npx hardhat setPool \
   --network sepolia \
@@ -662,7 +674,7 @@ npx hardhat setPool \
   --pooladdress $ETH_TOKEN_POOL
 ```
 
-### Step 4.8: Configure Cross-Chain Connectivity (Ethereum → Solana)
+### Step 4.9: Configure Cross-Chain Connectivity (Ethereum → Solana)
 ```bash
 npx hardhat applyChainUpdates \
   --network sepolia \
