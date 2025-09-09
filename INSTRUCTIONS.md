@@ -76,20 +76,27 @@ The repository contains two essential submodules:
 The project uses a centralized environment system with symlinks already configured for consistency across directories.
 
 ```bash
-# Copy the example file to create your .env at the project root (preserves symlink structure)
-cp -P .env.example .env
+# Copy the example file to create your .env at the project root
+cp .env.example .env
+
+# Create symlinks so all directories use the same .env file
+ln -sf ../.env oracle/.env
+ln -sf ../../.env cross-chain-stablecoin/stablecoin-program/.env
+ln -sf ../../../../.env smart-contract-examples/ccip/cct/hardhat/.env
 ```
+
 
 **📁 Pre-configured File Structure:**
 ```
-.env.example                   # Template file at project root (master source)
-.env -> .env.example          # Main environment file (symlink to template)
+.env.example                   # Template file at project root
+.env                          # Main environment file (created from .env.example)
 oracle/.env -> ../.env        # Oracle symlink points to root .env
 cross-chain-stablecoin/stablecoin-program/.env -> ../../.env
 smart-contract-examples/ccip/cct/hardhat/.env -> ../../../../.env
 ```
 
-**✨ Unified Environment Management!** When you use `cp -P .env.example .env`, the `.env` becomes a symlink to `.env.example`. All subdirectories' `.env` files are already symlinked to the root `.env`, creating a unified chain: `subdirs/.env → root/.env → root/.env.example`. Any updates you make to the root `.env` automatically propagate to all directories instantly!
+**✨ How It Works:** All subdirectory `.env` files are symlinks pointing to the root `.env`. When you edit any `.env` file (like `oracle/.env`), you're actually editing the root `.env`, and changes automatically propagate to all directories!
+
 
 ### Step 0.3: Review .env File Structure
 ```bash
@@ -461,7 +468,7 @@ cd smart-contract-examples/ccip/cct/hardhat
 
 # Load and export environment variables for Hardhat
 set -a  # Automatically export all variables
-source ../../../../.env
+source .env
 set +a  # Stop auto-exporting
 
 # Verify Ethereum variables are set
@@ -474,12 +481,9 @@ echo "🔍 Etherscan API: ${ETHERSCAN_API_KEY:0:10}..."
 
 **📝 Note:** If any Ethereum variables show as empty, update your root `.env` file:
 ```bash
-# Navigate back to project root to update .env
-cd ../../../../
+# Update .env file (symlinked to root) directly
 echo "PRIVATE_KEY=0x[your-private-key-here]" >> .env
 echo "ETHERSCAN_API_KEY=[your-etherscan-api-key-here]" >> .env
-# Then return to hardhat directory
-cd smart-contract-examples/ccip/cct/hardhat
 source .env
 ```
 
