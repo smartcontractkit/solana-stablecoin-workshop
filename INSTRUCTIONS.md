@@ -264,8 +264,22 @@ The stablecoin program includes two minting instructions:
 - `deposit_and_mint_single` - For wallet authority (CCIP setup phase)
 - `deposit_and_mint_multisig` - For multisig authority (post-CCIP phase)
 
-### Step 2.3: Build and Deploy Stablecoin Program
+### Step 2.3: Update Stablecoin Program for Your Oracle (Critical)
 ```bash
+# Load your oracle program ID from .env
+source .env
+
+# Update the stablecoin program to recognize your oracle BEFORE deployment
+cd programs/stablecoin-program/src/
+sed -i '' "s/pubkey!(\"[^\"]*\")/pubkey!(\"$ORACLE_PROGRAM_ID\")/" lib.rs
+cd ../../..
+```
+
+**⚠️ Why This Step is Required:** The stablecoin program has a security constraint that only allows interaction with a specific oracle program. We update this constraint to recognize your oracle as legitimate before deployment.
+
+### Step 2.4: Build and Deploy Stablecoin Program
+```bash
+# Build and deploy with your oracle program ID configured
 anchor build
 anchor deploy --provider.cluster devnet
 ```
@@ -278,20 +292,6 @@ anchor deploy --provider.cluster devnet
 vim .env
 # Find STABLECOIN_PROGRAM_ID= and add your program ID from the deployment output above
 ```
-
-### Step 2.4: Update Stablecoin Program for Your Oracle (Critical)
-```bash
-# Update the stablecoin program to recognize your oracle
-cd programs/stablecoin-program/src/
-sed -i '' "s/9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1/$ORACLE_PROGRAM_ID/" lib.rs
-
-# Rebuild and redeploy with your oracle program ID
-cd ../../..
-anchor build
-anchor deploy --provider.cluster devnet
-```
-
-**⚠️ Why This Step is Required:** The stablecoin program has a security constraint that only allows interaction with a specific oracle program. Since you deployed your own oracle in Phase 1, you must update this constraint to recognize your oracle as legitimate.
 
 **Expected Output:**
 ```
@@ -966,7 +966,7 @@ vim .env
 **C. Oracle Program ID Mismatch:**
 ```bash
 # If you see "AccountOwnedByWrongProgram" or "ConstraintAddress" errors
-# This usually means Step 2.4 was skipped or failed
+# This usually means Step 2.3 was skipped or failed
 # Re-run the oracle program update step:
 
 cd cross-chain-stablecoin/stablecoin-program
@@ -974,7 +974,7 @@ source .env
 
 # Update stablecoin program source code
 cd programs/stablecoin-program/src/
-sed -i '' "s/9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1/$ORACLE_PROGRAM_ID/" lib.rs
+sed -i '' "s/pubkey!(\"[^\"]*\")/pubkey!(\"$ORACLE_PROGRAM_ID\")/" lib.rs
 
 # Rebuild and redeploy
 cd ../../..
