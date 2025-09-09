@@ -21,6 +21,12 @@ async function oracleBackedMint() {
   console.log('💰 Collateral: 0.1 SOL (100,000,000 lamports)');
   console.log('📊 Using real SOL/USD price from Chainlink Data Streams');
   
+  // Debug: Check environment variables
+  console.log('🔍 Debug Info:');
+  console.log('  Token Mint:', process.env.SOL_TOKEN_MINT);
+  console.log('  Multisig Address:', process.env.SOL_MULTISIG_ADDRESS);
+  console.log('  Admin Wallet:', provider.wallet.publicKey.toString());
+  
   // Derive required accounts
   const [mintAuthority] = PublicKey.findProgramAddressSync(
     [Buffer.from('mint_authority')],
@@ -31,6 +37,20 @@ async function oracleBackedMint() {
     [Buffer.from('collateral_vault')],
     program.programId
   );
+  
+  // Check if required environment variables are set
+  if (!process.env.SOL_TOKEN_MINT) {
+    throw new Error('❌ SOL_TOKEN_MINT not set in environment variables');
+  }
+  if (!process.env.SOL_MULTISIG_ADDRESS) {
+    throw new Error('❌ SOL_MULTISIG_ADDRESS not set in environment variables');
+  }
+  if (!process.env.ORACLE_PROGRAM_ID) {
+    throw new Error('❌ ORACLE_PROGRAM_ID not set in environment variables');
+  }
+  if (!process.env.ORACLE_PRICE_FEED_PDA) {
+    throw new Error('❌ ORACLE_PRICE_FEED_PDA not set in environment variables');
+  }
   
   const signature = await retryTransaction(
     provider.connection,
@@ -47,6 +67,7 @@ async function oracleBackedMint() {
           oracleProgram: new PublicKey(process.env.ORACLE_PROGRAM_ID!),
           oraclePriceFeed: new PublicKey(process.env.ORACLE_PRICE_FEED_PDA!),
         })
+        .signers([]) // Admin wallet is already the default signer
         .rpc();
     }
   );
