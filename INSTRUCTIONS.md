@@ -532,13 +532,10 @@ vim .env
 source .env
 ```
 
-### Step 4.2: Install Dependencies and Setup ESM
+### Step 4.2: Install Dependencies
 ```bash
 # Install Node.js dependencies
 npm install
-
-# Configure project for ESM (required by Hardhat)
-npm pkg set type="module"
 ```
 
 ### Step 4.3: Compile Contracts
