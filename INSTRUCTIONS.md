@@ -78,7 +78,9 @@ The project uses a centralized environment system with symlinks already configur
 ```bash
 # Copy the example file to create your .env at the project root
 cp .env.example .env
+```
 
+```bash
 # Create symlinks so all directories use the same .env file
 ln -sf ../.env oracle/.env
 ln -sf ../../.env cross-chain-stablecoin/stablecoin-program/.env
@@ -144,14 +146,16 @@ DATASTREAMS_CLIENT_SECRET=your-secret-with-special&characters<here>
 # Test that environment variables load correctly
 source .env
 echo "ORACLE_PROGRAM_ID: $ORACLE_PROGRAM_ID"
+```
 
+```bash
 # Verify symlinks are working
 ls -la cross-chain-stablecoin/stablecoin-program/.env
 ls -la smart-contract-examples/ccip/cct/hardhat/.env
 echo "ANCHOR_PROVIDER_URL: $ANCHOR_PROVIDER_URL"
-
-# If you see parsing errors, check for unquoted special characters
 ```
+
+**Note:** If you see parsing errors, check for unquoted special characters in your `.env` file.
 
 ---
 
@@ -166,13 +170,15 @@ cd oracle
 ```bash
 # Build the oracle program
 anchor build
+```
 
+```bash
 # Deploy to devnet
 anchor deploy --provider.cluster devnet
-
-# Note the deployed program ID - you'll need this later
-# Example: 9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1
 ```
+
+**Note:** Copy the deployed program ID from the output - you'll need this later.
+**Example:** `9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1`
 
 ### Step 1.3: Update Oracle Program ID in Environment
 ```bash
@@ -269,7 +275,9 @@ The stablecoin program includes two minting instructions:
 ```bash
 # Load your oracle program ID from .env
 source .env
+```
 
+```bash
 # Update the stablecoin program to recognize your oracle BEFORE deployment
 cd programs/stablecoin-program/src/
 sed -i '' "s/pubkey!(\"[^\"]*\")/pubkey!(\"$ORACLE_PROGRAM_ID\")/" lib.rs
@@ -280,8 +288,12 @@ cd ../../..
 
 ### Step 2.4: Build and Deploy Stablecoin Program
 ```bash
-# Build and deploy with your oracle program ID configured
+# Build with your oracle program ID configured
 anchor build
+```
+
+```bash
+# Deploy to devnet
 anchor deploy --provider.cluster devnet
 ```
 
@@ -304,10 +316,14 @@ Program Id: [your-updated-stablecoin-program-id]
 ```bash
 # Install Node.js dependencies for PDA derivation script
 npm install
+```
 
+```bash
 # Derive the stablecoin program's mint authority PDA (needed for multisig in Phase 3)
 npx ts-node utils/derive-pdas.ts
+```
 
+```bash
 # Update .env file with the mint authority PDA
 vim .env
 # Find SOL_MINT_AUTHORITY_PDA= and add the mint authority PDA from the output above
@@ -333,7 +349,9 @@ vim .env
 ```bash
 # Load environment variables
 source .env
+```
 
+```bash
 # Create token with wallet authority (required for CCIP setup)
 ANCHOR_PROVIDER_URL="https://api.devnet.solana.com" \
 ANCHOR_WALLET="/Users/$(whoami)/.config/solana/id.json" \
@@ -373,7 +391,9 @@ source .env
 ```bash
 # Navigate to the existing solana-starter-kit submodule (from stablecoin-program directory)
 cd ../../solana-starter-kit
+```
 
+```bash
 # Install dependencies
 yarn install
 ```
@@ -382,7 +402,9 @@ yarn install
 ```bash
 # Load variables from .env (set in previous phases)
 source .env
+```
 
+```bash
 # Verify required variables are set
 echo "🪙 Token Mint: $SOL_TOKEN_MINT"
 echo "🏊 Pool Program: $CCIP_POOL_PROGRAM"
@@ -424,7 +446,9 @@ source .env
 yarn svm:admin:propose-administrator \
   --token-mint $SOL_TOKEN_MINT \
   --administrator $SOL_ADMIN_WALLET
+```
 
+```bash
 # Accept admin role
 yarn svm:admin:accept-admin-role \
   --token-mint $SOL_TOKEN_MINT
@@ -455,11 +479,15 @@ Signature: [transaction-signature]
 vim .env
 # Add this line with your actual multisig address from above:
 # SOL_MULTISIG_ADDRESS=[your-multisig-address-from-above]
+```
 
+```bash
 # Load variables and transfer authority
 source .env
 spl-token authorize $SOL_TOKEN_MINT mint $SOL_MULTISIG_ADDRESS
+```
 
+```bash
 # Verify the transfer was successful
 echo "✅ Verifying mint authority transfer:"
 spl-token display $SOL_TOKEN_MINT | grep "Mint authority"
@@ -506,12 +534,16 @@ yarn svm:admin:set-pool \
 ```bash
 # Navigate to Hardhat directory (from solana-starter-kit directory)
 cd ../smart-contract-examples/ccip/cct/hardhat
+```
 
+```bash
 # Load and export environment variables for Hardhat
 set -a  # Automatically export all variables
 source .env
 set +a  # Stop auto-exporting
+```
 
+```bash
 # Verify Ethereum variables are set
 echo "🔗 Ethereum RPC: $ETHEREUM_SEPOLIA_RPC_URL"
 echo "🔑 Private Key: ${PRIVATE_KEY:0:10}..." # Show only first 10 chars for security
@@ -577,8 +609,12 @@ vim .env
 
 ### Step 4.5: Deploy TokenPool
 ```bash
-# Load the Ethereum token address and deploy pool
+# Load the Ethereum token address
 source .env
+```
+
+```bash
+# Deploy token pool
 npx hardhat deployTokenPool \
   --network sepolia \
   --tokenaddress $ETH_TOKEN_ADDRESS \
@@ -609,7 +645,9 @@ source .env
 npx hardhat claimAdmin \
   --network sepolia \
   --tokenaddress $ETH_TOKEN_ADDRESS
+```
 
+```bash
 # Accept admin role
 npx hardhat acceptAdminRole \
   --network sepolia \
@@ -683,13 +721,19 @@ cargo run -- update-oracle
 ```bash
 # Navigate to stablecoin program directory
 cd ../../cross-chain-stablecoin/stablecoin-program
+```
 
+```bash
 # Load environment variables
 source .env
+```
 
+```bash
 # Create token account
 spl-token create-account $SOL_TOKEN_MINT
+```
 
+```bash
 # Mint oracle-backed stablecoins using real Chainlink price data
 npx ts-node mint-oracle-backed.ts
 ```
@@ -730,10 +774,14 @@ vim .env
 ```bash
 # Navigate to solana-starter-kit for CCIP operations
 cd ../../solana-starter-kit
+```
 
+```bash
 # Load environment variables
 source .env
+```
 
+```bash
 # Delegate token authority to CCIP
 yarn svm:token:delegate --token-mint $SOL_TOKEN_MINT
 ```
