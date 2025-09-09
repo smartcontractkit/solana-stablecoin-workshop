@@ -367,8 +367,8 @@ source .env
 
 ### Step 3.1: Setup Solana Starter Kit
 ```bash
-# Navigate to the existing solana-starter-kit submodule
-cd solana-starter-kit
+# Navigate to the existing solana-starter-kit submodule (from stablecoin-program directory)
+cd ../../solana-starter-kit
 
 # Install dependencies
 yarn install
@@ -500,7 +500,8 @@ yarn svm:admin:set-pool \
 
 ### Step 4.1: Setup Ethereum Environment
 ```bash
-cd smart-contract-examples/ccip/cct/hardhat
+# Navigate to Hardhat directory (from solana-starter-kit directory)
+cd ../smart-contract-examples/ccip/cct/hardhat
 
 # Load and export environment variables for Hardhat
 set -a  # Automatically export all variables
@@ -638,7 +639,8 @@ npx hardhat applyChainUpdates \
 
 ### Step 5.1: Configure Solana → Ethereum Connectivity
 ```bash
-cd solana-starter-kit
+# Navigate back to solana-starter-kit (from hardhat directory)
+cd ../../../../solana-starter-kit
 
 # Load environment variables
 source .env
@@ -671,7 +673,8 @@ yarn svm:pool:edit-chain-remote-config \
 
 ### Step 6.1: Update Oracle with Fresh Price Data
 ```bash
-cd oracle/client
+# Navigate to oracle client (from solana-starter-kit directory)
+cd ../oracle/client
 cargo run -- update-oracle
 ```
 
@@ -787,8 +790,8 @@ CCIP Message ID: [ccip-message-id]
 
 ### View Your Configuration
 ```bash
-# Load and display all your addresses
-cd oracle
+# Navigate to oracle directory (from solana-starter-kit directory)
+cd ../oracle
 source .env
 
 echo "=== 🏗️ PROGRAM IDs ==="
@@ -820,8 +823,8 @@ After completing the deployment, you can run comprehensive tests to verify all c
 
 ### Test Prerequisites
 ```bash
-# Navigate to the stablecoin program directory
-cd cross-chain-stablecoin/stablecoin-program
+# Navigate to the stablecoin program directory (from oracle directory)
+cd ../cross-chain-stablecoin/stablecoin-program
 
 # Make test script executable
 chmod +x test-individual.sh
