@@ -790,37 +790,6 @@ CCIP Message ID: [ccip-message-id]
 
 ---
 
-## 📊 Key Addresses Summary
-
-### View Your Configuration
-```bash
-# Navigate to oracle directory (from solana-starter-kit directory)
-cd ../oracle
-source .env
-
-echo "=== 🏗️ PROGRAM IDs ==="
-echo "Oracle Program:     $ORACLE_PROGRAM_ID"
-echo "Stablecoin Program: $STABLECOIN_PROGRAM_ID"
-echo "CCIP Pool Program:  $CCIP_POOL_PROGRAM"
-
-echo -e "\n=== 🪙 TOKEN & ACCOUNTS ==="
-echo "Token Mint:         $SOL_TOKEN_MINT"
-echo "Multisig Address:   $SOL_MULTISIG_ADDRESS"
-echo "Pool Config PDA:    $SOL_POOL_CONFIG_PDA"
-echo "Pool Signer PDA:    $SOL_POOL_SIGNER_PDA"
-echo "ALT Address:        $SOL_ALT_ADDRESS"
-echo "Mint Authority PDA: $SOL_MINT_AUTHORITY_PDA"
-
-echo -e "\n=== 🔮 ORACLE ==="
-echo "Price Feed PDA:     $ORACLE_PRICE_FEED_PDA"
-
-echo -e "\n=== 🌐 ETHEREUM ==="
-echo "Token Address:      $ETH_TOKEN_ADDRESS"
-echo "Token Pool:         $ETH_TOKEN_POOL"
-```
-
----
-
 ## 🧪 Testing (Optional but Recommended)
 
 After completing the deployment, you can run comprehensive tests to verify all components are working correctly.
