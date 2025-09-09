@@ -256,7 +256,8 @@ ORACLE_PRICE_FEED_PDA=[your-price-feed-pda-from-step-1.3]
 
 ### Step 2.1: Setup Stablecoin Program
 ```bash
-cd cross-chain-stablecoin/stablecoin-program
+# Navigate to stablecoin program (from oracle directory)
+cd ../cross-chain-stablecoin/stablecoin-program
 ```
 
 ### Step 2.2: Configure Program for CCIP Compatibility
@@ -330,6 +331,9 @@ vim .env
 
 ### Step 2.6: Create Initial Oracle-Backed Stablecoin Token
 ```bash
+# Load environment variables
+source .env
+
 # Create token with wallet authority (required for CCIP setup)
 ANCHOR_PROVIDER_URL="https://api.devnet.solana.com" \
 ANCHOR_WALLET="/Users/$(whoami)/.config/solana/id.json" \
@@ -919,7 +923,7 @@ yarn svm:token:delegate --token-mint $SOL_TOKEN_MINT
 #### 3. Oracle Price Feed Not Found
 **Solution:** Update oracle with fresh data
 ```bash
-cd oracle/client
+cd ../oracle/client
 cargo run -- update-oracle
 ```
 
@@ -953,7 +957,7 @@ yarn svm:token-transfer --receiver-address $ETH_RECEIVER_ADDRESS
 ```bash
 # If you see "ANCHOR_PROVIDER_URL is not defined"
 # This is usually fixed by the .env symlinks, but if needed:
-cd cross-chain-stablecoin/stablecoin-program
+cd ../cross-chain-stablecoin/stablecoin-program
 
 # Verify .env symlinks exist
 ls -la .env .env.example
@@ -981,7 +985,7 @@ vim .env
 # This usually means Step 2.3 was skipped or failed
 # Re-run the oracle program update step:
 
-cd cross-chain-stablecoin/stablecoin-program
+cd ../cross-chain-stablecoin/stablecoin-program
 source .env
 
 # Update stablecoin program source code
@@ -996,14 +1000,14 @@ anchor build && anchor deploy --provider.cluster devnet
 **D. Recommended Testing Method:**
 ```bash
 # Use the test-individual.sh script (recommended)
-cd cross-chain-stablecoin/stablecoin-program
+cd ../cross-chain-stablecoin/stablecoin-program
 ./test-individual.sh oracle      # Oracle integration tests
 ./test-individual.sh stablecoin  # Program logic tests  
 ./test-individual.sh integration # Complete CPI tests
 ./test-individual.sh all         # All tests together
 
-# Alternative: Test oracle client directly
-cd oracle/client
+# Alternative: Test oracle client directly (from stablecoin-program directory)
+cd ../../oracle/client
 cargo run -- update-oracle
 ```
 
@@ -1186,7 +1190,8 @@ const signature = await retryTransaction(
 #### Step 1: Update Stablecoin Program Source Code
 Navigate to the stablecoin program source file:
 ```bash
-cd cross-chain-stablecoin/stablecoin-program/programs/stablecoin-program/src/lib.rs
+cd ../cross-chain-stablecoin/stablecoin-program/programs/stablecoin-program/src/
+vim lib.rs
 ```
 
 Find line 11 and update the `ORACLE_PROGRAM_ID` constant:
@@ -1211,14 +1216,14 @@ ORACLE_PRICE_FEED_PDA=YOUR_PRICE_FEED_PDA_HERE
 
 **📍 To find your Price Feed PDA:**
 ```bash
-cd oracle/client
+cd ../oracle/client
 cargo run -- update-oracle
 # Look for: "📍 PriceFeed PDA: [your-actual-pda-address]"
 ```
 
 #### Step 3: Rebuild and Redeploy Stablecoin Program
 ```bash
-cd cross-chain-stablecoin/stablecoin-program
+cd ../cross-chain-stablecoin/stablecoin-program
 anchor build
 anchor deploy --provider.cluster devnet
 ```
