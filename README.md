@@ -53,7 +53,7 @@ graph LR
     
     subgraph "🪙 Stablecoin System (Jae)"
         SP[Stablecoin Program<br/>Mint/Burn Logic]
-        MS[SPL Token Multisig<br/>2-of-3 Security]
+        MS[SPL Token Multisig<br/>1-of-3 Security]
         
         OP --> SP
         SP --> MS
