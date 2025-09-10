@@ -760,7 +760,7 @@ npx ts-node mint-oracle-backed.ts
 📊 Using real SOL/USD price from Chainlink Data Streams
 ✅ Oracle-backed minting successful!
 🔗 Transaction: [transaction-hash]
-💰 Tokens minted: ~21.4 USD worth (based on current SOL price)
+💰 Tokens minted: ~[X.X] USD worth (based on current SOL price)
 ```
 
 ### Step 6.3: Create Pool Token Account (Required for CCIP)
