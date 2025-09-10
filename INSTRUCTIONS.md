@@ -139,7 +139,7 @@ DATASTREAMS_CLIENT_SECRET=your-secret-with-special&characters<here>
 **🔄 Values to Fill During Deployment:**
 - `ORACLE_PROGRAM_ID`, `ORACLE_PRICE_FEED_PDA`: Generated in Phase 1
 - `SOL_TOKEN_MINT`: Generated in Phase 2
-- `SOL_POOL_CONFIG_PDA`, `SOL_POOL_SIGNER_PDA`: Generated in Phase 3
+- `SOL_POOL_STATE_PDA`, `SOL_POOL_SIGNER_PDA`: Generated in Phase 3
 - `ETH_TOKEN_ADDRESS`, `ETH_TOKEN_POOL`: Generated in Phase 4
 
 ### Step 0.5: Verify Environment Loading
@@ -147,13 +147,6 @@ DATASTREAMS_CLIENT_SECRET=your-secret-with-special&characters<here>
 # Test that environment variables load correctly
 source .env
 echo "FEED_ID: $FEED_ID"
-```
-
-```bash
-# Verify symlinks are working
-ls -la cross-chain-stablecoin/stablecoin-program/.env
-ls -la smart-contract-examples/ccip/cct/hardhat/.env
-echo "ANCHOR_PROVIDER_URL: $ANCHOR_PROVIDER_URL"
 ```
 
 **Note:** If you see parsing errors, check for unquoted special characters in your `.env` file.
@@ -410,20 +403,20 @@ yarn svm:pool:initialize \
 **Expected Output:**
 ```
 ✅ POOL INITIALIZED SUCCESSFULLY
-📍 Pool State PDA: [your-pool-config-pda]
+📍 Pool State PDA: [your-pool-state-pda]
 📍 Pool Signer PDA: [your-pool-signer-pda]
 🔗 Transaction: [transaction-hash]
 ```
 
 **Key Addresses to Save:**
-- **Pool Config PDA:** `[your-pool-config-pda]` *(copy this address)*
+- **Pool State PDA:** `[your-pool-state-pda]` *(copy this address)*
 - **Pool Signer PDA:** `[your-pool-signer-pda]` *(copy this address)*
 
 ```bash
 # Update .env with the pool addresses
 vim .env
 # Add these lines with your actual addresses from the output above:
-# SOL_POOL_CONFIG_PDA=[your-pool-config-pda-from-above]
+# SOL_POOL_STATE_PDA=[your-pool-state-pda-from-above]
 # SOL_POOL_SIGNER_PDA=[your-pool-signer-pda-from-above]
 
 # Load the updated variables
@@ -685,7 +678,7 @@ npx hardhat applyChainUpdates \
   --pooladdress $ETH_TOKEN_POOL \
   --remotechain solanaDevnet \
   --remotetokenaddress $SOL_TOKEN_MINT \
-  --remotepooladdresses $SOL_POOL_CONFIG_PDA
+  --remotepooladdresses $SOL_POOL_STATE_PDA
 ```
 
 ---
