@@ -736,7 +736,7 @@ cd ../../cross-chain-stablecoin/stablecoin-program
 ```
 
 ```bash
-# Load environment variables and configure Anchor wallet
+# Load environment variables and configure Anchor wallet from default id.json directory
 source .env
 export ANCHOR_WALLET="/Users/$(whoami)/.config/solana/id.json"
 ```
@@ -744,7 +744,6 @@ export ANCHOR_WALLET="/Users/$(whoami)/.config/solana/id.json"
 **📝 What `ANCHOR_WALLET` does:**
 - **Keypair Loading**: Tells Anchor which wallet file to use for signing transactions
 - **Transaction Authority**: This wallet will be the transaction payer and signer
-- **Dynamic Path**: `$(whoami)` automatically gets your current username
 - **Default Location**: Points to your default Solana CLI wallet
 
 ```bash
@@ -753,7 +752,7 @@ spl-token create-account $SOL_TOKEN_MINT
 ```
 
 ```bash
-# Mint oracle-backed stablecoins using real Chainlink price data
+# Mint oracle-backed stablecoins using Chainlink datastream-backed price data
 npx ts-node mint-oracle-backed.ts
 ```
 
