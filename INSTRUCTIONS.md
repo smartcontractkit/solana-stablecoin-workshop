@@ -292,11 +292,15 @@ anchor deploy --provider.cluster devnet
 **Key Address to Save:**
 - **Stablecoin Program ID:** `[your-stablecoin-program-id]` *(copy this address)*
 
+**⚠️ Critical Step:** Update your `.env` file with the deployed program ID:
 ```bash
-# Update .env with the stablecoin program ID
+# Update .env with the stablecoin program ID (REQUIRED for PDA derivation)
 vim .env
 # Find STABLECOIN_PROGRAM_ID= and add your program ID from the deployment output above
+# Example: STABLECOIN_PROGRAM_ID=GpBchCTBC6HbmX8j4AHfGDukuxTyvWR5BTqfosVK2SBU
 ```
+
+**📝 Why This Step is Critical:** The PDA derivation script in Step 2.5 requires the correct `STABLECOIN_PROGRAM_ID` to generate the proper mint authority PDA. Without this, you'll get incorrect PDAs that won't work with your deployed program.
 
 ### Step 2.5: Derive Stablecoin Mint Authority PDA
 ```bash

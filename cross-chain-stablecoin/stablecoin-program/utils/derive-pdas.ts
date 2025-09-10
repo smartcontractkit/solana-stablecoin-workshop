@@ -6,13 +6,23 @@ import dotenv from 'dotenv';
 // Load environment variables
 dotenv.config();
 
-const STABLECOIN_PROGRAM_ID = new PublicKey(
-  process.env.STABLECOIN_PROGRAM_ID || "7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR"
-);
+// Validate required environment variables
+if (!process.env.STABLECOIN_PROGRAM_ID) {
+  console.error("❌ ERROR: STABLECOIN_PROGRAM_ID not found in .env file!");
+  console.error("📝 Please add your deployed stablecoin program ID to .env:");
+  console.error("   STABLECOIN_PROGRAM_ID=<your-program-id-from-anchor-deploy>");
+  process.exit(1);
+}
 
-const ORACLE_PROGRAM_ID = new PublicKey(
-  process.env.ORACLE_PROGRAM_ID || "9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1"
-);
+if (!process.env.ORACLE_PROGRAM_ID) {
+  console.error("❌ ERROR: ORACLE_PROGRAM_ID not found in .env file!");
+  console.error("📝 Please add your deployed oracle program ID to .env:");
+  console.error("   ORACLE_PROGRAM_ID=<your-oracle-program-id>");
+  process.exit(1);
+}
+
+const STABLECOIN_PROGRAM_ID = new PublicKey(process.env.STABLECOIN_PROGRAM_ID);
+const ORACLE_PROGRAM_ID = new PublicKey(process.env.ORACLE_PROGRAM_ID);
 
 function main() {
   console.log("🔑 Deriving Stablecoin Program Mint Authority PDA...\n");
