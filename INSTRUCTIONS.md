@@ -24,20 +24,26 @@ This document provides comprehensive instructions for building a fully functiona
 
 ### Required Tools
 ```bash
-# Solana CLI
+# Solana CLI (v1.18.4+)
 sh -c "$(curl -sSfL https://release.solana.com/v1.18.4/install)"
 
-# Anchor Framework
+# Anchor Framework (v0.31.1+)
 npm install -g @coral-xyz/anchor-cli
 
+# Node.js (v16+) and npm
+# Download from: https://nodejs.org/
+# Or use package manager: brew install node (macOS) / apt install nodejs npm (Ubuntu)
+
 # Git
-# Install via your system package manager
+# Install via your system package manager or https://git-scm.com/downloads
 ```
 
-### Required Accounts
+### Required Accounts & Access
 - **Solana Wallet** with devnet SOL
-- **Ethereum Wallet** with Sepolia ETH
-- **Chainlink Data Streams SDK** access
+  - Get SOL from: [https://faucet.solana.com/](https://faucet.solana.com/)
+- **Ethereum Wallet** with Sepolia ETH  
+  - Get Sepolia ETH from: [https://sepoliafaucet.com/](https://sepoliafaucet.com/)
+- **Chainlink Data Streams SDK** access (provided in workshop)
 
 
 ## 🔧 Environment Setup (Required Before Phase 1)

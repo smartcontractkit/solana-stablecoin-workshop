@@ -20,22 +20,13 @@ This repository contains a **complete workshop implementation** of an **oracle-b
 - **Harry** - Chainlink Data Streams and Oracle Program implementation
 - **Jae** - Stablecoin integration with Oracle Program and Cross-Chain CCIP configuration
 
-## 📋 Prerequisites
+## Workshop Setup Guide
 
-**Before starting the workshop, ensure you have:**
+**Ready to build?** Follow the complete step-by-step guide:
 
-### Required Tools
-- **[Solana CLI](https://docs.solana.com/cli/install-solana-cli-tools)** (v1.18.4+)
-- **[Anchor Framework](https://www.anchor-lang.com/docs/installation)** (v0.31.1+)
-- **[Node.js](https://nodejs.org/)** (v16+) and **npm**
-- **[Git](https://git-scm.com/downloads)** for repository management
+**[→ INSTRUCTIONS.md](./INSTRUCTIONS.md)** - Complete prerequisites, installation, and deployment walkthrough
 
-### Required Accounts & Access
-- **Solana Wallet** with devnet SOL ([faucet.solana.com](https://faucet.solana.com/))
-- **Ethereum Wallet** with Sepolia ETH ([sepoliafaucet.com](https://sepoliafaucet.com/))
-- **Chainlink Data Streams SDK** access (provided in workshop)
-
-> **📖 Complete setup instructions** are provided in [INSTRUCTIONS.md](./INSTRUCTIONS.md) - start there for detailed installation and configuration steps.
+If you encounter any issues during the workshop, check the troubleshooting section in INSTRUCTIONS.md.
 
 ## 📁 Project Structure
 
@@ -112,22 +103,9 @@ This workshop leverages key Chainlink development tools:
 - **TypeScript** - Testing and deployment scripts
 - **Hardhat** - Ethereum smart contract deployment
 
-## 🚀 Quick Start
+## 🚀 Workshop Content
 
-### Prerequisites
-```bash
-# Required software
-Solana CLI >= 1.17.0
-Anchor >= 0.31.1
-Node.js >= 16.0.0
-Rust >= 1.70.0
-```
-
-## 📋 Complete Deployment Instructions
-
-**👉 See [INSTRUCTIONS.md](./INSTRUCTIONS.md) for the complete step-by-step deployment guide**
-
-The instructions cover:
+The workshop covers:
 - **Phase 1:** Oracle Program Deployment (Data Streams integration)
 - **Phase 2:** Stablecoin Program Deployment (Oracle integration)
 - **Phase 3:** CCIP Pool Setup (Cross-chain configuration)
@@ -182,14 +160,6 @@ cd cross-chain-stablecoin/stablecoin-program
 - Configure SPL Token multisig for enhanced security
 - Set up CCIP for cross-chain token transfers
 - Deploy and configure Ethereum side components
-
-## Workshop Setup Guide
-
-**Ready to build?** Follow the complete step-by-step deployment guide:
-
-**[→ INSTRUCTIONS.md](./INSTRUCTIONS.md)** - Complete deployment walkthrough
-
-If you encounter any issues during the workshop, check the troubleshooting section below.
 
 ## 📚 Documentation
 
