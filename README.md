@@ -26,7 +26,7 @@ This repository contains a **complete workshop implementation** of an **oracle-b
 
 ### Required Tools
 - **[Solana CLI](https://docs.solana.com/cli/install-solana-cli-tools)** (v1.18.4+)
-- **[Anchor Framework](https://www.anchor-lang.com/docs/installation)** (v0.29.0+)
+- **[Anchor Framework](https://www.anchor-lang.com/docs/installation)** (v0.31.1+)
 - **[Node.js](https://nodejs.org/)** (v16+) and **npm**
 - **[Git](https://git-scm.com/downloads)** for repository management
 
@@ -40,7 +40,7 @@ This repository contains a **complete workshop implementation** of an **oracle-b
 ## 📁 Project Structure
 
 ```
-example_verify/
+solana-stablecoin-workshop/
 ├── README.md                    # This overview and instructions
 ├── INSTRUCTIONS.md              # Complete step-by-step deployment guide
 ├── oracle/                      # Chainlink Data Streams & Oracle Program
@@ -121,19 +121,6 @@ Solana CLI >= 1.17.0
 Anchor >= 0.31.1
 Node.js >= 16.0.0
 Rust >= 1.70.0
-```
-
-### Setup & Deployment
-```bash
-# 1. Configure Solana
-solana config set --url devnet
-solana-keygen new
-solana airdrop 5
-
-> **💡** Press Enter for no passphrase, `y` to overwrite existing keys
-
-# 2. Follow complete deployment guide
-# See INSTRUCTIONS.md for detailed step-by-step process
 ```
 
 ## 📋 Complete Deployment Instructions
