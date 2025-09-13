@@ -599,7 +599,9 @@ vim .env
 # Add these lines with your actual credentials:
 # PRIVATE_KEY=0x[your-private-key-here]
 # ETHERSCAN_API_KEY=[your-etherscan-api-key-here]
+```
 
+```bash
 # Load the updated variables
 source .env
 ```
