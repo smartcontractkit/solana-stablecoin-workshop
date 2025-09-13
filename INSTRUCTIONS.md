@@ -408,7 +408,7 @@ cd ../../solana-starter-kit
 
 ```bash
 # Install dependencies
-yarn install
+npm install
 ```
 
 ### Step 3.2: Load Environment Variables
@@ -425,7 +425,7 @@ echo "🏊 Pool Program: $CCIP_POOL_PROGRAM"
 
 ### Step 3.3: Initialize CCIP Token Pool
 ```bash
-yarn svm:pool:initialize \
+npm run svm:pool:initialize -- \
   --token-mint $SOL_TOKEN_MINT \
   --burn-mint-pool-program $CCIP_POOL_PROGRAM
 ```
@@ -459,14 +459,14 @@ source .env
 ### Step 3.4: Set Up CCIP Administration
 ```bash
 # Propose administrator
-yarn svm:admin:propose-administrator \
+npm run svm:admin:propose-administrator -- \
   --token-mint $SOL_TOKEN_MINT \
   --administrator $SOL_ADMIN_WALLET
 ```
 
 ```bash
 # Accept admin role
-yarn svm:admin:accept-admin-role \
+npm run svm:admin:accept-admin-role -- \
   --token-mint $SOL_TOKEN_MINT
 ```
 
@@ -523,7 +523,7 @@ spl-token authorize $SOL_TOKEN_MINT mint $SOL_MULTISIG_ADDRESS
 
 ### Step 3.7: Create Address Lookup Table (ALT)
 ```bash
-yarn svm:admin:create-alt \
+npm run svm:admin:create-alt -- \
   --token-mint $SOL_TOKEN_MINT \
   --pool-program $CCIP_POOL_PROGRAM \
   --additional-addresses $SOL_MULTISIG_ADDRESS
@@ -548,7 +548,7 @@ vim .env
 # Load the updated variables
 source .env
 
-yarn svm:admin:set-pool \
+npm run svm:admin:set-pool -- \
   --token-mint $SOL_TOKEN_MINT \
   --lookup-table $SOL_ALT_ADDRESS \
   --writable-indices 3,4,7
@@ -759,7 +759,7 @@ cd ../../../../solana-starter-kit
 source .env
 
 # Initialize chain remote config
-yarn svm:pool:init-chain-remote-config \
+npm run svm:pool:init-chain-remote-config -- \
   --token-mint $SOL_TOKEN_MINT \
   --burn-mint-pool-program $CCIP_POOL_PROGRAM \
   --remote-chain ethereum-sepolia \
@@ -771,7 +771,7 @@ yarn svm:pool:init-chain-remote-config \
 
 ### Step 5.2: Add Ethereum Pool Address
 ```bash
-yarn svm:pool:edit-chain-remote-config \
+npm run svm:pool:edit-chain-remote-config -- \
   --token-mint $SOL_TOKEN_MINT \
   --burn-mint-pool-program $CCIP_POOL_PROGRAM \
   --remote-chain ethereum-sepolia \
@@ -863,7 +863,7 @@ source .env
 
 ```bash
 # Delegate token authority to CCIP
-yarn svm:token:delegate --token-mint $SOL_TOKEN_MINT
+npm run svm:token:delegate -- --token-mint $SOL_TOKEN_MINT
 ```
 
 **Expected Output:**
@@ -907,7 +907,7 @@ spl-token balance $SOL_TOKEN_MINT
 
 ```bash
 # Transfer your oracle-minted tokens (replace with your actual balance)
-yarn svm:token-transfer \
+npm run svm:token-transfer -- \
   --token-mint $SOL_TOKEN_MINT \
   --token-amount [your-token-balance-from-above] \
   --destination-chain ethereum-sepolia \
@@ -1033,7 +1033,7 @@ spl-token create-account $SOL_TOKEN_MINT \
 #### 2. "owner does not match" Error During Transfer
 **Solution:** Delegate token authority to CCIP
 ```bash
-yarn svm:token:delegate --token-mint $SOL_TOKEN_MINT
+npm run svm:token:delegate -- --token-mint $SOL_TOKEN_MINT
 ```
 
 #### 3. Oracle Price Feed Not Found
@@ -1057,20 +1057,20 @@ spl-token mint $SOL_TOKEN_MINT [amount] \
 **Solution:** Use `--receiver-address` instead of `--destination-address`
 ```bash
 # ❌ Wrong - uses hardcoded fallback address
-yarn svm:token-transfer --destination-address $ETH_RECEIVER_ADDRESS
+npm run svm:token-transfer -- --destination-address $ETH_RECEIVER_ADDRESS
 
 # ✅ Correct - uses your specified address  
-yarn svm:token-transfer --receiver-address $ETH_RECEIVER_ADDRESS
+npm run svm:token-transfer -- --receiver-address $ETH_RECEIVER_ADDRESS
 ```
 
 **Problem B:** Transfer uses default amount (10000000) instead of your specified amount
 **Solution:** Use `--token-amount` instead of `--amount`
 ```bash
 # ❌ Wrong - parameter ignored, uses default amount
-yarn svm:token-transfer --amount 18000000
+npm run svm:token-transfer -- --amount 18000000
 
 # ✅ Correct - uses your specified amount
-yarn svm:token-transfer --token-amount 18000000
+npm run svm:token-transfer -- --token-amount 18000000
 ```
 
 #### 6. Oracle Testing Issues
