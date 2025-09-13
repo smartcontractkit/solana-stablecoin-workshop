@@ -44,9 +44,6 @@ npm install -g @coral-xyz/anchor-cli
 # Configure Solana CLI for devnet
 solana config set --url https://api.devnet.solana.com
 solana config set --keypair ~/.config/solana/id.json
-
-# Verify configuration
-solana config get
 ```
 
 ### Get Devnet SOL Funds
@@ -687,7 +684,9 @@ Token deployed to: [your-ethereum-token-address]
 # Update .env with the Ethereum token address
 vim .env
 # Find ETH_TOKEN_ADDRESS= and add your token address from the deployment output above
+```
 
+```bash
 # Reload environment variables after updating .env
 source .env
 ```
