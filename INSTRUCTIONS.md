@@ -396,6 +396,8 @@ npx ts-node create-token-for-ccip.ts
 🔗 Transaction: [transaction-hash]
 ```
 
+> **💡 Token Decimals:** This stablecoin uses 6 decimals (like USDC). So 1,000,000 tokens = 1.0 actual tokens, and 18,000,000 tokens = 18.0 actual tokens.
+
 **Key Address to Save:**
 - **Stablecoin Token Mint:** `[your-token-mint-address]` *(copy this address)*
 
@@ -1209,6 +1211,13 @@ npx tsx mint-oracle-backed.ts          # Instead of: npx ts-node mint-oracle-bac
 
 **Stuck in vim:** Press `Esc`, type `:wq`, press Enter
 **Key generation prompts:** Press Enter (no passphrase), type `y` (overwrite)
+
+#### 9. Token Amount Confusion
+
+**Problem:** Large token numbers (like 18,000,000) seem wrong
+**Explanation:** Tokens use 6 decimals - divide by 1,000,000 for actual value
+- 18,000,000 tokens = 18.0 actual tokens
+- 1,000,000 tokens = 1.0 actual token
 
 ---
 
