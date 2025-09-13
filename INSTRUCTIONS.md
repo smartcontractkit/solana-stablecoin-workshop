@@ -72,6 +72,7 @@ cd solana-stablecoin-workshop
 
 ```bash
 # Initialize and update all submodules (required for CCIP integration)
+# ⚠️ WARNING: This can take 20+ minutes depending on your internet connection
 git submodule update --init --recursive
 ```
 
