@@ -197,7 +197,7 @@ ORACLE_PROGRAM_ID=
 ORACLE_PROGRAM_ID=9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1
 ```
 
-**⚠️ Important:** The client reads `ORACLE_PROGRAM_ID` from the `.env` file, so this step is required for the oracle client to work with your deployed program.
+**⚠️ Required:** Oracle client needs `ORACLE_PROGRAM_ID` from `.env`.
 
 ### Step 1.4: Initialize Oracle Price Feed
 ```bash
@@ -223,7 +223,7 @@ Each workshop participant will get their own unique addresses:
 - **Oracle Program ID:** `[your-unique-oracle-program-id]` *(generated during your deployment)*
 - **Price Feed PDA:** `[your-unique-price-feed-pda]` *(derived from your oracle program)*
 
-**⚠️ Important:** Every participant will have different addresses! The Price Feed PDA is derived from YOUR specific deployed oracle program ID. Make sure to update your `.env` file with YOUR addresses from the deployment output.
+**⚠️ Important:** Use YOUR addresses from deployment output (each participant has different addresses).
 
 **Example addresses (for reference only):**
 - Oracle Program ID: `9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1`
@@ -289,7 +289,7 @@ vim lib.rs
 cd ../../..
 ```
 
-**⚠️ Why This Step is Required:** The stablecoin program has a security constraint that only allows interaction with a specific oracle program. We update this constraint to recognize your oracle as legitimate before deployment.
+**⚠️ Required:** Update stablecoin program to recognize your oracle program ID.
 
 ### Step 2.4: Build and Deploy Stablecoin Program
 ```bash
@@ -318,7 +318,7 @@ vim .env
 source .env
 ```
 
-**📝 Why This Step is Critical:** The PDA derivation script in Step 2.5 requires the correct `STABLECOIN_PROGRAM_ID` to generate the proper mint authority PDA. Without this, you'll get incorrect PDAs that won't work with your deployed program.
+**📝 Note:** PDA derivation requires the correct `STABLECOIN_PROGRAM_ID`.
 
 ### Step 2.5: Derive Stablecoin Mint Authority PDA
 ```bash
@@ -900,7 +900,7 @@ vim .env
 **📝 What to add in .env:**
 - Add: `ETH_RECEIVER_ADDRESS=[your-ethereum-wallet-address]`
 
-**💡 Important:** Use the same Ethereum wallet address where you want to receive the tokens. This should be the wallet you used for Ethereum deployment steps.
+**💡 Important:** Use your Ethereum wallet address for token receipt.
 
 ```bash
 # Load the updated variables
