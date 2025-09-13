@@ -226,7 +226,7 @@ Each workshop participant will get their own unique addresses:
 ### Step 1.5: Update Oracle Price Feed PDA in Environment
 ```bash
 # Edit the .env file to add your oracle price feed PDA from Step 1.4 output
-vim .env
+vim ../.env
 ```
 
 **📝 What to update:**
@@ -291,6 +291,11 @@ anchor deploy --provider.cluster devnet
 vim .env
 # Find STABLECOIN_PROGRAM_ID= and add your program ID from the deployment output above
 # Example: STABLECOIN_PROGRAM_ID=GpBchCTBC6HbmX8j4AHfGDukuxTyvWR5BTqfosVK2SBU
+```
+
+```bash
+# Load your stablecoin program ID from .env
+source .env
 ```
 
 **📝 Why This Step is Critical:** The PDA derivation script in Step 2.5 requires the correct `STABLECOIN_PROGRAM_ID` to generate the proper mint authority PDA. Without this, you'll get incorrect PDAs that won't work with your deployed program.
@@ -438,6 +443,24 @@ yarn svm:admin:accept-admin-role \
 ```
 
 ### Step 3.5: Create SPL Token Multisig (Critical for CCIP + Oracle Integration)
+
+**⚠️ Prerequisites Check:** Before creating the multisig, ensure all required addresses are set:
+```bash
+# Load environment variables
+source .env
+
+# Verify all required addresses are set
+echo "🔍 Verifying multisig prerequisites:"
+echo "📍 Pool Signer PDA: $SOL_POOL_SIGNER_PDA"
+echo "👤 Admin Wallet: $SOL_ADMIN_WALLET"
+echo "🔑 Mint Authority PDA: $SOL_MINT_AUTHORITY_PDA"
+```
+
+**📝 If any address shows as empty:**
+- `SOL_ADMIN_WALLET`: Run `solana address` and update your `.env` file
+- `SOL_POOL_SIGNER_PDA`: Complete Step 3.3 (Initialize CCIP Token Pool)
+- `SOL_MINT_AUTHORITY_PDA`: Complete Step 2.5 (Derive Stablecoin Mint Authority PDA)
+
 ```bash
 # Create 1-of-3 multisig with Pool Signer PDA, Admin Wallet, and Stablecoin Mint Authority PDA
 spl-token create-multisig 1 \
