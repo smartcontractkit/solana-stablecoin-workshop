@@ -936,7 +936,9 @@ After completing the deployment, you can run comprehensive tests to verify all c
 ```bash
 # Navigate to the stablecoin program directory (from oracle directory)
 cd ../cross-chain-stablecoin/stablecoin-program
+```
 
+```bash
 # Make test script executable
 chmod +x test-individual.sh
 ```
@@ -1065,14 +1067,23 @@ yarn svm:token-transfer --receiver-address $ETH_RECEIVER_ADDRESS
 # If you see "ANCHOR_PROVIDER_URL is not defined"
 # This is usually fixed by the .env symlinks, but if needed:
 cd ../cross-chain-stablecoin/stablecoin-program
+```
 
+```bash
 # Verify .env symlinks exist
 ls -la .env .env.example
+```
 
+```bash
 # If missing, recreate symlinks
 ln -sf ../../.env .env
-ln -sf ../../.env.example .env.example
+```
 
+```bash
+ln -sf ../../.env.example .env.example
+```
+
+```bash
 # Use the recommended test script instead of direct ts-mocha
 ./test-individual.sh oracle
 ```
@@ -1091,16 +1102,28 @@ vim .env
 # If you see "AccountOwnedByWrongProgram" or "ConstraintAddress" errors
 # This usually means Step 2.3 was skipped or failed
 # Re-run the oracle program update step:
-
 cd ../cross-chain-stablecoin/stablecoin-program
-source .env
+```
 
+```bash
+source .env
+```
+
+```bash
 # Update stablecoin program source code
 cd programs/stablecoin-program/src/
-sed -i '' "s/pubkey!(\"[^\"]*\")/pubkey!(\"$ORACLE_PROGRAM_ID\")/" lib.rs
+```
 
+```bash
+sed -i '' "s/pubkey!(\"[^\"]*\")/pubkey!(\"$ORACLE_PROGRAM_ID\")/" lib.rs
+```
+
+```bash
 # Rebuild and redeploy
 cd ../../..
+```
+
+```bash
 anchor build && anchor deploy --provider.cluster devnet
 ```
 
