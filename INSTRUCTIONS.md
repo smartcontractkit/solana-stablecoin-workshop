@@ -345,6 +345,8 @@ npm install
 npx ts-node utils/derive-pdas.ts
 ```
 
+> 💡 **TypeScript issues?** If `ts-node` fails, see [TypeScript Execution Issues](#7-typescript-execution-issues) for the `tsx` alternative.
+
 ```bash
 # Update .env file with the mint authority PDA
 vim .env
@@ -1181,6 +1183,21 @@ If you see `AccountNotFound` errors during testing, the oracle program is likely
 ```bash
 source .env
 solana program show $ORACLE_PROGRAM_ID
+```
+
+#### 7. TypeScript Execution Issues
+
+**Problem:** `ts-node` fails with "Unknown file extension .ts" error
+**Solution:** Use `tsx` as a modern alternative
+
+```bash
+# Install tsx
+npm install -D tsx
+
+# Replace ts-node commands with tsx:
+npx tsx utils/derive-pdas.ts           # Instead of: npx ts-node utils/derive-pdas.ts
+npx tsx create-token-for-ccip.ts       # Instead of: npx ts-node create-token-for-ccip.ts  
+npx tsx mint-oracle-backed.ts          # Instead of: npx ts-node mint-oracle-backed.ts
 ```
 
 ---
