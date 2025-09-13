@@ -826,9 +826,13 @@ vim .env
 # Load the updated variables
 source .env
 
+# Check your current token balance first
+spl-token balance $SOL_TOKEN_MINT
+
+# Transfer your oracle-minted tokens (replace with your actual balance)
 yarn svm:token-transfer \
   --token-mint $SOL_TOKEN_MINT \
-  --amount 1000000 \
+  --amount [your-token-balance-from-above] \
   --destination-chain ethereum-sepolia \
   --receiver-address $ETH_RECEIVER_ADDRESS
 ```
@@ -841,8 +845,10 @@ yarn svm:token-transfer \
 EVM Receiver Address: [your-ethereum-wallet-address]
 Transaction Signature: [transaction-signature]
 CCIP Message ID: [ccip-message-id]
-✅ Sent 1000000 tokens (1 token with 6 decimals)
+✅ Sent [your-specified-amount] tokens (preserves oracle-backed USD value)
 ```
+
+**💡 Critical:** Always specify `--amount` with your exact token balance to ensure the correct oracle-backed USD value transfers to Ethereum. The system will burn exactly what you specify on Solana and mint the same amount on Ethereum.
 
 ### Step 7.3: Monitor Transfer Progress
 - **Solana Explorer:** https://explorer.solana.com/tx/[transaction-hash]?cluster=devnet
