@@ -105,7 +105,7 @@ smart-contract-examples/ccip/cct/hardhat/.env -> ../../../../.env
 vim .env
 ```
 
-> **📝** Vim: `i` to edit, `Esc` then `:wq` to save
+**📝 Vim:** `i` to edit, `Esc` then `:wq` to save
 
 ```bash
 
@@ -331,7 +331,7 @@ npm install
 npx ts-node utils/derive-pdas.ts
 ```
 
-> 💡 **TypeScript issues?** If `ts-node` fails, see [TypeScript Execution Issues](#7-typescript-execution-issues) for the `tsx` alternative.
+**💡 TypeScript issues?** If `ts-node` fails, see [TypeScript Execution Issues](#7-typescript-execution-issues) for the `tsx` alternative.
 
 ```bash
 # Update .env file with the mint authority PDA
@@ -377,7 +377,7 @@ npx ts-node create-token-for-ccip.ts
 🔗 Transaction: [transaction-hash]
 ```
 
-> **💡 Token Decimals:** This stablecoin uses 6 decimals (like USDC). So 1,000,000 tokens = 1.0 actual tokens, and 18,000,000 tokens = 18.0 actual tokens.
+**💡 Token Decimals:** This stablecoin uses 6 decimals (like USDC). So 1,000,000 tokens = 1.0 actual tokens, and 18,000,000 tokens = 18.0 actual tokens.
 
 **Key Address to Save:**
 - **Stablecoin Token Mint:** `[your-token-mint-address]` *(copy this address)*
