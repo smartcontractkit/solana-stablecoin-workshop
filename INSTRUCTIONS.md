@@ -30,9 +30,6 @@ sh -c "$(curl -sSfL https://release.solana.com/v1.18.4/install)"
 # Anchor Framework
 npm install -g @coral-xyz/anchor-cli
 
-# Node.js and Yarn
-npm install -g yarn
-
 # Git
 # Install via your system package manager
 ```
