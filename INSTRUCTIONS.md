@@ -72,7 +72,7 @@ cd solana-stablecoin-workshop
 
 ```bash
 # Initialize and update all submodules (required for CCIP integration)
-# ⚠️ WARNING: This can take 20+ minutes depending on your internet connection
+# ⚠️ WARNING: This can take 5+ minutes depending on your environment
 git submodule update --init --recursive
 ```
 
@@ -289,7 +289,13 @@ cd programs/stablecoin-program/src/
 
 ```bash
 # Update the stablecoin program to recognize your oracle BEFORE deployment
-sed -i '' "s/pubkey!(\"[^\"]*\")/pubkey!(\"$ORACLE_PROGRAM_ID\")/" lib.rs
+vim lib.rs
+
+# Find line 11 that looks like:
+# const ORACLE_PROGRAM_ID: Pubkey = pubkey!("9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1");
+# 
+# Replace the program ID with your oracle program ID from .env:
+# const ORACLE_PROGRAM_ID: Pubkey = pubkey!("YOUR_ORACLE_PROGRAM_ID_HERE");
 ```
 
 ```bash
