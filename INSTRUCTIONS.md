@@ -81,17 +81,8 @@ cp .env.example .env
 ```bash
 # Create symlinks so all directories use the same .env file
 ln -sf ../.env oracle/.env
-```
-
-```bash
 ln -sf ../../.env cross-chain-stablecoin/stablecoin-program/.env
-```
-
-```bash
 ln -sf ../../../../.env smart-contract-examples/ccip/cct/hardhat/.env
-```
-
-```bash
 ln -sf ../.env solana-starter-kit/.env
 ```
 
