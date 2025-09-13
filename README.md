@@ -35,16 +35,9 @@ solana-stablecoin-workshop/
 ├── README.md                    # This overview and instructions
 ├── INSTRUCTIONS.md              # Complete step-by-step deployment guide
 ├── oracle/                      # Chainlink Data Streams & Oracle Program
-│   ├── README.md               # Oracle system documentation
-│   ├── programs/oracle/        # Solana oracle program
-│   ├── client/                 # Rust client for Data Streams integration
-│   └── tests/                  # Oracle program tests
-└── cross-chain-stablecoin/     # Stablecoin & CCIP Integration
-    └── stablecoin-program/     # Main stablecoin implementation
-        ├── README.md           # Stablecoin system documentation
-        ├── programs/           # Solana stablecoin program
-        ├── tests/              # Comprehensive test suite (12 tests)
-        └── scripts/            # Deployment and utility scripts
+├── cross-chain-stablecoin/      # Stablecoin & CCIP Integration
+├── solana-starter-kit/          # CCIP Solana integration scripts and libraries
+└── smart-contract-examples/     # Ethereum smart contracts for CCIP
 ```
 
 ## 🏗️ System Architecture
