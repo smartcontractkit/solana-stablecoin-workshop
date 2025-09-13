@@ -687,6 +687,9 @@ Token deployed to: [your-ethereum-token-address]
 # Update .env with the Ethereum token address
 vim .env
 # Find ETH_TOKEN_ADDRESS= and add your token address from the deployment output above
+
+# Reload environment variables after updating .env
+source .env
 ```
 
 ### Step 4.6: Deploy TokenPool
