@@ -41,7 +41,7 @@ npm install -g @coral-xyz/anchor-cli
 ### Required Accounts & Access
 - **Solana Wallet** with devnet SOL
   - Get SOL from: [https://faucet.solana.com/](https://faucet.solana.com/)
-- **Ethereum Wallet** with Sepolia ETH  
+- **Ethereum Wallet** with Sepolia ETH
   - Get Sepolia ETH from: [https://sepoliafaucet.com/](https://sepoliafaucet.com/)
 - **Chainlink Data Streams SDK** access (provided in workshop)
 
@@ -112,8 +112,11 @@ vim .env
 # The file is organized by deployment phases:
 # - PHASE 1: Oracle Program Deployment (partially pre-filled, requires DATASTREAMS credentials from instructor)
 # - PHASE 2: Stablecoin Program Deployment (to be filled along the way)
-# - PHASE 3: CCIP Integration (to be filled along the way)
+# - PHASE 3: CCIP Integration (Solana Side) (to be filled along the way)
 # - PHASE 4: Ethereum Side Deployment (to be filled along the way)
+# - PHASE 5: Complete Cross-Chain Configuration (to be filled along the way)
+# - PHASE 6: Testing and Token Operations (to be filled along the way)
+# - PHASE 7: Execute Cross-Chain Transfer (to be filled along the way)
 ```
 
 ### Step 0.4: Important .env File Notes
