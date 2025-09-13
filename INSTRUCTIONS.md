@@ -546,10 +546,14 @@ ALT Address: [your-alt-address]
 vim .env
 # Add this line with your actual ALT address from above:
 # SOL_ALT_ADDRESS=[your-alt-address-from-above]
+```
 
+```bash
 # Load the updated variables
 source .env
+```
 
+```bash
 npm run svm:admin:set-pool -- \
   --token-mint $SOL_TOKEN_MINT \
   --lookup-table $SOL_ALT_ADDRESS \
@@ -689,11 +693,6 @@ source .env
 ```
 
 ### Step 4.6: Deploy TokenPool
-```bash
-# Load the Ethereum token address
-source .env
-```
-
 ```bash
 # Deploy token pool
 npx hardhat deployTokenPool \
