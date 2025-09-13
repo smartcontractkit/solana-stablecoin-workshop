@@ -882,6 +882,9 @@ spl-token balance $SOL_TOKEN_MINT
 ```
 
 ### Step 7.2: Execute Cross-Chain Transfer (Solana → Ethereum)
+
+**⚠️ Prerequisites:** Before executing the transfer, ensure your Ethereum receiver address is set:
+
 ```bash
 # Set your Ethereum receiver address
 vim .env
@@ -889,6 +892,8 @@ vim .env
 
 **📝 What to add in .env:**
 - Add: `ETH_RECEIVER_ADDRESS=[your-ethereum-wallet-address]`
+
+**💡 Important:** Use the same Ethereum wallet address where you want to receive the tokens. This should be the wallet you used for Ethereum deployment steps.
 
 ```bash
 # Load the updated variables
@@ -904,12 +909,14 @@ spl-token balance $SOL_TOKEN_MINT
 # Transfer your oracle-minted tokens (replace with your actual balance)
 yarn svm:token-transfer \
   --token-mint $SOL_TOKEN_MINT \
-  --amount [your-token-balance-from-above] \
+  --token-amount [your-token-balance-from-above] \
   --destination-chain ethereum-sepolia \
   --receiver-address $ETH_RECEIVER_ADDRESS
 ```
 
-**⚠️ Important:** Use `--receiver-address` (not `--destination-address`) to specify the Ethereum recipient address.
+**⚠️ Important:** 
+- Use `--token-amount` (not `--amount`) to specify the token amount
+- Use `--receiver-address` (not `--destination-address`) to specify the Ethereum recipient address
 
 **Expected Output:**
 ```
@@ -1044,8 +1051,9 @@ spl-token mint $SOL_TOKEN_MINT [amount] \
   --multisig-signer ~/.config/solana/id.json
 ```
 
-#### 5. Cross-Chain Transfer Goes to Wrong Address
-**Problem:** Transfer shows hardcoded fallback address instead of your intended receiver
+#### 5. Cross-Chain Transfer Issues
+
+**Problem A:** Transfer shows hardcoded fallback address instead of your intended receiver
 **Solution:** Use `--receiver-address` instead of `--destination-address`
 ```bash
 # ❌ Wrong - uses hardcoded fallback address
@@ -1053,6 +1061,16 @@ yarn svm:token-transfer --destination-address $ETH_RECEIVER_ADDRESS
 
 # ✅ Correct - uses your specified address  
 yarn svm:token-transfer --receiver-address $ETH_RECEIVER_ADDRESS
+```
+
+**Problem B:** Transfer uses default amount (10000000) instead of your specified amount
+**Solution:** Use `--token-amount` instead of `--amount`
+```bash
+# ❌ Wrong - parameter ignored, uses default amount
+yarn svm:token-transfer --amount 18000000
+
+# ✅ Correct - uses your specified amount
+yarn svm:token-transfer --token-amount 18000000
 ```
 
 #### 6. Oracle Testing Issues
