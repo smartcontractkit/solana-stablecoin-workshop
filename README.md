@@ -128,7 +128,9 @@ Rust >= 1.70.0
 # 1. Configure Solana
 solana config set --url devnet
 solana-keygen new
-solana airdrop 2
+solana airdrop 5
+
+> **💡** Press Enter for no passphrase, `y` to overwrite existing keys
 
 # 2. Follow complete deployment guide
 # See INSTRUCTIONS.md for detailed step-by-step process

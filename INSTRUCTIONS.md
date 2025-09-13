@@ -125,6 +125,11 @@ smart-contract-examples/ccip/cct/hardhat/.env -> ../../../../.env
 ```bash
 # Check the current .env file (located at project root, symlinked throughout)
 vim .env
+```
+
+> **📝** Vim: `i` to edit, `Esc` then `:wq` to save
+
+```bash
 
 # The file is organized by deployment phases:
 # - PHASE 1: Oracle Program Deployment (partially pre-filled, requires DATASTREAMS credentials from instructor)
@@ -1199,6 +1204,11 @@ npx tsx utils/derive-pdas.ts           # Instead of: npx ts-node utils/derive-pd
 npx tsx create-token-for-ccip.ts       # Instead of: npx ts-node create-token-for-ccip.ts  
 npx tsx mint-oracle-backed.ts          # Instead of: npx ts-node mint-oracle-backed.ts
 ```
+
+#### 8. CLI Prompt Issues
+
+**Stuck in vim:** Press `Esc`, type `:wq`, press Enter
+**Key generation prompts:** Press Enter (no passphrase), type `y` (overwrite)
 
 ---
 
