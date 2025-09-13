@@ -59,8 +59,13 @@ solana config get
 ### Step 0.1: Clone the Workshop Repository
 ```bash
 git clone https://github.com/smartcontractkit/solana-stablecoin-workshop
-cd solana-stablecoin-workshop
+```
 
+```bash
+cd solana-stablecoin-workshop
+```
+
+```bash
 # Initialize and update all submodules (required for CCIP integration)
 git submodule update --init --recursive
 ```
@@ -83,8 +88,17 @@ cp .env.example .env
 ```bash
 # Create symlinks so all directories use the same .env file
 ln -sf ../.env oracle/.env
+```
+
+```bash
 ln -sf ../../.env cross-chain-stablecoin/stablecoin-program/.env
+```
+
+```bash
 ln -sf ../../../../.env smart-contract-examples/ccip/cct/hardhat/.env
+```
+
+```bash
 ln -sf ../.env solana-starter-kit/.env
 ```
 
@@ -263,9 +277,17 @@ source .env
 ```
 
 ```bash
-# Update the stablecoin program to recognize your oracle BEFORE deployment
+# Navigate to the stablecoin program source directory
 cd programs/stablecoin-program/src/
+```
+
+```bash
+# Update the stablecoin program to recognize your oracle BEFORE deployment
 sed -i '' "s/pubkey!(\"[^\"]*\")/pubkey!(\"$ORACLE_PROGRAM_ID\")/" lib.rs
+```
+
+```bash
+# Return to the stablecoin program root directory
 cd ../../..
 ```
 
@@ -361,11 +383,14 @@ npx ts-node create-token-for-ccip.ts
 ```bash
 # Update .env with the token mint and other required variables
 vim .env
-# Find and update these lines:
-# SOL_TOKEN_MINT=[your-token-mint-address-from-above]
-# SOL_ADMIN_WALLET=[your-solana-wallet-address]
-# Add this line if not present: CCIP_POOL_PROGRAM=41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB
+```
 
+**📝 What to update in .env:**
+- Find and update: `SOL_TOKEN_MINT=[your-token-mint-address-from-above]`
+- Find and update: `SOL_ADMIN_WALLET=[your-solana-wallet-address]`
+- Add if not present: `CCIP_POOL_PROGRAM=41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB`
+
+```bash
 # Load the updated variables
 source .env
 ```
@@ -420,10 +445,13 @@ yarn svm:pool:initialize \
 ```bash
 # Update .env with the pool addresses
 vim .env
-# Add these lines with your actual addresses from the output above:
-# SOL_POOL_STATE_PDA=[your-pool-state-pda-from-above]
-# SOL_POOL_SIGNER_PDA=[your-pool-signer-pda-from-above]
+```
 
+**📝 What to update in .env:**
+- Add: `SOL_POOL_STATE_PDA=[your-pool-state-pda-from-above]`
+- Add: `SOL_POOL_SIGNER_PDA=[your-pool-signer-pda-from-above]`
+
+```bash
 # Load the updated variables
 source .env
 ```
@@ -539,7 +567,13 @@ cd ../smart-contract-examples/ccip/cct/hardhat
 ```bash
 # Load and export environment variables for Hardhat
 set -a  # Automatically export all variables
+```
+
+```bash
 source .env
+```
+
+```bash
 set +a  # Stop auto-exporting
 ```
 
@@ -606,9 +640,17 @@ vim .env
 ```bash
 # Reload environment variables
 set -a
-source .env
-set +a
+```
 
+```bash
+source .env
+```
+
+```bash
+set +a
+```
+
+```bash
 # Check your setup
 echo "🔑 Private Key: ${PRIVATE_KEY:0:10}..."
 echo "🔗 RPC URL: $ETHEREUM_SEPOLIA_RPC_URL"
@@ -843,15 +885,22 @@ spl-token balance $SOL_TOKEN_MINT
 ```bash
 # Set your Ethereum receiver address
 vim .env
-# Add this line with your Ethereum wallet address:
-# ETH_RECEIVER_ADDRESS=[your-ethereum-wallet-address]
+```
 
+**📝 What to add in .env:**
+- Add: `ETH_RECEIVER_ADDRESS=[your-ethereum-wallet-address]`
+
+```bash
 # Load the updated variables
 source .env
+```
 
+```bash
 # Check your current token balance first
 spl-token balance $SOL_TOKEN_MINT
+```
 
+```bash
 # Transfer your oracle-minted tokens (replace with your actual balance)
 yarn svm:token-transfer \
   --token-mint $SOL_TOKEN_MINT \
