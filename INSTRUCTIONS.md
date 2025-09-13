@@ -49,6 +49,17 @@ solana config set --keypair ~/.config/solana/id.json
 solana config get
 ```
 
+### Get Devnet SOL Funds
+```bash
+# Get initial SOL for workshop (covers all deployment costs)
+solana airdrop 5
+```
+
+**💰 Need More SOL?** 
+- The stablecoin program deployment requires ~2.3 SOL
+- If you need additional funds, visit: [https://faucet.solana.com/](https://faucet.solana.com/)
+- You can request up to 2 SOL every 8 hours (sign in with GitHub for higher limits)
+
 ---
 
 ## 🔧 Environment Setup (Required Before Phase 1)
