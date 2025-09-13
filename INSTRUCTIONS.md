@@ -7,13 +7,13 @@ This document provides comprehensive instructions for building a fully functiona
 ## 🎯 System Overview
 
 **What We're Building:**
-- **Oracle-backed stablecoin** using real Chainlink Data Streams (SOL/USD price feeds)
+- **Oracle-backed stablecoin** using real Chainlink Data Streams SDK (SOL/USD price feeds)
 - **Cross-chain token transfers** via Chainlink CCIP (Solana ↔ Ethereum)
 - **Production-ready architecture** with proper multisig authority management
 - **Real-time price verification** and on-chain storage
 
 **Key Components:**
-1. **Oracle Program** - Verifies and stores Chainlink Data Streams on Solana
+1. **Oracle Program** - Verifies and stores Chainlink Data Streams SDK reports on Solana
 2. **Stablecoin Program** - Mints tokens based on oracle price data via CPI
 3. **CCIP Integration** - Enables cross-chain transfers using Chainlink infrastructure
 4. **Multisig Authority** - Manages mint authority for both oracle and CCIP operations
@@ -37,7 +37,7 @@ npm install -g @coral-xyz/anchor-cli
 ### Required Accounts
 - **Solana Wallet** with devnet SOL
 - **Ethereum Wallet** with Sepolia ETH
-- **Chainlink Data Streams** access
+- **Chainlink Data Streams SDK** access
 
 ### Environment Setup
 ```bash
@@ -839,7 +839,7 @@ npx ts-node mint-oracle-backed.ts
 ```
 🔮 Minting oracle-backed stablecoins...
 💰 Collateral: 0.1 SOL (100,000,000 lamports)
-📊 Using real SOL/USD price from Chainlink Data Streams
+📊 Using real SOL/USD price from Chainlink Data Streams SDK
 ✅ Oracle-backed minting successful!
 🔗 Transaction: [transaction-hash]
 💰 Tokens minted: ~[X.X] USD worth (based on current SOL price)
