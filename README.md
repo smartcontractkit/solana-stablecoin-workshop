@@ -20,6 +20,34 @@ This repository contains a **complete workshop implementation** of an **oracle-b
 - **Harry** - Chainlink Data Streams and Oracle Program implementation
 - **Jae** - Stablecoin integration with Oracle Program and Cross-Chain CCIP configuration
 
+## 📋 Prerequisites
+
+**Before starting the workshop, ensure you have:**
+
+### Required Tools
+- **[Solana CLI](https://docs.solana.com/cli/install-solana-cli-tools)** - `sh -c "$(curl -sSfL https://release.solana.com/v1.18.4/install)"`
+- **[Anchor Framework](https://www.anchor-lang.com/docs/installation)** - `npm install -g @coral-xyz/anchor-cli`
+- **[Node.js](https://nodejs.org/)** (v16+) and **npm**
+- **[Git](https://git-scm.com/downloads)** for repository management
+
+### Required Accounts & Access
+- **Solana Wallet** with devnet SOL ([faucet.solana.com](https://faucet.solana.com/))
+- **Ethereum Wallet** with Sepolia ETH ([sepoliafaucet.com](https://sepoliafaucet.com/))
+- **Chainlink Data Streams SDK** access (provided in workshop)
+
+### Quick Setup Verification
+```bash
+# Verify installations
+solana --version        # Should show v1.18.4+
+anchor --version        # Should show 0.29.0+
+node --version          # Should show v16+
+git --version           # Any recent version
+
+# Configure Solana for devnet
+solana config set --url https://api.devnet.solana.com
+solana airdrop 5        # Get initial SOL (~2.3 SOL needed for deployment)
+```
+
 ## 📁 Project Structure
 
 ```
