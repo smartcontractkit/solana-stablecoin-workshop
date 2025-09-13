@@ -660,7 +660,7 @@ npx hardhat deployToken \
   --name "Oracle-Backed Stablecoin" \
   --symbol "OBSC" \
   --decimals 6 \
-  --premint 1000000000000 \
+  --premint 0 \
   --maxsupply 1000000000000000
 ```
 
