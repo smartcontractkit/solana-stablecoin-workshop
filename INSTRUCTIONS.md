@@ -909,6 +909,46 @@ CCIP Message ID: [ccip-message-id]
 
 **💡 Critical:** Always specify `--amount` with your exact token balance to ensure the correct oracle-backed USD value transfers to Ethereum. The system will burn exactly what you specify on Solana and mint the same amount on Ethereum.
 
+### Step 7.2: Execute Cross-Chain Transfer (Ethereum → Solana)
+
+```bash
+# Navigate to solana-starter-kit (if not already there)
+cd ../../solana-starter-kit
+```
+
+```bash
+# Load environment variables
+source .env
+```
+
+```bash
+# Transfer your Ethereum-minted OBSC tokens back to Solana (burn on EVM, mint on SVM)
+# IMPORTANT: Use the -- separator so flags are passed to the script
+npm run evm:transfer -- \
+  --token $ETH_TOKEN_ADDRESS \
+  --amount [raw-token-amount-with-decimals] \
+  --token-receiver $SOL_ADMIN_WALLET \
+  --private-key $PRIVATE_KEY
+```
+
+**Notes:**
+- **Token amount units:** OBSC uses 6 decimals. For 20 tokens, use `20000000`.
+- **Fee token:** Defaults to LINK. Ensure you have enough LINK on Sepolia for CCIP fees.
+- **Receiver flags:** Use `--token-receiver` with your Solana wallet address. Do not use `--receiver-address` here (that flag is for Solana → EVM).
+- **RPC URL:** The script reads `ETHEREUM_SEPOLIA_RPC_URL` from `.env` (no CLI flag). Ensure it is set.
+
+**Expected Output:**
+```
+✅ Token Transfer Complete!
+Transaction URL: https://sepolia.etherscan.io/tx/[tx-hash]
+👉 CCIP Explorer: https://ccip.chain.link/msg/[message-id]
+```
+
+**Troubleshooting:**
+- If you see warnings like `npm warn Unknown cli config "--token"`, you likely forgot the `--` separator. Run with `npm run evm:transfer -- --token ...`.
+- If logs show `Using default BnM token transfer`, your flags weren’t parsed. Ensure you used the `--` separator and the correct flag names: `--token`, `--amount`, `--token-receiver`, `--private-key`.
+- If the receiver shows `11111111111111111111111111111111`, set a proper `--receiver` (CCIP message receiver) if needed. Token delivery is controlled by `--token-receiver`.
+
 ### Step 7.3: Monitor Transfer Progress
 - **Solana Explorer:** https://explorer.solana.com/tx/[transaction-hash]?cluster=devnet
 - **CCIP Explorer:** https://ccip.chain.link/msg/[message-id]
