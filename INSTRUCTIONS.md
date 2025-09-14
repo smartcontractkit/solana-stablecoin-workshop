@@ -40,9 +40,11 @@ npm install -g @coral-xyz/anchor-cli
 
 ### Required Accounts & Access
 - **Solana Wallet** with devnet SOL
-  - Get SOL from: [https://faucet.solana.com/](https://faucet.solana.com/)
+  - Command: `solana airdrop 5` (covers all deployment costs ~2.3 SOL)
+  - Additional SOL: [https://faucet.solana.com/](https://faucet.solana.com/)
 - **Ethereum Wallet** with Sepolia ETH
-  - Get Sepolia ETH from: [https://sepoliafaucet.com/](https://sepoliafaucet.com/)
+  - **Ask instructor for Sepolia ETH** (recommended - faster)
+  - Alternative faucets: [https://faucets.chain.link/](https://faucets.chain.link/) or [https://sepoliafaucet.com/](https://sepoliafaucet.com/)
 - **Chainlink Data Streams SDK** access (provided in workshop)
 
 
@@ -564,7 +566,12 @@ npm run svm:admin:set-pool -- \
 
 ## 🔗 Phase 4: Ethereum Side Deployment
 
-### Step 4.1: Setup Ethereum Environment
+### Step 4.1: Setup Ethereum Environment & Credentials
+
+**⚠️ Prerequisites:** Ensure you have Sepolia ETH for gas fees (~0.01 ETH needed)
+- **Ask instructor for Sepolia ETH** (recommended - faster)
+- Alternative: Visit [https://faucet.chain.link/](https://faucet.chain.link/) → Connect wallet → Request Sepolia ETH → Wait for confirmation
+
 ```bash
 # Navigate to Hardhat directory (from solana-starter-kit directory)
 cd ../smart-contract-examples/ccip/cct/hardhat
@@ -586,23 +593,29 @@ set +a  # Stop auto-exporting
 ```bash
 # Verify Ethereum variables are set
 echo "🔗 Ethereum RPC: $ETHEREUM_SEPOLIA_RPC_URL"
+```
+
+```bash
 echo "🔑 Private Key: ${PRIVATE_KEY:0:10}..." # Show only first 10 chars for security
+```
+
+```bash
 echo "🔍 Etherscan API: ${ETHERSCAN_API_KEY:0:10}..."
 ```
 
 **ℹ️ What `set -a` does:** This command exports all variables to child processes (like Hardhat), ensuring they're available to Node.js.
 
-**📝 Note:** If any Ethereum variables show as empty, update your root `.env` file:
+**📝 Missing credentials?** Update your `.env` file:
 ```bash
 # Update .env file (symlinked to root) directly
 vim .env
 # Add these lines with your actual credentials:
-# PRIVATE_KEY=0x[your-private-key-here]
+# PRIVATE_KEY=0x[your-64-character-private-key-here]
 # ETHERSCAN_API_KEY=[your-etherscan-api-key-here]
 ```
 
 ```bash
-# Load the updated variables
+# Reload after editing
 source .env
 ```
 
@@ -624,47 +637,7 @@ Successfully generated 172 typings!
 Compiled 58 Solidity files successfully (evm target: paris).
 ```
 
-### Step 4.4: Setup Ethereum Wallet and Get Testnet ETH
-
-**⚠️ Prerequisites for Ethereum Deployment:**
-
-Before deploying contracts, ensure you have:
-
-1. **Private Key in .env file:**
-```bash
-# Edit your .env file to add your Ethereum private key
-vim .env
-# Add this line with your actual private key:
-# PRIVATE_KEY=0x[your-64-character-private-key-here]
-```
-
-2. **Testnet ETH for gas fees:**
-   - Visit: https://faucet.chain.link/
-   - Connect your Ethereum wallet
-   - Request Sepolia ETH (you'll need ~0.01 ETH for deployments)
-   - Wait for the transaction to confirm
-
-3. **Verify setup:**
-```bash
-# Reload environment variables
-set -a
-```
-
-```bash
-source .env
-```
-
-```bash
-set +a
-```
-
-```bash
-# Check your setup
-echo "🔑 Private Key: ${PRIVATE_KEY:0:10}..."
-echo "🔗 RPC URL: $ETHEREUM_SEPOLIA_RPC_URL"
-```
-
-### Step 4.5: Deploy ERC20 Token for Oracle-Backed Stablecoin
+### Step 4.4: Deploy ERC20 Token for Oracle-Backed Stablecoin
 ```bash
 npx hardhat deployToken \
   --network sepolia \
@@ -694,7 +667,7 @@ vim .env
 source .env
 ```
 
-### Step 4.6: Deploy TokenPool
+### Step 4.5: Deploy TokenPool
 ```bash
 # Deploy token pool
 npx hardhat deployTokenPool \
@@ -721,7 +694,7 @@ vim .env
 source .env
 ```
 
-### Step 4.7: Claim and Accept Admin Role
+### Step 4.6: Claim and Accept Admin Role
 ```bash
 # Claim admin
 npx hardhat claimAdmin \
@@ -736,7 +709,7 @@ npx hardhat acceptAdminRole \
   --tokenaddress $ETH_TOKEN_ADDRESS
 ```
 
-### Step 4.8: Register Pool with TokenAdminRegistry
+### Step 4.7: Register Pool with TokenAdminRegistry
 ```bash
 npx hardhat setPool \
   --network sepolia \
@@ -744,7 +717,7 @@ npx hardhat setPool \
   --pooladdress $ETH_TOKEN_POOL
 ```
 
-### Step 4.9: Configure Cross-Chain Connectivity (Ethereum → Solana)
+### Step 4.8: Configure Cross-Chain Connectivity (Ethereum → Solana)
 ```bash
 npx hardhat applyChainUpdates \
   --network sepolia \
