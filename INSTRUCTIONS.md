@@ -735,10 +735,14 @@ npx hardhat applyChainUpdates \
 ```bash
 # Navigate back to solana-starter-kit (from hardhat directory)
 cd ../../../../solana-starter-kit
+```
 
+```bash
 # Load environment variables
 source .env
+```
 
+```bash
 # Initialize chain remote config
 npm run svm:pool:init-chain-remote-config -- \
   --token-mint $SOL_TOKEN_MINT \
