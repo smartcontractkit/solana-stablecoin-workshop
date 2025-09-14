@@ -26,6 +26,8 @@ This repository contains a **complete workshop implementation** of an **oracle-b
 
 **[→ INSTRUCTIONS.md](./INSTRUCTIONS.md)** - Complete prerequisites, installation, and deployment walkthrough
 
+For Korean instructions, see **[INSTRUCTIONS_KR.md](./INSTRUCTIONS_KR.md)**.
+
 If you encounter any issues during the workshop, check the troubleshooting section in INSTRUCTIONS.md.
 
 ## 📁 Project Structure
