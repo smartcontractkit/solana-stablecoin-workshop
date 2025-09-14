@@ -39,6 +39,10 @@ npm install -g @coral-xyz/anchor-cli
 ```
 
 ### 필수 계정 및 접근 권한
+
+**아직 Solana 지갑이 없으신가요?**
+1) 생성: `solana-keygen new -o ~/.config/solana/id.json`
+2) 주소 확인: `solana address`
 - **Solana 지갑**(devnet SOL 보유)
   - 명령어: `solana airdrop 5` (전체 배포 비용 약 ~2.3 SOL 커버)
   - 추가 SOL: [https://faucet.solana.com/](https://faucet.solana.com/)
