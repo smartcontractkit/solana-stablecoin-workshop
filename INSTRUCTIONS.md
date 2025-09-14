@@ -857,12 +857,7 @@ Delegate: 2AjuzTy6z2webxEUu7eZ1DkAyLagZaqH2dgzhbBYjJiG (CCIP fee-billing PDA)
 
 ## 🌉 Phase 7: Execute Cross-Chain Transfer
 
-### Step 7.1: Verify Token Balance
-```bash
-spl-token balance $SOL_TOKEN_MINT
-```
-
-### Step 7.2: Execute Cross-Chain Transfer (Solana → Ethereum)
+### Step 7.1: Execute Cross-Chain Transfer (Solana → Ethereum)
 
 **⚠️ Prerequisites:** Before executing the transfer, ensure your Ethereum receiver address is set:
 
