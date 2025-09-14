@@ -39,6 +39,10 @@ npm install -g @coral-xyz/anchor-cli
 ```
 
 ### Required Accounts & Access
+
+**Don’t have a Solana wallet yet?**
+1) Create one: `solana-keygen new -o ~/.config/solana/id.json`
+2) Show address: `solana address`
 - **Solana Wallet** with devnet SOL
   - Command: `solana airdrop 5` (covers all deployment costs ~2.3 SOL)
   - Additional SOL: [https://faucet.solana.com/](https://faucet.solana.com/)
