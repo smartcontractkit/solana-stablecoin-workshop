@@ -13,7 +13,7 @@ This repository contains a **complete workshop implementation** of an **oracle-b
 - **Oracle program** for on-chain price verification and storage
 - **Stablecoin program** with collateral management and minting logic
 - **Cross-chain transfers** using Chainlink CCIP
-- **Multisig security** with SPL Token multisig integration
+- **Multisig authority management** with SPL Token multisig integration
 - **Production-ready testing** with comprehensive test suites
 
 ### Workshop Instructors
@@ -54,7 +54,7 @@ graph LR
     
     subgraph "🪙 Stablecoin System (Jae)"
         SP[Stablecoin Program<br/>Mint/Burn Logic]
-        MS[SPL Token Multisig<br/>1-of-3 Security]
+        MS[SPL Token Multisig<br/>1-of-3 Authority]
         
         OP --> SP
         SP --> MS
@@ -150,7 +150,7 @@ cd cross-chain-stablecoin/stablecoin-program
 ### Part 2: Stablecoin & Cross-Chain Integration (Jae)
 - Build oracle-backed stablecoin with collateral management
 - Implement Cross-Program Invocation (CPI) between programs
-- Configure SPL Token multisig for enhanced security
+- Configure SPL Token multisig for authority management
 - Set up CCIP for cross-chain token transfers
 - Deploy and configure Ethereum side components
 
@@ -166,7 +166,7 @@ Each component includes comprehensive documentation:
 By completing this workshop, you will have:
 
 ✅ **Built a datastreams-backed stablecoin system**  
-✅ **Implemented secure multisig authority management**  
+✅ **Implemented multisig authority management**  
 ✅ **Configured cross-chain transfers via CCIP**  
 ✅ **Deployed to both Solana and Ethereum networks**  
 
