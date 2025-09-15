@@ -23,25 +23,28 @@ This document provides comprehensive instructions for building a fully functiona
 ## 📋 Prerequisites
 
 ### Required Tools
-```bash
-# Solana CLI (v1.18.4+)
-sh -c "$(curl -sSfL https://release.solana.com/v1.18.4/install)"
 
-# Anchor Framework (v0.31.1+)
+Solana CLI (v1.18.4+)
+```bash
+sh -c "$(curl -sSfL https://release.solana.com/v1.18.4/install)"
+```
+
+Anchor Framework (v0.31.1+)
+```bash
 npm install -g @coral-xyz/anchor-cli
+```
 
 **macOS (if npm install is unavailable):**
 ```bash
 cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
 ```
 
-# Node.js (v16+) and npm
-# Download from: https://nodejs.org/
-# Or use package manager: brew install node (macOS) / apt install nodejs npm (Ubuntu)
+Node.js (v16+) and npm
+- Download from: https://nodejs.org/
+- Or use package manager: brew install node (macOS) / apt install nodejs npm (Ubuntu)
 
-# Git
-# Install via your system package manager or https://git-scm.com/downloads
-```
+Git
+- Install via your system package manager or https://git-scm.com/downloads
 
 ### Required Accounts & Access
 
