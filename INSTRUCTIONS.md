@@ -7,13 +7,13 @@ This document provides comprehensive instructions for building a fully functiona
 ## 🎯 System Overview
 
 **What We're Building:**
-- **Oracle-backed stablecoin** using real Chainlink Data Streams (SOL/USD price feeds)
+- **Oracle-backed stablecoin** using Chainlink Data Streams SDK (SOL/USD price feeds)
 - **Cross-chain token transfers** via Chainlink CCIP (Solana ↔ Ethereum)
 - **Production-ready architecture** with proper multisig authority management
 - **Real-time price verification** and on-chain storage
 
 **Key Components:**
-1. **Oracle Program** - Verifies and stores Chainlink Data Streams on Solana
+1. **Oracle Program** - Verifies and stores Chainlink Data Streams SDK reports on Solana
 2. **Stablecoin Program** - Mints tokens based on oracle price data via CPI
 3. **CCIP Integration** - Enables cross-chain transfers using Chainlink infrastructure
 4. **Multisig Authority** - Manages mint authority for both oracle and CCIP operations
@@ -23,45 +23,57 @@ This document provides comprehensive instructions for building a fully functiona
 ## 📋 Prerequisites
 
 ### Required Tools
+
+Solana CLI (v1.18.4+)
 ```bash
-# Solana CLI
 sh -c "$(curl -sSfL https://release.solana.com/v1.18.4/install)"
-
-# Anchor Framework
-npm install -g @coral-xyz/anchor-cli
-
-# Node.js and Yarn
-npm install -g yarn
-
-# Git
-# Install via your system package manager
 ```
 
-### Required Accounts
-- **Solana Wallet** with devnet SOL
-- **Ethereum Wallet** with Sepolia ETH
-- **Chainlink Data Streams** access
-
-### Environment Setup
+Anchor Framework (v0.31.1+)
 ```bash
-# Configure Solana CLI for devnet
-solana config set --url https://api.devnet.solana.com
-solana config set --keypair ~/.config/solana/id.json
-
-# Verify configuration
-solana config get
+npm install -g @coral-xyz/anchor-cli
 ```
 
----
+**macOS (if npm install is unavailable):**
+```bash
+cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
+```
+
+Node.js (v16+) and npm
+- Download from: https://nodejs.org/
+- Or use package manager: brew install node (macOS) / apt install nodejs npm (Ubuntu)
+
+Git
+- Install via your system package manager or https://git-scm.com/downloads
+
+### Required Accounts & Access
+
+**Don’t have a Solana wallet yet?**
+1) Create one: `solana-keygen new -o ~/.config/solana/id.json`
+2) Show address: `solana address`
+- **Solana Wallet** with devnet SOL
+  - Command: `solana airdrop 5` (covers all deployment costs ~2.3 SOL)
+  - Additional SOL: [https://faucet.solana.com/](https://faucet.solana.com/)
+- **Ethereum Wallet** with Sepolia ETH
+  - **Ask instructor for Sepolia ETH** (recommended - faster)
+  - Alternative faucets: [https://faucets.chain.link/](https://faucets.chain.link/) or [https://sepoliafaucet.com/](https://sepoliafaucet.com/)
+- **Chainlink Data Streams SDK** access (provided in workshop)
+
 
 ## 🔧 Environment Setup (Required Before Phase 1)
 
 ### Step 0.1: Clone the Workshop Repository
 ```bash
 git clone https://github.com/smartcontractkit/solana-stablecoin-workshop
-cd solana-stablecoin-workshop
+```
 
+```bash
+cd solana-stablecoin-workshop
+```
+
+```bash
 # Initialize and update all submodules (required for CCIP integration)
+# ⚠️ WARNING: This can take 5+ minutes depending on your environment
 git submodule update --init --recursive
 ```
 
@@ -105,12 +117,20 @@ smart-contract-examples/ccip/cct/hardhat/.env -> ../../../../.env
 ```bash
 # Check the current .env file (located at project root, symlinked throughout)
 vim .env
+```
+
+**📝 Vim:** `i` to edit, `Esc` then `:wq` to save
+
+```bash
 
 # The file is organized by deployment phases:
 # - PHASE 1: Oracle Program Deployment (partially pre-filled, requires DATASTREAMS credentials from instructor)
 # - PHASE 2: Stablecoin Program Deployment (to be filled along the way)
-# - PHASE 3: CCIP Integration (to be filled along the way)
+# - PHASE 3: CCIP Integration (Solana Side) (to be filled along the way)
 # - PHASE 4: Ethereum Side Deployment (to be filled along the way)
+# - PHASE 5: Complete Cross-Chain Configuration (to be filled along the way)
+# - PHASE 6: Testing and Token Operations (to be filled along the way)
+# - PHASE 7: Execute Cross-Chain Transfer (to be filled along the way)
 ```
 
 ### Step 0.4: Important .env File Notes
@@ -191,7 +211,7 @@ ORACLE_PROGRAM_ID=
 ORACLE_PROGRAM_ID=9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1
 ```
 
-**⚠️ Important:** The client reads `ORACLE_PROGRAM_ID` from the `.env` file, so this step is required for the oracle client to work with your deployed program.
+**⚠️ Required:** Oracle client needs `ORACLE_PROGRAM_ID` from `.env`.
 
 ### Step 1.4: Initialize Oracle Price Feed
 ```bash
@@ -217,7 +237,7 @@ Each workshop participant will get their own unique addresses:
 - **Oracle Program ID:** `[your-unique-oracle-program-id]` *(generated during your deployment)*
 - **Price Feed PDA:** `[your-unique-price-feed-pda]` *(derived from your oracle program)*
 
-**⚠️ Important:** Every participant will have different addresses! The Price Feed PDA is derived from YOUR specific deployed oracle program ID. Make sure to update your `.env` file with YOUR addresses from the deployment output.
+**⚠️ Important:** Use YOUR addresses from deployment output (each participant has different addresses).
 
 **Example addresses (for reference only):**
 - Oracle Program ID: `9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1`
@@ -226,7 +246,7 @@ Each workshop participant will get their own unique addresses:
 ### Step 1.5: Update Oracle Price Feed PDA in Environment
 ```bash
 # Edit the .env file to add your oracle price feed PDA from Step 1.4 output
-vim .env
+vim ../.env
 ```
 
 **📝 What to update:**
@@ -263,13 +283,27 @@ source .env
 ```
 
 ```bash
-# Update the stablecoin program to recognize your oracle BEFORE deployment
+# Navigate to the stablecoin program source directory
 cd programs/stablecoin-program/src/
-sed -i '' "s/pubkey!(\"[^\"]*\")/pubkey!(\"$ORACLE_PROGRAM_ID\")/" lib.rs
+```
+
+```bash
+# Update the stablecoin program to recognize your oracle BEFORE deployment
+vim lib.rs
+
+# Find line 11 that looks like:
+# const ORACLE_PROGRAM_ID: Pubkey = pubkey!("9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1");
+# 
+# Replace the program ID with your oracle program ID from .env:
+# const ORACLE_PROGRAM_ID: Pubkey = pubkey!("YOUR_ORACLE_PROGRAM_ID_HERE");
+```
+
+```bash
+# Return to the stablecoin program root directory
 cd ../../..
 ```
 
-**⚠️ Why This Step is Required:** The stablecoin program has a security constraint that only allows interaction with a specific oracle program. We update this constraint to recognize your oracle as legitimate before deployment.
+**⚠️ Required:** Update stablecoin program to recognize your oracle program ID.
 
 ### Step 2.4: Build and Deploy Stablecoin Program
 ```bash
@@ -293,7 +327,12 @@ vim .env
 # Example: STABLECOIN_PROGRAM_ID=GpBchCTBC6HbmX8j4AHfGDukuxTyvWR5BTqfosVK2SBU
 ```
 
-**📝 Why This Step is Critical:** The PDA derivation script in Step 2.5 requires the correct `STABLECOIN_PROGRAM_ID` to generate the proper mint authority PDA. Without this, you'll get incorrect PDAs that won't work with your deployed program.
+```bash
+# Load your stablecoin program ID from .env
+source .env
+```
+
+**📝 Note:** PDA derivation requires the correct `STABLECOIN_PROGRAM_ID`.
 
 ### Step 2.5: Derive Stablecoin Mint Authority PDA
 ```bash
@@ -305,6 +344,8 @@ npm install
 # Derive the stablecoin program's mint authority PDA (needed for multisig in Phase 3)
 npx ts-node utils/derive-pdas.ts
 ```
+
+**💡 TypeScript issues?** If `ts-node` fails, see [TypeScript Execution Issues](#7-typescript-execution-issues) for the `tsx` alternative.
 
 ```bash
 # Update .env file with the mint authority PDA
@@ -350,17 +391,22 @@ npx ts-node create-token-for-ccip.ts
 🔗 Transaction: [transaction-hash]
 ```
 
+**💡 Token Decimals:** This stablecoin uses 6 decimals (like USDC). So 1,000,000 tokens = 1.0 actual tokens, and 18,000,000 tokens = 18.0 actual tokens.
+
 **Key Address to Save:**
 - **Stablecoin Token Mint:** `[your-token-mint-address]` *(copy this address)*
 
 ```bash
 # Update .env with the token mint and other required variables
 vim .env
-# Find and update these lines:
-# SOL_TOKEN_MINT=[your-token-mint-address-from-above]
-# SOL_ADMIN_WALLET=[your-solana-wallet-address]
-# Add this line if not present: CCIP_POOL_PROGRAM=41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB
+```
 
+**📝 What to update in .env:**
+- Find and update: `SOL_TOKEN_MINT=[your-token-mint-address-from-above]`
+- Find and update: `SOL_ADMIN_WALLET=[your-solana-wallet-address]`
+- Add if not present: `CCIP_POOL_PROGRAM=41FGToCmdaWa1dgZLKFAjvmx6e6AjVTX7SVRibvsMGVB`
+
+```bash
 # Load the updated variables
 source .env
 ```
@@ -378,7 +424,7 @@ cd ../../solana-starter-kit
 
 ```bash
 # Install dependencies
-yarn install
+npm install
 ```
 
 ### Step 3.2: Load Environment Variables
@@ -395,7 +441,7 @@ echo "🏊 Pool Program: $CCIP_POOL_PROGRAM"
 
 ### Step 3.3: Initialize CCIP Token Pool
 ```bash
-yarn svm:pool:initialize \
+npm run svm:pool:initialize -- \
   --token-mint $SOL_TOKEN_MINT \
   --burn-mint-pool-program $CCIP_POOL_PROGRAM
 ```
@@ -415,10 +461,13 @@ yarn svm:pool:initialize \
 ```bash
 # Update .env with the pool addresses
 vim .env
-# Add these lines with your actual addresses from the output above:
-# SOL_POOL_STATE_PDA=[your-pool-state-pda-from-above]
-# SOL_POOL_SIGNER_PDA=[your-pool-signer-pda-from-above]
+```
 
+**📝 What to update in .env:**
+- Add: `SOL_POOL_STATE_PDA=[your-pool-state-pda-from-above]`
+- Add: `SOL_POOL_SIGNER_PDA=[your-pool-signer-pda-from-above]`
+
+```bash
 # Load the updated variables
 source .env
 ```
@@ -426,18 +475,36 @@ source .env
 ### Step 3.4: Set Up CCIP Administration
 ```bash
 # Propose administrator
-yarn svm:admin:propose-administrator \
+npm run svm:admin:propose-administrator -- \
   --token-mint $SOL_TOKEN_MINT \
   --administrator $SOL_ADMIN_WALLET
 ```
 
 ```bash
 # Accept admin role
-yarn svm:admin:accept-admin-role \
+npm run svm:admin:accept-admin-role -- \
   --token-mint $SOL_TOKEN_MINT
 ```
 
 ### Step 3.5: Create SPL Token Multisig (Critical for CCIP + Oracle Integration)
+
+**⚠️ Prerequisites Check:** Before creating the multisig, ensure all required addresses are set:
+```bash
+# Load environment variables
+source .env
+
+# Verify all required addresses are set
+echo "🔍 Verifying multisig prerequisites:"
+echo "📍 Pool Signer PDA: $SOL_POOL_SIGNER_PDA"
+echo "👤 Admin Wallet: $SOL_ADMIN_WALLET"
+echo "🔑 Mint Authority PDA: $SOL_MINT_AUTHORITY_PDA"
+```
+
+**📝 If any address shows as empty:**
+- `SOL_ADMIN_WALLET`: Run `solana address` and update your `.env` file
+- `SOL_POOL_SIGNER_PDA`: Complete Step 3.3 (Initialize CCIP Token Pool)
+- `SOL_MINT_AUTHORITY_PDA`: Complete Step 2.5 (Derive Stablecoin Mint Authority PDA)
+
 ```bash
 # Create 1-of-3 multisig with Pool Signer PDA, Admin Wallet, and Stablecoin Mint Authority PDA
 spl-token create-multisig 1 \
@@ -472,7 +539,7 @@ spl-token authorize $SOL_TOKEN_MINT mint $SOL_MULTISIG_ADDRESS
 
 ### Step 3.7: Create Address Lookup Table (ALT)
 ```bash
-yarn svm:admin:create-alt \
+npm run svm:admin:create-alt -- \
   --token-mint $SOL_TOKEN_MINT \
   --pool-program $CCIP_POOL_PROGRAM \
   --additional-addresses $SOL_MULTISIG_ADDRESS
@@ -493,11 +560,15 @@ ALT Address: [your-alt-address]
 vim .env
 # Add this line with your actual ALT address from above:
 # SOL_ALT_ADDRESS=[your-alt-address-from-above]
+```
 
+```bash
 # Load the updated variables
 source .env
+```
 
-yarn svm:admin:set-pool \
+```bash
+npm run svm:admin:set-pool -- \
   --token-mint $SOL_TOKEN_MINT \
   --lookup-table $SOL_ALT_ADDRESS \
   --writable-indices 3,4,7
@@ -507,7 +578,12 @@ yarn svm:admin:set-pool \
 
 ## 🔗 Phase 4: Ethereum Side Deployment
 
-### Step 4.1: Setup Ethereum Environment
+### Step 4.1: Setup Ethereum Environment & Credentials
+
+**⚠️ Prerequisites:** Ensure you have Sepolia ETH for gas fees (~0.01 ETH needed)
+- **Ask instructor for Sepolia ETH** (recommended - faster)
+- Alternative: Visit [https://faucet.chain.link/](https://faucet.chain.link/) → Connect wallet → Request Sepolia ETH → Wait for confirmation
+
 ```bash
 # Navigate to Hardhat directory (from solana-starter-kit directory)
 cd ../smart-contract-examples/ccip/cct/hardhat
@@ -516,28 +592,42 @@ cd ../smart-contract-examples/ccip/cct/hardhat
 ```bash
 # Load and export environment variables for Hardhat
 set -a  # Automatically export all variables
+```
+
+```bash
 source .env
+```
+
+```bash
 set +a  # Stop auto-exporting
 ```
 
 ```bash
 # Verify Ethereum variables are set
 echo "🔗 Ethereum RPC: $ETHEREUM_SEPOLIA_RPC_URL"
+```
+
+```bash
 echo "🔑 Private Key: ${PRIVATE_KEY:0:10}..." # Show only first 10 chars for security
+```
+
+```bash
 echo "🔍 Etherscan API: ${ETHERSCAN_API_KEY:0:10}..."
 ```
 
 **ℹ️ What `set -a` does:** This command exports all variables to child processes (like Hardhat), ensuring they're available to Node.js.
 
-**📝 Note:** If any Ethereum variables show as empty, update your root `.env` file:
+**📝 Missing credentials?** Update your `.env` file:
 ```bash
 # Update .env file (symlinked to root) directly
 vim .env
 # Add these lines with your actual credentials:
-# PRIVATE_KEY=0x[your-private-key-here]
+# PRIVATE_KEY=0x[your-64-character-private-key-here]
 # ETHERSCAN_API_KEY=[your-etherscan-api-key-here]
+```
 
-# Load the updated variables
+```bash
+# Reload after editing
 source .env
 ```
 
@@ -559,46 +649,14 @@ Successfully generated 172 typings!
 Compiled 58 Solidity files successfully (evm target: paris).
 ```
 
-### Step 4.4: Setup Ethereum Wallet and Get Testnet ETH
-
-**⚠️ Prerequisites for Ethereum Deployment:**
-
-Before deploying contracts, ensure you have:
-
-1. **Private Key in .env file:**
-```bash
-# Edit your .env file to add your Ethereum private key
-vim .env
-# Add this line with your actual private key:
-# PRIVATE_KEY=0x[your-64-character-private-key-here]
-```
-
-2. **Testnet ETH for gas fees:**
-   - Visit: https://faucet.chain.link/
-   - Connect your Ethereum wallet
-   - Request Sepolia ETH (you'll need ~0.01 ETH for deployments)
-   - Wait for the transaction to confirm
-
-3. **Verify setup:**
-```bash
-# Reload environment variables
-set -a
-source .env
-set +a
-
-# Check your setup
-echo "🔑 Private Key: ${PRIVATE_KEY:0:10}..."
-echo "🔗 RPC URL: $ETHEREUM_SEPOLIA_RPC_URL"
-```
-
-### Step 4.5: Deploy ERC20 Token for Oracle-Backed Stablecoin
+### Step 4.4: Deploy ERC20 Token for Oracle-Backed Stablecoin
 ```bash
 npx hardhat deployToken \
   --network sepolia \
   --name "Oracle-Backed Stablecoin" \
   --symbol "OBSC" \
   --decimals 6 \
-  --premint 1000000000000 \
+  --premint 0 \
   --maxsupply 1000000000000000
 ```
 
@@ -616,12 +674,12 @@ vim .env
 # Find ETH_TOKEN_ADDRESS= and add your token address from the deployment output above
 ```
 
-### Step 4.6: Deploy TokenPool
 ```bash
-# Load the Ethereum token address
+# Reload environment variables after updating .env
 source .env
 ```
 
+### Step 4.5: Deploy TokenPool
 ```bash
 # Deploy token pool
 npx hardhat deployTokenPool \
@@ -648,7 +706,7 @@ vim .env
 source .env
 ```
 
-### Step 4.7: Claim and Accept Admin Role
+### Step 4.6: Claim and Accept Admin Role
 ```bash
 # Claim admin
 npx hardhat claimAdmin \
@@ -663,7 +721,7 @@ npx hardhat acceptAdminRole \
   --tokenaddress $ETH_TOKEN_ADDRESS
 ```
 
-### Step 4.8: Register Pool with TokenAdminRegistry
+### Step 4.7: Register Pool with TokenAdminRegistry
 ```bash
 npx hardhat setPool \
   --network sepolia \
@@ -671,7 +729,7 @@ npx hardhat setPool \
   --pooladdress $ETH_TOKEN_POOL
 ```
 
-### Step 4.9: Configure Cross-Chain Connectivity (Ethereum → Solana)
+### Step 4.8: Configure Cross-Chain Connectivity (Ethereum → Solana)
 ```bash
 npx hardhat applyChainUpdates \
   --network sepolia \
@@ -689,12 +747,16 @@ npx hardhat applyChainUpdates \
 ```bash
 # Navigate back to solana-starter-kit (from hardhat directory)
 cd ../../../../solana-starter-kit
+```
 
+```bash
 # Load environment variables
 source .env
+```
 
+```bash
 # Initialize chain remote config
-yarn svm:pool:init-chain-remote-config \
+npm run svm:pool:init-chain-remote-config -- \
   --token-mint $SOL_TOKEN_MINT \
   --burn-mint-pool-program $CCIP_POOL_PROGRAM \
   --remote-chain ethereum-sepolia \
@@ -706,7 +768,7 @@ yarn svm:pool:init-chain-remote-config \
 
 ### Step 5.2: Add Ethereum Pool Address
 ```bash
-yarn svm:pool:edit-chain-remote-config \
+npm run svm:pool:edit-chain-remote-config -- \
   --token-mint $SOL_TOKEN_MINT \
   --burn-mint-pool-program $CCIP_POOL_PROGRAM \
   --remote-chain ethereum-sepolia \
@@ -757,7 +819,7 @@ npx ts-node mint-oracle-backed.ts
 ```
 🔮 Minting oracle-backed stablecoins...
 💰 Collateral: 0.1 SOL (100,000,000 lamports)
-📊 Using real SOL/USD price from Chainlink Data Streams
+📊 Using real SOL/USD price from Chainlink Data Streams SDK
 ✅ Oracle-backed minting successful!
 🔗 Transaction: [transaction-hash]
 💰 Tokens minted: ~[X.X] USD worth (based on current SOL price)
@@ -798,7 +860,7 @@ source .env
 
 ```bash
 # Delegate token authority to CCIP
-yarn svm:token:delegate --token-mint $SOL_TOKEN_MINT
+npm run svm:token:delegate -- --token-mint $SOL_TOKEN_MINT
 ```
 
 **Expected Output:**
@@ -811,29 +873,42 @@ Delegate: 2AjuzTy6z2webxEUu7eZ1DkAyLagZaqH2dgzhbBYjJiG (CCIP fee-billing PDA)
 
 ## 🌉 Phase 7: Execute Cross-Chain Transfer
 
-### Step 7.1: Verify Token Balance
-```bash
-spl-token balance $SOL_TOKEN_MINT
-```
+### Step 7.1: Execute Cross-Chain Transfer (Solana → Ethereum)
 
-### Step 7.2: Execute Cross-Chain Transfer (Solana → Ethereum)
+**⚠️ Prerequisites:** Before executing the transfer, ensure your Ethereum receiver address is set:
+
 ```bash
 # Set your Ethereum receiver address
 vim .env
-# Add this line with your Ethereum wallet address:
-# ETH_RECEIVER_ADDRESS=[your-ethereum-wallet-address]
+```
 
+**📝 What to add in .env:**
+- Add: `ETH_RECEIVER_ADDRESS=[your-ethereum-wallet-address]`
+
+**💡 Important:** Use your Ethereum wallet address for token receipt.
+
+```bash
 # Load the updated variables
 source .env
+```
 
-yarn svm:token-transfer \
+```bash
+# Check your current token balance first
+spl-token balance $SOL_TOKEN_MINT
+```
+
+```bash
+# Transfer your oracle-minted tokens (replace with your actual balance)
+npm run svm:token-transfer -- \
   --token-mint $SOL_TOKEN_MINT \
-  --amount 1000000 \
+  --token-amount [your-token-balance-from-above] \
   --destination-chain ethereum-sepolia \
   --receiver-address $ETH_RECEIVER_ADDRESS
 ```
 
-**⚠️ Important:** Use `--receiver-address` (not `--destination-address`) to specify the Ethereum recipient address.
+**⚠️ Important:** 
+- Use `--token-amount` (not `--amount`) to specify the token amount
+- Use `--receiver-address` (not `--destination-address`) to specify the Ethereum recipient address
 
 **Expected Output:**
 ```
@@ -841,8 +916,10 @@ yarn svm:token-transfer \
 EVM Receiver Address: [your-ethereum-wallet-address]
 Transaction Signature: [transaction-signature]
 CCIP Message ID: [ccip-message-id]
-✅ Sent 1000000 tokens (1 token with 6 decimals)
+✅ Sent [your-specified-amount] tokens (preserves oracle-backed USD value)
 ```
+
+**💡 Critical:** Always specify `--amount` with your exact token balance to ensure the correct oracle-backed USD value transfers to Ethereum. The system will burn exactly what you specify on Solana and mint the same amount on Ethereum.
 
 ### Step 7.3: Monitor Transfer Progress
 - **Solana Explorer:** https://explorer.solana.com/tx/[transaction-hash]?cluster=devnet
@@ -858,7 +935,9 @@ After completing the deployment, you can run comprehensive tests to verify all c
 ```bash
 # Navigate to the stablecoin program directory (from oracle directory)
 cd ../cross-chain-stablecoin/stablecoin-program
+```
 
+```bash
 # Make test script executable
 chmod +x test-individual.sh
 ```
@@ -946,7 +1025,7 @@ spl-token create-account $SOL_TOKEN_MINT \
 #### 2. "owner does not match" Error During Transfer
 **Solution:** Delegate token authority to CCIP
 ```bash
-yarn svm:token:delegate --token-mint $SOL_TOKEN_MINT
+npm run svm:token:delegate -- --token-mint $SOL_TOKEN_MINT
 ```
 
 #### 3. Oracle Price Feed Not Found
@@ -964,15 +1043,26 @@ spl-token mint $SOL_TOKEN_MINT [amount] \
   --multisig-signer ~/.config/solana/id.json
 ```
 
-#### 5. Cross-Chain Transfer Goes to Wrong Address
-**Problem:** Transfer shows hardcoded fallback address instead of your intended receiver
+#### 5. Cross-Chain Transfer Issues
+
+**Problem A:** Transfer shows hardcoded fallback address instead of your intended receiver
 **Solution:** Use `--receiver-address` instead of `--destination-address`
 ```bash
 # ❌ Wrong - uses hardcoded fallback address
-yarn svm:token-transfer --destination-address $ETH_RECEIVER_ADDRESS
+npm run svm:token-transfer -- --destination-address $ETH_RECEIVER_ADDRESS
 
 # ✅ Correct - uses your specified address  
-yarn svm:token-transfer --receiver-address $ETH_RECEIVER_ADDRESS
+npm run svm:token-transfer -- --receiver-address $ETH_RECEIVER_ADDRESS
+```
+
+**Problem B:** Transfer uses default amount (10000000) instead of your specified amount
+**Solution:** Use `--token-amount` instead of `--amount`
+```bash
+# ❌ Wrong - parameter ignored, uses default amount
+npm run svm:token-transfer -- --amount 18000000
+
+# ✅ Correct - uses your specified amount
+npm run svm:token-transfer -- --token-amount 18000000
 ```
 
 #### 6. Oracle Testing Issues
@@ -987,14 +1077,23 @@ yarn svm:token-transfer --receiver-address $ETH_RECEIVER_ADDRESS
 # If you see "ANCHOR_PROVIDER_URL is not defined"
 # This is usually fixed by the .env symlinks, but if needed:
 cd ../cross-chain-stablecoin/stablecoin-program
+```
 
+```bash
 # Verify .env symlinks exist
 ls -la .env .env.example
+```
 
+```bash
 # If missing, recreate symlinks
 ln -sf ../../.env .env
-ln -sf ../../.env.example .env.example
+```
 
+```bash
+ln -sf ../../.env.example .env.example
+```
+
+```bash
 # Use the recommended test script instead of direct ts-mocha
 ./test-individual.sh oracle
 ```
@@ -1013,16 +1112,28 @@ vim .env
 # If you see "AccountOwnedByWrongProgram" or "ConstraintAddress" errors
 # This usually means Step 2.3 was skipped or failed
 # Re-run the oracle program update step:
-
 cd ../cross-chain-stablecoin/stablecoin-program
-source .env
+```
 
+```bash
+source .env
+```
+
+```bash
 # Update stablecoin program source code
 cd programs/stablecoin-program/src/
-sed -i '' "s/pubkey!(\"[^\"]*\")/pubkey!(\"$ORACLE_PROGRAM_ID\")/" lib.rs
+```
 
+```bash
+sed -i '' "s/pubkey!(\"[^\"]*\")/pubkey!(\"$ORACLE_PROGRAM_ID\")/" lib.rs
+```
+
+```bash
 # Rebuild and redeploy
 cd ../../..
+```
+
+```bash
 anchor build && anchor deploy --provider.cluster devnet
 ```
 
@@ -1047,253 +1158,31 @@ source .env
 solana program show $ORACLE_PROGRAM_ID
 ```
 
----
+#### 7. TypeScript Execution Issues
 
-## ⚙️ Anchor Framework Best Practices & Workflow
-
-This section outlines the proper Anchor development workflow to prevent common deployment issues and ensure consistent development experience.
-
-### 🎯 Proper Anchor Deployment Workflow
-
-**The Golden Rule:** Always sync your `Anchor.toml` with deployed program IDs
+**Problem:** `ts-node` fails with "Unknown file extension .ts" error
+**Solution:** Use `tsx` as a modern alternative
 
 ```bash
-# 1. Build the program
-anchor build
+# Install tsx
+npm install -D tsx
 
-# 2. Deploy to devnet
-anchor deploy --provider.cluster devnet
-
-# 3. CRITICAL: Sync the program ID in Anchor.toml
-anchor keys sync
-
-# 4. Verify the sync worked
-vim Anchor.toml
-# Look for the [programs.devnet] section to verify program IDs are synced
+# Replace ts-node commands with tsx:
+npx tsx utils/derive-pdas.ts           # Instead of: npx ts-node utils/derive-pdas.ts
+npx tsx create-token-for-ccip.ts       # Instead of: npx ts-node create-token-for-ccip.ts  
+npx tsx mint-oracle-backed.ts          # Instead of: npx ts-node mint-oracle-backed.ts
 ```
 
-### 🔧 Shared Retry Utility
+#### 8. CLI Prompt Issues
 
-All scripts and tests now use a shared retry utility to handle Solana network instability:
+**Stuck in vim:** Press `Esc`, type `:wq`, press Enter
+**Key generation prompts:** Press Enter (no passphrase), type `y` (overwrite)
 
-**Location:** `cross-chain-stablecoin/stablecoin-program/utils/retry-helper.ts`
+#### 9. Token Amount Confusion
 
-**Features:**
-- **Exponential backoff:** 2s, 4s, 8s delays
-- **Automatic blockhash refresh** on each retry
-- **Transaction confirmation** waiting
-- **Detailed error logging**
-
-**Usage in your scripts:**
-```typescript
-import { retryTransaction } from "./utils/retry-helper.ts"
-
-// Wrap any transaction call
-const signature = await retryTransaction(
-  connection,
-  async (blockhash) => {
-    return await program.methods
-      .yourMethod()
-      .accounts({ /* accounts */ })
-      .rpc({ skipPreflight: false })
-  }
-)
-```
-
-### 🚨 Common Issues & Root Cause Analysis
-
-#### Issue #1: Program ID Mismatches
-**Problem:** `Anchor.toml` shows different program ID than deployed program
-**Root Cause:** Not running `anchor keys sync` after deployment
-**Solution:** Always run `anchor keys sync` after `anchor deploy`
-
-#### Issue #2: TypeScript Module Resolution Errors
-**Problem:** `Cannot find module './target/types/program_name'`
-**Root Cause:** Program not deployed yet, so IDL files don't exist
-**Solution:** Deploy the program first, then run TypeScript scripts
-
-#### Issue #3: "Blockhash not found" Errors
-**Problem:** Intermittent transaction failures on Solana devnet
-**Root Cause:** Network instability and stale blockhashes
-**Solution:** Use the shared retry utility (automatically applied to all scripts)
-
-### 🎯 Development Sequence
-
-**For New Programs:**
-1. `anchor build` (compile)
-2. `anchor deploy` (deploy to devnet)
-3. `anchor keys sync` (update Anchor.toml)
-4. Run TypeScript scripts/tests
-
-**For Existing Programs:**
-1. Verify program is deployed: `solana program show <PROGRAM_ID>`
-2. Run scripts directly (no need to redeploy)
-3. Use retry utility for network stability
-
-### 📋 Code Quality Standards
-
-**All scripts include:**
-- ✅ Shared retry utility for network stability
-- ✅ Environment variable loading from `.env`
-- ✅ Proper error handling and logging
-- ✅ TypeScript with `.ts` imports
-- ✅ No hardcoded values (except security constraints)
-
-**All test files:**
-- ✅ Import retry utility: `import { retryTransaction } from "../utils/retry-helper.ts"`
-- ✅ Wrap transaction calls with retry logic
-- ✅ Load mock/real data from environment variables
-- ✅ Clean separation of unit vs integration tests
+**Problem:** Large token numbers (like 18,000,000) seem wrong
+**Explanation:** Tokens use 6 decimals - divide by 1,000,000 for actual value
+- 18,000,000 tokens = 18.0 actual tokens
+- 1,000,000 tokens = 1.0 actual token
 
 ---
-
-## 🎯 System Architecture
-
-### Data Flow
-1. **Chainlink Data Streams** → Oracle Program (price verification)
-2. **Oracle Program** → Stablecoin Program (CPI for price data)
-3. **Stablecoin Program** → Token Minting (based on collateral + price)
-4. **CCIP Router** → Cross-chain transfer (burn on source, mint on destination)
-
-### Authority Management
-- **Phase 1:** Wallet authority (for CCIP setup)
-- **Phase 2:** 1-of-3 Multisig authority (Pool Signer + Admin + Oracle PDA)
-- **Result:** Both oracle minting and CCIP transfers work seamlessly
-
-### Security Features
-- **Real-time price verification** via Chainlink Data Streams
-- **On-chain price storage** with timestamp validation
-- **Multisig authority** for enhanced security
-- **Cross-program invocation** for oracle-stablecoin integration
-- **CCIP message verification** for cross-chain security
-
----
-
-## 🚀 Production Considerations
-
-### Security Enhancements
-1. **Multi-signature wallets** for admin operations
-2. **Time-locked upgrades** for program modifications
-3. **Rate limiting** for large transfers
-4. **Emergency pause** mechanisms
-
-### Monitoring and Maintenance
-1. **Oracle price feed updates** (automated via cron jobs)
-2. **CCIP transfer monitoring** via explorer APIs
-3. **Token supply tracking** across chains
-4. **Gas fee optimization** for Ethereum operations
-
-### Scaling Considerations
-1. **Multiple oracle feeds** for price redundancy
-2. **Additional chain support** via CCIP
-3. **Liquidity management** across chains
-4. **Fee optimization** strategies
-
----
-
-## 📚 Additional Resources
-
-### Documentation Links
-- [Chainlink Data Streams](https://docs.chain.link/data-streams)
-- [Chainlink CCIP](https://docs.chain.link/ccip)
-- [Solana Program Development](https://docs.solana.com/developing/on-chain-programs/overview)
-- [Anchor Framework](https://www.anchor-lang.com/)
-
-### Explorer Links
-- [Solana Explorer](https://explorer.solana.com/?cluster=devnet)
-- [Ethereum Sepolia Explorer](https://sepolia.etherscan.io/)
-- [CCIP Explorer](https://ccip.chain.link/)
-
-### Support
-- [Chainlink Discord](https://discord.gg/chainlink)
-- [Solana Discord](https://discord.gg/solana)
-- [GitHub Issues](https://github.com/smartcontractkit/solana-starter-kit/issues)
-
----
-
-## ⚠️ Important: Custom Oracle Program Deployment
-
-**If you deploy your own oracle program (different from the provided example), you MUST update the stablecoin program to reference your oracle program ID.**
-
-### 🔧 Required Steps for Custom Oracle Deployment:
-
-#### Step 1: Update Stablecoin Program Source Code
-Navigate to the stablecoin program source file:
-```bash
-cd ../cross-chain-stablecoin/stablecoin-program/programs/stablecoin-program/src/
-vim lib.rs
-```
-
-Find line 11 and update the `ORACLE_PROGRAM_ID` constant:
-```rust
-// Oracle program ID (static for workshop - matches deployed oracle)
-const ORACLE_PROGRAM_ID: Pubkey = pubkey!("YOUR_ORACLE_PROGRAM_ID_HERE");
-```
-
-Replace `YOUR_ORACLE_PROGRAM_ID_HERE` with your actual deployed oracle program ID.
-
-**📝 Note:** The oracle program ID is hardcoded in the stablecoin program for security and simplicity. This ensures the stablecoin can only interact with the verified oracle program.
-
-#### Step 2: Update Environment Configuration
-Update your `.env` file with your oracle program details:
-```bash
-# Your deployed oracle program
-ORACLE_PROGRAM_ID=YOUR_ORACLE_PROGRAM_ID_HERE
-
-# Your oracle price feed PDA (derived from your oracle program)
-ORACLE_PRICE_FEED_PDA=YOUR_PRICE_FEED_PDA_HERE
-```
-
-**📍 To find your Price Feed PDA:**
-```bash
-cd ../oracle/client
-cargo run -- update-oracle
-# Look for: "📍 PriceFeed PDA: [your-actual-pda-address]"
-```
-
-#### Step 3: Rebuild and Redeploy Stablecoin Program
-```bash
-cd ../cross-chain-stablecoin/stablecoin-program
-anchor build
-anchor deploy --provider.cluster devnet
-```
-
-#### Step 4: Update INSTRUCTIONS.md (This File)
-Update the program IDs throughout this file to match your deployments:
-- Replace `ORACLE_PROGRAM_ID=9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1` with your oracle program ID
-- Replace `STABLECOIN_PROGRAM_ID=7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR` with your stablecoin program ID
-- Replace `ORACLE_PRICE_FEED_PDA=[your-oracle-price-feed-pda]` with your price feed PDA
-
-### 🚨 Why This Is Required
-
-The stablecoin program has a **hardcoded constraint** that validates the oracle program ID for security. This prevents malicious actors from using fake oracle programs. When you deploy your own oracle, the stablecoin program must be updated to recognize your oracle as legitimate.
-
-**Error you'll see if not updated:**
-```
-AnchorError caused by account: oracle_program. Error Code: ConstraintAddress.
-Program log: Left:  YOUR_ORACLE_PROGRAM_ID
-Program log: Right: OLD_ORACLE_PROGRAM_ID
-```
-
-### 🎯 Alternative: Use Provided Example Programs
-
-If you want to skip this step, you can use the pre-deployed example programs:
-- **Oracle Program:** `9YTvEFu2acfWURWixk16fm1mdgVbyBJY2EYdS1oKpkJ1`
-- **Stablecoin Program:** `7HebG1xx5GjmJw3yxCpRWBV2yCt7VspRUk4ponx35jpR`
-
-These are already configured to work together and are used throughout this tutorial.
-
----
-
-## 🎉 Conclusion
-
-You have successfully implemented a complete oracle-backed stablecoin system with cross-chain capabilities! This system demonstrates:
-
-- **Real-world price integration** via Chainlink Data Streams
-- **Secure cross-chain transfers** via Chainlink CCIP
-- **Production-ready architecture** with proper authority management
-- **Seamless user experience** across multiple blockchains
-
-This implementation serves as a foundation for building sophisticated DeFi applications that leverage real-world data and cross-chain functionality.
-
-**🎆 Congratulations on building the future of decentralized finance! 🎆**

@@ -13,30 +13,33 @@ This repository contains a **complete workshop implementation** of an **oracle-b
 - **Oracle program** for on-chain price verification and storage
 - **Stablecoin program** with collateral management and minting logic
 - **Cross-chain transfers** using Chainlink CCIP
-- **Multisig security** with SPL Token multisig integration
+- **Multisig authority management** with SPL Token multisig integration
 - **Production-ready testing** with comprehensive test suites
 
 ### Workshop Instructors
 - **Harry** - Chainlink Data Streams and Oracle Program implementation
 - **Jae** - Stablecoin integration with Oracle Program and Cross-Chain CCIP configuration
 
+## Workshop Setup Guide
+
+**Ready to build?** Follow the complete step-by-step guide:
+
+**[→ INSTRUCTIONS.md](./INSTRUCTIONS.md)** - Complete prerequisites, installation, and deployment walkthrough
+
+For Korean instructions, see **[INSTRUCTIONS_KR.md](./INSTRUCTIONS_KR.md)**.
+
+If you encounter any issues during the workshop, check the troubleshooting section in INSTRUCTIONS.md.
+
 ## 📁 Project Structure
 
 ```
-example_verify/
+solana-stablecoin-workshop/
 ├── README.md                    # This overview and instructions
 ├── INSTRUCTIONS.md              # Complete step-by-step deployment guide
 ├── oracle/                      # Chainlink Data Streams & Oracle Program
-│   ├── README.md               # Oracle system documentation
-│   ├── programs/oracle/        # Solana oracle program
-│   ├── client/                 # Rust client for Data Streams integration
-│   └── tests/                  # Oracle program tests
-└── cross-chain-stablecoin/     # Stablecoin & CCIP Integration
-    └── stablecoin-program/     # Main stablecoin implementation
-        ├── README.md           # Stablecoin system documentation
-        ├── programs/           # Solana stablecoin program
-        ├── tests/              # Comprehensive test suite (12 tests)
-        └── scripts/            # Deployment and utility scripts
+├── cross-chain-stablecoin/      # Stablecoin & CCIP Integration
+├── solana-starter-kit/          # CCIP Solana integration scripts and libraries
+└── smart-contract-examples/     # Ethereum smart contracts for CCIP
 ```
 
 ## 🏗️ System Architecture
@@ -53,7 +56,7 @@ graph LR
     
     subgraph "🪙 Stablecoin System (Jae)"
         SP[Stablecoin Program<br/>Mint/Burn Logic]
-        MS[SPL Token Multisig<br/>2-of-3 Security]
+        MS[SPL Token Multisig<br/>1-of-3 Authority]
         
         OP --> SP
         SP --> MS
@@ -95,33 +98,9 @@ This workshop leverages key Chainlink development tools:
 - **TypeScript** - Testing and deployment scripts
 - **Hardhat** - Ethereum smart contract deployment
 
-## 🚀 Quick Start
+## 🚀 Workshop Content
 
-### Prerequisites
-```bash
-# Required software
-Solana CLI >= 1.17.0
-Anchor >= 0.31.1
-Node.js >= 16.0.0
-Rust >= 1.70.0
-```
-
-### Setup & Deployment
-```bash
-# 1. Configure Solana
-solana config set --url devnet
-solana-keygen new
-solana airdrop 2
-
-# 2. Follow complete deployment guide
-# See INSTRUCTIONS.md for detailed step-by-step process
-```
-
-## 📋 Complete Deployment Instructions
-
-**👉 See [INSTRUCTIONS.md](./INSTRUCTIONS.md) for the complete step-by-step deployment guide**
-
-The instructions cover:
+The workshop covers:
 - **Phase 1:** Oracle Program Deployment (Data Streams integration)
 - **Phase 2:** Stablecoin Program Deployment (Oracle integration)
 - **Phase 3:** CCIP Pool Setup (Cross-chain configuration)
@@ -173,7 +152,7 @@ cd cross-chain-stablecoin/stablecoin-program
 ### Part 2: Stablecoin & Cross-Chain Integration (Jae)
 - Build oracle-backed stablecoin with collateral management
 - Implement Cross-Program Invocation (CPI) between programs
-- Configure SPL Token multisig for enhanced security
+- Configure SPL Token multisig for authority management
 - Set up CCIP for cross-chain token transfers
 - Deploy and configure Ethereum side components
 
@@ -183,14 +162,13 @@ Each component includes comprehensive documentation:
 
 - **[Oracle System](./oracle/README.md)** - Complete Data Streams and Oracle documentation
 - **[Stablecoin System](./cross-chain-stablecoin/stablecoin-program/README.md)** - Stablecoin and CCIP integration guide
-- **[Deployment Guide](./INSTRUCTIONS.md)** - Step-by-step deployment instructions
 
 ## 🎉 Workshop Outcomes
 
 By completing this workshop, you will have:
 
 ✅ **Built a datastreams-backed stablecoin system**  
-✅ **Implemented secure multisig authority management**  
+✅ **Implemented multisig authority management**  
 ✅ **Configured cross-chain transfers via CCIP**  
 ✅ **Deployed to both Solana and Ethereum networks**  
 
